@@ -1,0 +1,68 @@
+"List of files for Zork-0 parser"
+
+<COMPILATION-FLAG P-DEBUGGING-PARSER <>>
+<COMPILATION-FLAG P-ZORK0 <>>
+<COMPILATION-FLAG P-ARTHUR <>>
+<COMPILATION-FLAG P-GENDERS <>>
+<CONSTANT P-DBUG T>
+
+;"These are referenced in the parser library (artefacts from Zork0?)."
+<CONSTANT LIBRARY <>>
+<CONSTANT GREAT-HALL <>>
+<CONSTANT JESTER <>>
+<CONSTANT PROLOGUE-NOVICE-COUNTER <>>
+<CONSTANT NOVICE-MOVES <>>
+<ROUTINE READ-DEMO (A B) <>>
+
+;"prare.zil in parser library reference this function."
+<ROUTINE DIR-TO-STRING (DIR)
+	 <COND (<EQUAL? .DIR ,P?UP>
+		<RETURN "up">)
+	       (<EQUAL? .DIR ,P?DOWN>
+		<RETURN "down">)
+	       (<EQUAL? .DIR ,P?NORTH>
+		<RETURN "north">)
+	       (<EQUAL? .DIR ,P?NE>
+		<RETURN "northeast">)
+	       (<EQUAL? .DIR ,P?EAST>
+		<RETURN "east">)
+	       (<EQUAL? .DIR ,P?SE>
+		<RETURN "southeast">)
+	       (<EQUAL? .DIR ,P?SOUTH>
+		<RETURN "south">)
+	       (<EQUAL? .DIR ,P?SW>
+		<RETURN "southwest">)
+	       (<EQUAL? .DIR ,P?WEST>
+		<RETURN "west">)
+	       (<EQUAL? .DIR ,P?NW>
+		<RETURN "northwest">)
+	       (<EQUAL? .DIR ,P?IN>
+		<RETURN "in">)
+	       (<EQUAL? .DIR ,P?OUT>
+		<RETURN "out">)>>
+
+;"verbs.zil calls this even if we are not debugging parser."
+<IFFLAG (P-DEBUGGING-PARSER <>) (T
+<ROUTINE D-APPLY (STR FCN "OPTIONAL" (FOO <>) "AUX" RES)
+ <COND (<T? .FCN>
+	<COND (<T? .FOO> <SET RES <ZAPPLY .FCN .FOO>>)
+	      (T <SET RES <ZAPPLY .FCN>>)>
+	.RES)>>)>
+
+;"In addition these changes are done to the original files:
+    defs.zil      line 14   ;<REPLACE-DEFINITION PLURAL <CONSTANT PLURAL PLURALBIT>>
+	                   28   <INCLUDE "BASEDEFS" "SYMBOLS">
+    places.zil    line  8   (FLAGS NARTICLEBIT PLURALBIT)>		;"The parser-library assume these bits are defined on some object"					   
+"
+
+<INSERT-FILE "constants">
+<INSERT-FILE "pstack">
+<INSERT-FILE "pmem">
+<INSERT-FILE "pdefs">
+<INSERT-FILE "parser">
+<INSERT-FILE "find">
+<INSERT-FILE "reds">
+<INSERT-FILE "gram">
+<INSERT-FILE "top">
+<INSERT-FILE "prare">
+;<INSERT-FILE "qverbs">
