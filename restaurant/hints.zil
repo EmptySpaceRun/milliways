@@ -367,16 +367,17 @@ the cursor and text"
 				"The blue frob is important, probably."
 				"Try consulting the Guide about it.">
 			<LTABLE 3
-				"Where did the Guide go? And what about my friends?"
+				"Where did the Guide go?"
 				"Firstly, about the Guide."
 				"How should that be anyone else's problem but your own?"
 				"For your information, it's probably still on the ship."
-				"Alright. Secondly, about your friends."
+                "If you actually bothered to play around with objects and not just go straight
+to the hints, you might notice that the Guide is inside your gown, which is in the Hatchway.">
+            <LTABLE 3
+                "Wait. Where are my friends?"
 				"To be specific, they aren't actually your friends. They only keep you on the ship because..."
 				"...who knows why? And they've left you here, haven't they?"
-				"But yes, they returned to the ship. Didn't you read?"
-				"SIDE NOTE: If you actually bothered to play around with objects,
-you would have noticed that the Guide is inside your gown, which is in the Hatchway.">
+				"But yes, they returned to the ship. Didn't you read?">
 			<LTABLE 3
 				"So... what IS the blue frob?"
 				"Try examining it."
@@ -388,7 +389,7 @@ you would have noticed that the Guide is inside your gown, which is in the Hatch
 				"Once you have gotten a satifying answer, you should be able to know almost immdiately what to do."
 				"PULL APART THE BLUE FROB."
                 "You won't need this yet. But it will be helpful later on.">
-			<LTABLE 3
+            <LTABLE 3
 				"This crater... how do I get down it?"
 				"You've died in it, have you?"
 				"Think about the reason you died."
@@ -405,17 +406,26 @@ you would have noticed that the Guide is inside your gown, which is in the Hatch
 			<LTABLE 3
 				"What ABOUT the plant on the ledge?"
 				"Well... what do you think?"
-				"Have you even found it?"
-				"No? Alright, I'll help you."
-				"From the Blighted Ground, go SE. SW. DOWN. PICK PLANT."
-				"Once you have it, what do you normally do with these kind of things?"
-				"First, read the footnote."
+                "Have you even found the plant?"
+                "If so, continue. If not, look to HOW CAN I GET DOWN TO THE LEDGE?"
+				"Once you have picked the plant, what do you normally do?"
+			    "(In fact: First, read the footnote you are prompted with.)"
 				"Then, you need to EXAMINE THE PLANT."
 				"Does this make sense to you?"
 				"If so, LEAVE NOW."
 				"OK, you're still here. Either you're just annoying, or absolutely useless."
 				"PLUG THE PLANT INTO THE RADIO."
-				"Well done.">>
+				"Well done.">
+            <LTABLE 3
+                "How can I get down to the Ledge?"
+                "Try CLIMB DOWN TO THE LEDGE."
+                "Do you even know where the ledge is?">
+            <LTABLE 3
+                "Where is the Ledge anyway?"
+				"Start at the Blighted Ground."
+                "GO SOUTHEAST."
+                "SOUTHWEST."
+                "DOWN.">>
 		<PLTABLE
 			"DARK"
 			<LTABLE 3
@@ -501,8 +511,10 @@ that he has a first-class access card. And when you try entering the Car Park, y
 				"If you try taking it, you're put off by his thretening looks."
 				"So, you must get it when he's not looking."
 				"Or, when he's not awake."
-				"At this point, you should probably look at the section entitled IS THE KITCHEN USEFUL?"
-				"After you've done that, you need to think (obviously). What can you use?"
+				"At this point, you should probably look at the section entitled IS THE KITCHEN USEFUL?">
+			<LTABLE 3
+                "How do I knock the first class idiot out?"
+                "After you've done that, you need to think (obviously). What can you use?"
 				"Well, if you need to, you can ask the Guide about some of the objects there."
 				"You should read up on Pan Galactic Gargle Blasters if you haven't already."
 				"It says that it can knock someone out."
@@ -532,8 +544,9 @@ But if you try to take any of them, it won't let you."
                 "Getting the first-class access card"
                 "If you started off from the first-class idiot (continued), then you should be fine. Otherwise, try reading that first."
                 "The Blaster isn't working. He won't accept it."
-                "Have you noticed the wine bottle?"
-                "He finishes the wine - no problem - if you just give him just wine."
+                "Have you noticed the red dye?"
+                "The idiot drinks the dye - no problem - if you just give him it in a glass."
+                "You know why if you try it."
                 "But..."
                 "If you pour the two in the same glass, the idiot will think it's wine (Blaster is clear), and he will drink it."
                 "There you go.">
@@ -559,9 +572,10 @@ But if you try to take any of them, it won't let you."
                 " **** EXTREME SPOLIERS AHEAD ****"
                 "  - You can find the meat on the Golgafrincham Ark B"
                 "  - The peanuts in the Planetary Design Workshop"
-                "  - The water in the Kitchen (see How Do I Get Water?)"
+                "  - The water in the Kitchen (see HOW DO I GET WATER?)"
                 "  - Finally, the Pan Galactic Gargle Blaster, also in the
-Kitchen (again, see another section - How Do I Safely Add the PGGB to the Meal?)">
+Kitchen (again, see another section - HOW DO I SAFELY ADD THE PAN GALACTIC
+GARGLE BLASTER TO THE MEAL?)">
             <LTABLE 3
                 "How do I get water?"
                 "There is a sink in the Kitchen of Milliways."
@@ -609,12 +623,255 @@ not clever enough to be able to use three nouns), which is satisfying enough for
                 "Now that the show has started, you can reach the Big Bang Burger Bar from the teleportation point."
                 "It is also useful at the BBBB, so keep it in your possession.">>
 		<PLTABLE
+            "GOLGAFRINCHAM ARK B"
+            <LTABLE 3
+                "What am I doing here?"
+                "You were teleported here, just like all the other parts."
+                "[This space intentionally left blank]">
+            <LTABLE 3
+                "How do I leave?"
+                "You'll have to wait."
+                "There's no other way out.">
+            <LTABLE 3
+                "Who is this captain and what is he doing here?"
+                "He's the captain of the ship."
+                "He spends all his time in the bath."
+                "Over three years now he's been in there."
+                "Not to mention that he's holding a plate of meat."
+                "Not real meat, mind you."
+                "Sort of.">
+            <LTABLE 3
+                "How do I get into the bath?"
+                "You don't need to."
+                "You can't. At least, not in this game you can't.">
+            <LTABLE 3
+                "How do I get the meat?"
+                "ASK CAPTAIN ABOUT THE MEAT."
+                "There. He's dropped it on the floor. Now you can go to pick it up.">
+            <LTABLE 3
+                "What's the objective of this room?"
+                "There isn't much to do in this room, so you should quickly be able to work it out."
+                "Getting the plate from the captain is it.">>
+        <PLTABLE
+            "DIRK GENTLY'S HOLISTIC DETECTIVE AGENCY"
+            <LTABLE 3
+                "Who am I?"
+                "You can just type in WHO AM I?"
+                "You're Dirk Gently. Make sense?">
+            <LTABLE 3
+                "I don't have a babel fish anymore! Where did it go?"
+                "You won't need it here."
+                "See the section labeled WHO AM I?">
+            <LTABLE 3
+                "What do I need to do in the Office?"
+                "Answer your phone when it rings."
+                "Just kidding. You could also look out the window, and try to open it."
+                "...Which doesn't work, just to let you know."
+                "Also, you might want to look at those papers. Maybe SEARCH THEM."
+                "Once you're done in this room, you can leave to the west.">
+            <LTABLE 3
+                "How do I get over that sofa?"
+                "CLIMB DOWN THE STAIRS."
+                "JUMP OVER THE SOFA.">
+            <LTABLE 3
+                "I still can't get down those stairs!"
+                "CLIMB ON THE SOFA."
+                "DESCEND STAIRCASE.">
+            <LTABLE 3
+                "Uh, hello? It's STILL not working!"
+                "Just once more! Try DOWN this time."
+                "Finally, eh?"
+                "If not still, just keep going DOWN.">>
+        <PLTABLE
+            "PLANETARY DESIGN WORKSHOP"
+            <LTABLE 3
+                "Hey, what do I do? There's a lot here!"
+                "Talk to the guy you can see."
+                "Ask him about stuff like some objects you have."
+                "He knows a lot, probably.">
+            <LTABLE 3
+                "What do I do with the device he gave me?"
+                "Ask him about it."
+                "You know there's a code."
+                "Ask him for the code."
+                "Then you can start entring in the code."
+                "However, you won't be able to enter the whole thing in one go! The dial on the machine goes from 0 to 9."
+                "Try doing it."
+                "Nothing happens. What happened?"
+                "Push the white button, perhaps?"
+                "No, that isn't it either."
+                "Read over the last sentence when you ask Slartibartfast about the bug-testing device."
+                "You have to push the white button after EACH dial-change."
+                "Now try it again and see what happens.">
+            <LTABLE 3
+                "What's up with this teleporter and what do I do?"
+                "This hint section (like most) won't actually help you."
+                "Just ask slartibartfast about it and it won't be useful except in context with other sections."
+                "ACTUALLY HELPFUL HINT: Don't enter it unless the old man tells you to, and save beforehand.">
+            <LTABLE 3
+                "What do I do with the peanuts?"
+                "Don't eat them."
+                "You won't be able to, anyway."
+                "If you examine them (after you open it), what does it remind you of?"
+                "Look at the Guide entry on dinner. What do the peanuts remind you of?"
+                "That's right! Breadcrumbs. Crushed, a little powdery."
+                "You probably would never have guessed that without me, eh?">
+            <LTABLE 3
+                "Hey! I got a key."
+                "Does anything have a keyhole here?"
+                "The weirdbox does. Try that.">
+            <LTABLE 3
+                "What's this claw supposed to be for?"
+                "You'll want to try using it on different things."
+                "This is more randomly trying different objects, but you can open the platinum egg with it.">
+            <LTABLE 3
+                "Is the wrench useful?"
+                "Possibly. It's a wrench.">
+            <LTABLE 3
+                "Oh, I'm back. What should I do?"
+                "Assuming you picked up the red frob on the way, put it on the computer as Slartibartfast tells you to."
+                "Then you'll get a red rhombicosidodecahedron."
+                "Put all the frobs/things that used to be frobs in the same-coloured tubes."
+                "Finish by putting the tubes on the rack."
+                "And entering the chamber when it lights up.">>
+        <PLTABLE
+            "FJORDS OF NORWAY"
+            <LTABLE 3
+                "HANDY WARNING"
+                "Save now."
+                "When moving, go back and forth between rooms, trying to map the whole thing out as best as you can."
+                "You'll need to if you want to leave the Fjords."
+                "You'll also need to read direction and descriptions of when you move, so you don't mess up with it.">
+            <LTABLE 3
+                "I crashed into a mountain from the zeppelin!"
+                "There's a reason why Slarty told you it wasn't ready yet."
+                "His personal zeppelin hangs over the Fjords of Norway, and you missed it."
+                "You'll never actually find yourself in the zeppelin."
+                "You have to wait until Slartibartfast tells you that you can enter the teleportation machine."
+                "But right now, restoring is the only option.">
+            <LTABLE 3
+                "I can't reach the pillar!"
+                "That's because you need to be quicker."
+                "Try moving from the start of this scene: NE, SE, NE, SE.">
+            <LTABLE 3
+                "This channel is really confusing! How do I get out?"
+                "The channel is made up of literally four rooms."
+                "Try mapping this out."
+                "From the first water channel room you found yourself in, go NORTH. EAST. SE.">
+            <LTABLE 3
+                "How do I get up to the passage in the north wall?"
+                "Try using the rock sticking out of the rock below it."
+                "Jump, and you will find yourself holding to the rock."
+                "Then ENTER THE PASSAGE."
+                "Oops! Your hands are too slippy!"
+                "Maybe DRY MY HANDS WITH THE TOWEL?"
+                "Nope; too wet."
+                "But if you could try that one, then that means you do have a towel!"
+                "EXAMINE THE ROCK. What could you do?"
+                "Towels have a better grip than your hands, and can be used as a lasso."
+                "The next thing is to HOOK ROCK WITH TOWEL, or maybe CLIMB ROCK WITH TOWEL."
+                "Then ENTER PASSAGE.">
+            <LTABLE 3
+                "Where's this red frob Slarty mentioned?"
+                "North of the Cozy Chamber, at the Slippery Slope."
+                "Try going back UP the slope.">
+            <LTABLE 3
+                "How do I cross the chasm?"
+                "At the Bottom of a Dark Chasm (southeast of the cozy chamber), there is a long plank of wood."
+                "Get it (you'll need to shift some objects around first), then return to the West Crevasse."
+                "Put the plank across the chasm. Go east."
+                "That's it?"
+                "It appears so, yes.">
+            <LTABLE 3
+                "I keep freezing to death!"
+                "You need to be quicker."
+                "Or spend some time in the water channel; you'll soothe yourself there."
+                "Unless you've gotten too cold, then it does't do anything.">
+            <LTABLE 3
+                "Alright, I'm at the Telepad. WHAT'S THE MAGIC WORD?"
+                "If you really are stuck, ask at intfiction.org or email me at mfouquetogarra@gmail.com ."
+                "Ok. "
+                "[Press ENTER one at a time to reveal the magic word]"
+                "Seriously? Continuing, are we?"
+                "First, may I recommend looking at the HANDY WARNING section?"
+                "No?"
+                "Fine."
+                "MRKUG is the word."
+                "(If you said MRIUG or MRIVG as well, that's fine. The way the map is made could have led to that. But not very likely.)">>
+        <PLTABLE
+            "BIG BANG BURGER BAR"
+            <LTABLE 3
+                "Ooh, burger! How do I get one?"
+                "There's no way to.">
+            <LTABLE 3
+                "What do I do in the Dressing Room?"
+                "The register for eligibility to enter Max Quordlepleen's Dressing Rooms is here."
+                "First, read some names."
+                "Sure, now write your name, because that makes the most sense."
+                "Ok, the name isn't on the list. Why not?"
+                "Think back to when you talked to the Galactic Security Agent."
+                "You couldn't write your name, it wasn't registered."
+                "You had to use the automatic autograph pen."
+                "Because of that, your face will now be registered with the name from that pen."
+                "So WRITE ON REGISTER WITH SIGNATURE PEN!"
+                "Then, when you return, you'll be allowed in.">
+            <LTABLE 3
+                "How do I leave?"
+                "Just wait until they cheer for midnight."
+                "Wait a few more rounds after that, and you're back in the Dark!">>
+        <PLTABLE
+            "STUNT SHIP"
+            <LTABLE 3
+                "How do I get out of the darkness?"
+                "Wait. Like, quite a few times."
+                "The light will turn on by itself.">
+            <LTABLE 3
+                "I die as soon as the light goes on!"
+                "You've got to have put the peanuts on the dinner beofre you cook it or you won't have enough protein."
+                "That means going quite far back."
+                "We apologise for the inconvenience.">
+            <LTABLE 3
+                "Woah! I die really quickly!"
+                "Yes."
+                "This is a tense endgame scene.">
+            <LTABLE 3
+                "How do I stop the ship?"
+                "You can't.">
+            <LTABLE 3
+                "How do I get the escape pod working?"
+                "Try calling for help on the microphone."
+                "The person over the radio will try talking to you, but it'll come out all weird (see THE MESSAGE IS ALL GARBLED!)."
+                "Afterwards, look at the seuence. What else has that sort of thing (top left, middle, etc)?"
+                "The remote control does, c'mere, remote control!"
+                "Enter in the sequence to the remote control, and the escape pod should power up.">
+            <LTABLE 3
+                "The message is all garbled!"
+                "Yeah."
+                "You would've been able to tell if you examined the loudspeaker."
+                "It's broken."
+                "You can't fix it, but there is a plug on the side!"
+                "Guess what else plugs in?"
+                "The radio which Marvin is holding!"
+                "Unfortunately, he's not willing to hand it over now because you're no longer clever and depressed."
+                "The best thing to do is either restore to when you were still clever, or continue without it (which is the longer approach)."
+                "You don't need it, but you may not have enough time to win if you take the longer approach."
+                "If you take the longer approach, continue calling for help until you know all five parts of the sequence.">
+            <LTABLE 3
+                "What does the big red button do?"
+                "Push it."
+                "It controls the escape pod."
+                "So you can push it to leave."
+                "But it's on the other side of the room!"
+                "So, one person will have to stay behind."
+                "Who do you think couldn't care about staying behind?"
+                "Marvin."
+                "MARVIN, PUSH THE RED BUTTON.">>
+        <PLTABLE
 			"MISCELLANEOUS"
 			<LTABLE 3
 				"HOW ALL THE POINTS ARE SCORED"
 				"This section should only be used as a last resort, or for your own interest after you've completed the game."
 				"  SCORE   ACTION"
-	  			;"     10   Pull apart the blue frob"
 	  			"      5   Picking the clover"                                          ;D
 	  			"     15   Getting Marvin to follow you"                                ;D
 				"     10   Enter the Dark from Magrathea"                               ;D
@@ -630,7 +887,7 @@ not clever enough to be able to use three nouns), which is satisfying enough for
 				"     10   Get the Green Cube (frob of randomness)"                     ;D
 				"     25   Leave the Golgafrincham Ark B"                               ;D
                 "     25   Return from the Big Bang Burger Bar"                         ;D
-                "     25   Escape your building as Dirk"                                
+                "     25   Escape your building as Dirk"                                ;D
                 "     15   Pour a spoonful of Pan Galactic Gargle Blaster into the meal";D
                 "     25   Getting Clyde to open the safe"                              ;D
                 "     25   Finishing making the meal"                                   ;D
@@ -644,8 +901,6 @@ not clever enough to be able to use three nouns), which is satisfying enough for
 				"You shouldn't develop anything in this section until you've finished the game. Things in the
 section will invariably give away the answers to puzzles in the game."
 				"Have you tried..."
-				;"...to FIND WATER?"
-				;"Or FIND ZAPHOD, FIND TRILLIAN and FIND FORD?"
 				"hitting/kissing Marvin?"
 				"asking Marvin about life, and then again? (you may want to save first...)"
                 "checking your rank when you type SCORE (including when you have negative points)?"
@@ -658,20 +913,49 @@ section will invariably give away the answers to puzzles in the game."
                 "throwing the fruit at the mice?"
                 "examining the painting?"
                 "destroying the painting?"
-                "drinking the Santrigiean Mineral Water?"
+                "drinking the Santriginean Mineral Water?"
+                "leaving the water out in the Dining Hall for too long, while you're there?"
                 "putting the Guide in the oven and then turning the oven on?"
                 "attempting to swim in the water on the tray?"
-                "COUNT THE KEYS (the keyset...)"
+                "COUNT THE KEYS (on the keyset...)"
                 "referring to Hotblack Desiato's Ship as STUNT SHIP?"
+                "reading the last words book in the PDW multiple times (if you haven't misspelled a single word)?"
+                "trying to TURN OFF THE TELEPORTER after it has been fully fixed?"
+                "entering the teleportation chamber before Slartibartfast tells you to do so (DEFINITELY save first on this one!)"
+                "using the device multiple times while in the Fjords of Norway?"
+                "jumping off of the ledge in the Glacier and the dark chasm?"
+                "enjoying the sight at the Slippery Slope multiple times?"
+                "SAY MRKUG at various times, including (especially) before you've finished the Fjords course?"
+                "playing with the chatterbox in Dirk Gently's Holistic Detective Agency (multiple times)?"
+                "to PHONE HOME, THE POLICE and?"
+                "(while playing) reading through all the four failed attempts to jump over the couch?"
+                "to SIT ON THE COUCH?"
+                "TURN ON THE LIGHTS while in the Office?"
+                "after meeting the Captain in the Small, Abandoned (Morpher) Ship; wait in one room without looking around for multiple turns? (save first)"
+                "pushing the orange button (under the flap)?"
+                "OPEN THE TIN OF ANCHOVIES?"
+                "trying to STEER THE SHIP a few times when you can see either the orange button or the green one?"
+                "reading through the register (in the Big Bang Burger Bar) multiple times?"
+                "WRITE THE BEAST'S NAME ON THE REGISTER?"
+                "STOP THE SHIP while inside the Stunt Ship?"
+                "not putting the peanuts on the dinner before cooking it, then arriving at the stunt ship?"
+                "examining the loudspeaker?"
+                "waiting until the ship crashes into the sun? (save first)"
+                "PANIC? How about DON'T PANIC?"
+                "DON'T do anything other than panicking?"
                 "typing QWERTY?"
 				"to SING? Or DANCE?"
 				"typing WHY? Or WHAT?"
 				"ANNIHALATE something?"
-				"DON'T do something?"
+                "returning to various scenes after you've successfully completed them?
+Examples: returning to Damogran after stealing the Heart of Gold, or returning to Traal after getting the interface."
+                "answering the game's various rhetorical questions, such as \"Did you have a
+particular direction in mind?\" or \"Are you trying to make yourself feel miserable?\" by typing YES or NO?"
+                "APPRECIATE something?"
+                "DIAGNOSE yourself while under the effects of the dinner?"
                 "Play in VERBOSE mode in some areas?"
-                "Read the last words book in the PDW multiple times (if you haven't misspelled a single word)?"
-                "SAY MRKUG before you've finished the Fjords course?"
-                "STOP THE SHIP while inside the Stunt Ship?">
+                "asking various NPCs about the meaning of life?"
+                "Oh, and obviously... Consulting the Guide about the Guide Entries listed below in the GUIDE ENTRIES section!">
             <LTABLE 3
                 "GUIDE ENTRIES"
                 "Here's a complete list of things that you can CONSULT the Hitchhiker's Guide about.

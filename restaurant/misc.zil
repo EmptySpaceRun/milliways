@@ -89,7 +89,8 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	<RTRUE>)
        (<AND <DIR-VERB?> <==? .OBJ ,PRSO>>
 	<RTRUE>)>
- <COND (<NOT <FSET? .OBJ ,PERSONBIT>>
+ <COND (<OR <NOT <FSET? .OBJ ,PERSONBIT>>
+            <EQUAL? .OBJ ,BLUR>>
 	;<PUT ,P-IT-WORDS 0 <GET ,P-ADJW ,NOW-PRSI>>
 	;<PUT ,P-IT-WORDS 1 <GET ,P-NAMW ,NOW-PRSI>>
 	<FSET ,IT ,TOUCHBIT>	;"to cause pronoun 'it' in output"
@@ -105,14 +106,14 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	<SETG P-HIM-OBJECT .OBJ>)>
  <RTRUE>>
 
-<ROUTINE NO-PRONOUN? (OBJ "OPTIONAL" (CAP 0))
+<ROUTINE NO-PRONOUN? (OBJ "OPTIONAL" (CAP <>))
 	<COND (<EQUAL? .OBJ ,PLAYER>
 	       <RFALSE>)
           (<NOT <FSET? .OBJ ,PERSONBIT>>
 	       <COND (<AND <EQUAL? .OBJ ,P-IT-OBJECT>
 			   <FSET? ,IT ,TOUCHBIT>>
 		      <RFALSE>)>)
-	      (<EQUAL? .OBJ ,FIRST-CLASS-IDIOT>)
+	      (<EQUAL? .OBJ ,FIRST-CLASS-IDIOT ,BLUR>)
           (<FSET? .OBJ ,FEMALEBIT>
 	       <COND (<AND <EQUAL? .OBJ ,P-HER-OBJECT>
 			   <FSET? ,HER ,TOUCHBIT>>
@@ -125,8 +126,7 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	       <COND (<AND <EQUAL? .OBJ ,P-HIM-OBJECT>
 			   <FSET? ,HIM ,TOUCHBIT>>
 		      <RFALSE>)>)>
-	<COND (<ZERO? .CAP><TELL !\ ><THE-J .OBJ T>)
-	      (<ONE? .CAP><TELL !\ ><THE-J .OBJ T T>)>
+	<THE-J .OBJ T .CAP>
 	<THIS-IS-IT .OBJ>
 	<RTRUE>>
 
@@ -134,19 +134,19 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	<COND (<NO-PRONOUN? .OBJ .CAP>
 	       T)
 	      (<NOT <FSET? .OBJ ,PERSONBIT>>
-	       <COND (<ZERO? .CAP> <TELL " it">)
+	       <COND (<ZERO? .CAP> <TELL "it">)
 		     (<ONE? .CAP> <TELL "It">)>)
 	      (<==? .OBJ ,PLAYER>
-	       <COND (<ZERO? .CAP> <TELL " you">)
+	       <COND (<ZERO? .CAP> <TELL "you">)
 		     (<ONE? .CAP> <TELL "You">)>)
 	      (<FSET? .OBJ ,FEMALEBIT>
-	       <COND (<ZERO? .CAP> <TELL " she">)
+	       <COND (<ZERO? .CAP> <TELL "she">)
 		     (<ONE? .CAP> <TELL "She">)>)
 	      (<FSET? .OBJ ,PLURALBIT>
-	       <COND (<ZERO? .CAP> <TELL " they">)
+	       <COND (<ZERO? .CAP> <TELL "they">)
 		     (<ONE? .CAP> <TELL "They">)>)
 	      (T
-	       <COND (<ZERO? .CAP> <TELL " he">)
+	       <COND (<ZERO? .CAP> <TELL "he">)
 		     (<ONE? .CAP> <TELL "He">)>)>
 	<COND (<NOT <ZERO? .VERB>>
 	       <PRINTC 32>
@@ -168,16 +168,13 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 
 <ROUTINE HIM-HER-IT (OBJ "OPTIONAL" (CAP 0) (POSSESS? <>))	;"His/his/him"
  <COND (<EQUAL? .OBJ ,PLAYER>
-    <COND (<NOT <ZERO? .CAP>> <TELL "You">) (T "you")>
+    <COND (<NOT <ZERO? .CAP>> <TELL "You">) (T <TELL " you">)>
     <COND (<NOT <ZERO? .POSSESS?>> <TELL !\r>)>)
        (<NO-PRONOUN? .OBJ .CAP>
 	<COND (<NOT <ZERO? .POSSESS?>> <TELL "'s">)>)
        (<NOT <FSET? .OBJ ,PERSONBIT>>
 	<COND (<ZERO? .CAP> <TELL " it">) (T <TELL "It">)>
 	<COND (<NOT <ZERO? .POSSESS?>> <TELL !\s>)>)
-       (<==? .OBJ ,PLAYER>
-	<COND (<ZERO? .CAP> <TELL " you">) (T <TELL "You">)>
-	<COND (<NOT <ZERO? .POSSESS?>> <TELL !\r>)>)
        (<FSET? .OBJ ,PLURALBIT>
 	<COND (<NOT <ZERO? .POSSESS?>>
 	       <COND (<ZERO? .CAP> <TELL " their">)
@@ -195,6 +192,27 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	       <COND (<ZERO? .CAP> <TELL " him">)
 		     (T <TELL "Him">)>)>)>
  <RTRUE>>
+
+<ROUTINE THAT-THEY (OBJ "OPT" (CAP? 0) (VER:STRING <>))
+    <COND (<NO-PRONOUN? .OBJ .CAP?>)
+          (<FSET? .OBJ ,PLURALBIT>
+           <COND (.CAP?
+                  <TELL !\T>)
+                 (ELSE
+                  <TELL !\t>)>
+           <TELL "hey">)
+          (<FSET? .OBJ ,PERSONBIT>
+           <COND (<ONE? .CAP?> <HE-SHE-IT .OBJ .CAP?>)
+                 (ELSE  <HIM-HER-IT .OBJ>)>)
+          (ELSE
+           <COND (.CAP?
+                  <TELL !\T>)
+                 (ELSE
+                  <TELL !\t>)>
+           <TELL "hat">)>
+    <COND (.VER
+           ;<TELL !\ >
+           <HE-SHE-IT .OBJ -1 .VER>)>>
 
 <OBJECT HER
 	(LOC GLOBAL-OBJECTS)
@@ -309,7 +327,8 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	    <EQUAL? .WRD ,W?TRILLIAN ,W?TRICIA ,W?MCMILLAN>
 	    <EQUAL? .WRD ,W?MARV ,W?MARVIN ,W?PREFECT>
         <EQUAL? .WRD ,W?SLART ,W?SLARTY ,W?SLARTIBAR>
-        <EQUAL? .WRD ,W?EARTH ,W?KAKRAFOON>>>>
+        <EQUAL? .WRD ,W?EARTH ,W?KAKRAFOON ,W?CLYDE>
+        <EQUAL? .WRD ,W?FLOYD ,W?CLYDE\'S ,W?CLYDE>>>>
 
 <ROUTINE TITLE-NOUN? (WRD)
     <OR ;<EQUAL? .WRD ,W?MR ,W?MS>

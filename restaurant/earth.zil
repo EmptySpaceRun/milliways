@@ -212,7 +212,7 @@ backwards before hastily standing up again.">)
     <COND (,DESTROYED-GLACIER
            <TELL
 "I think you're a bit too far away from the pillar, which has drifted
-away from the glacier...||Or are you the one drifting?" CR>
+away from the glacier" ,ELLIPSIS "||Or are you the one drifting?" CR>
            <RFALSE>)>
     <TELL "You climb atop the pillar." CR CR>
     ,PILLAR>
@@ -221,7 +221,7 @@ away from the glacier...||Or are you the one drifting?" CR>
     <COND (<VERB? CLIMB-ON CLIMB-UP WALK-AROUND BOARD>
            <DO-WALK ,P?SE>)
           (<VERB? EXAMINE>
-           <TELL "How it got there, and why it collapsed... is a mystery." CR>)
+           <TELL "How it got there, and why it collapsed" ,ELLIPSIS " is a mystery." CR>)
           (<VERB? TAKE>
            <IMPOSSIBLE>)
           (ELSE
@@ -255,7 +255,7 @@ away from the glacier...||Or are you the one drifting?" CR>
            <TELL ,SPARK>
            <JIGS-UP ,HIT-WATER>)
           (<VERB? EXAMINE>
-           <TELL "They must be at least one hundred meters. If not more!" CR>)
+           <TELL "They must be at least one hundred metres. If not more!" CR>)
           (<VERB? TAKE>
            <IMPOSSIBLE>)
           (ELSE
@@ -306,14 +306,14 @@ into the fjord, unless you " <PICK-ONE <PLTABLE "head" "go" "walk" "go to the">>
                   <TELL "southwest">
                   <COND (<NOT ,DESTROYED-GLACIER>
                          <TELL
-". To add to this, an enormous stone pillar has crashed into the southwest
+". To add to this, an enormous stone pillar has crashed into the southeast
 cliff, and it looks like a crack is forming in the ice beside it">
                          <COND (<G? ,GLACIER-BREAKING 10>
                                 <TELL ". The crack is looking pretty big">)>)>)
                  (<EQUAL? ,HERE ,ICE-BLOCK-1>
                   <TELL "east, or along a path to the south">)
                  (<EQUAL? ,HERE ,ICE-BLOCK-2>
-                  <TELL "south (curving to the east), and west. You can also head east.">)
+                  <TELL "south (curving to the east), and west. You can also head east">)
                  (<EQUAL? ,HERE ,ICE-BLOCK-3>
                   <TELL "only west">)
                  (<EQUAL? ,HERE ,STAIRCASE>
@@ -369,7 +369,7 @@ in the middle of.">
                <TELL "You can go north into the water channel in the rock">
                <COND (<AND <L? ,GLACIER-BREAKING 15>>
                       <SETG GLACIER-BREAKING 99>
-                      <TELL " and to the northwest... Something's wrong">
+                      <TELL " and to the northwest" ,ELLIPSIS " Something's wrong">
                       <SETG DESTROYED-GLACIER T>)
                      (<G? ,GLACIER-BREAKING 100>
                       <JIGS-UP
@@ -379,7 +379,9 @@ I forgot to mention - when you hit the water, you did die of shock." T>)>
                <TELL ,PAUSES>)>>
 
 <ROUTINE INTO-THE-WATER ()
-    <TELL "You plunge into the water, expecting the shock of jumping into an ice pool, but it's... warm?" CR CR>
+    <TELL
+"You plunge into the water, expecting the shock of
+jumping into an ice pool, but it's" ,ELLIPSIS " warm?" CR CR>
     ,CHANNEL1>
 
 <OBJECT	FJORD-CHANNEL
@@ -417,7 +419,7 @@ I forgot to mention - when you hit the water, you did die of shock." T>)>
     (LOC ROOMS)
     (DESC "Water Channel")
     (SOUTH SORRY "The pillar has collapsed.")
-    (EAST TO CHANNEL2)
+    (EAST PER TO-CHANNELS)
     (FLAGS LIGHTBIT ONBIT OUTSIDEBIT)
     (THINGS (WARM FJORD WATER ;IN) (CHANNEL WATER) GLOBAL-ROOM-F
             ROCK (ROCK WALL WALLS) WALLS-F)
@@ -427,7 +429,7 @@ I forgot to mention - when you hit the water, you did die of shock." T>)>
 <ROOM CHANNEL2
     (LOC ROOMS)
     (DESC "Water Channel")
-    (EAST TO CHANNEL1)
+    (EAST PER TO-CHANNELS)
     (SE TO CHANNEL3)
     (FLAGS LIGHTBIT ONBIT OUTSIDEBIT SEENBIT)
     (THINGS (WARM FJORD WATER ;IN) (CHANNEL WATER) GLOBAL-ROOM-F
@@ -435,10 +437,21 @@ I forgot to mention - when you hit the water, you did die of shock." T>)>
     (GLOBAL FJORD-CHANNEL STAR THIRD-PLANET)
     (ACTION CHANNEL-D)>
 
+<ROUTINE TO-CHANNELS ()
+    <TELL "You head east, then ">
+    <COND (<IN? ,PLAYER ,CHANNEL2>
+           <TELL "north a little bit, then some more">)
+          (ELSE
+           <TELL "south briefly, and finally a short while">)>
+    <TELL " to the west." CR CR>
+    <COND (<IN? ,PLAYER ,CHANNEL2>  <RETURN ,CHANNEL1>)
+          (ELSE                     <RETURN ,CHANNEL2>)>>
+
 <ROOM CHANNEL3
     (LOC ROOMS)
     (DESC "Water Channel")
     (NW TO CHANNEL2)
+    (NORTH PER CLIMB-ROCK)
     (UP PER CLIMB-ROCK)
     (FLAGS LIGHTBIT ONBIT OUTSIDEBIT SEENBIT)
     (THINGS (WARM FJORD WATER ;IN) (CHANNEL WATER) GLOBAL-ROOM-F
@@ -462,8 +475,9 @@ I forgot to mention - when you hit the water, you did die of shock." T>)>
 
 <ROUTINE STALACTITE-F ()
     <COND (<VERB? EXAMINE>
-           <TELL "A large stalactite, but coming out of the wall. It looks big enough
-that you could grab it, or hook something on it." CR>)
+           <TELL
+"A large stalactite, but coming out of the north wall. It looks
+big enough that you could grab it, or hook something on it." CR>)
           (<AND <VERB? BOARD CLIMB-ON TAKE WALK-AROUND CLIMB-UP>
                 <DOBJ? STALACTITE>
                 <OR <EQUAL? ,PRSI <> ,HANDS ,ROOMS>>>
@@ -477,7 +491,7 @@ that you could grab it, or hook something on it." CR>)
                 <VERB? BOARD PUT PUT-IN CLIMB-ON SPUT-ON>
                ;<AND <EQUAL? ,TOWEL ,PRSO ,PRSI>
                     <VERB? SPUT-ON>>>
-           <COND (<IN? ,TOWEL ,PLAYER>
+           <COND (<NOT <IN? ,TOWEL ,PLAYER>>
                   <TELL "You have to be holding the towel." CR>
                   <FUCKING-CLEAR>
                   <RTRUE>)
@@ -506,7 +520,7 @@ You are now dangling from the towel." CR>
     <COND (<VERB? WALK-TO BOARD THROUGH LEAP>
            <DO-WALK ,P?UP>)
           (<VERB? EXAMINE>
-           <TELL "Who knows when or by who or why it was made?" CR>)>>
+           <TELL "Who knows when or by whom or why it was made?" CR>)>>
 
 <ROUTINE CLIMB-ROCK ()
     <COND (,HELD-ROCK?
@@ -548,8 +562,8 @@ You are now dangling from the towel." CR>
                   <SETG TOWEL-HOLDING <>>
                   <SETG HELD-ROCK? <>>
                   <RTRUE>)
-                 (<AND <OR <NOT <EQUAL? ,P-WALK-DIR ,P?UP ,UP>>
-                           <NOT <EQUAL? ,PRSO ,P?UP ,UP>>>
+                 (<AND <OR <NOT <EQUAL? ,P-WALK-DIR ,P?UP ,UP ,P?NORTH>>
+                           <NOT <EQUAL? ,PRSO ,P?UP ,UP ,P?NORTH>>>
                        <VERB? WALK>
                        <OR ,TOWEL-HOLDING
                            ,HELD-ROCK?>>
@@ -562,7 +576,7 @@ You are now dangling from the towel." CR>
            <COND (<NOT <FSET? ,HERE ,SEENBIT>>
                   <TELL ", like you expected">
                   <FSET ,HERE ,SEENBIT>)>
-           <TELL ", the water is warm and satsfying. ",IT-LOOKS-LIKE "the ">
+           <TELL ", the water is warm and satisfying. ",IT-LOOKS-LIKE "the ">
            <COND (<IN? ,PLAYER ,CHANNEL1>
                   <TELL "only way to go appears to be east.">)
                  (<IN? ,PLAYER ,CHANNEL2>
@@ -578,10 +592,10 @@ might be able to swim to the northwest. ">
 reach the passage in the rock above you.">)
                         (ELSE
                          <TELL
-"Above you is a large piece of rock sticking out of
-the wall - you might be able to reach it. Above that
-is a passage in the rock - who knows when or by who
-it was made.">)>)>
+"Above you, in the north wall, is a large piece of rock
+sticking out of the wall - you might be able to reach it.
+Above that is a passage in the rock - who knows when or
+by whom it was made.">)>)>
            <CRLF>)>>
 
 
@@ -594,6 +608,7 @@ What you mean by home, you don't know. If you're not feeling
 at all comfortable here, you can either go north, or follow
 the northeast path or the southeast path.")
     (DOWN SORRY "Back down into the water? No thanks.")
+    (SOUTH SORRY "Back down into the water? No thanks.")
     (NE TO WEST-CREVASSE)
     (SE PER TO-DARK-CHASM)
     (NORTH PER SLIPPY)
@@ -736,6 +751,7 @@ anyway quite quickly." CR>)
     (LOC ROOMS)
     (DESC "At the Bottom of a Dark Chasm")
     (UP TO ROCKY-CHAMBER)
+    (NW TO ROCKY-CHAMBER)
     (THINGS (AT VERY DARK BOTTOM) (AT BOTTOM CHASM DARKNESS) GLOBAL-ROOM-F
             ;[(VERY FAINT SMALL) PASSAGE PATH3-F])
     (FLAGS LIGHTBIT ONBIT SEENBIT)
@@ -802,7 +818,7 @@ it. But it is very long." CR>)
 <OBJECT CHASM
     (LOC LOCAL-GLOBALS)
     (DESC "chasm")
-    (SYNONYM CREVASSE CHASM BRINK)
+    (SYNONYM CREVASSE CHASM BRINK GAP)
     (ADJECTIVE WEST WESTERN)
     (FLAGS CONTBIT)
     (ACTION CHASM-F)>
@@ -814,7 +830,7 @@ it. But it is very long." CR>)
           (<VERB? PUT>
            <COND (<DOBJ? PLANK>
                   <COND (,PLANK-ON-CHASM
-                         <TELL "It already is!" CR>
+                         <TELL ,ALREADY-IS CR>
                          <RTRUE>)>
                   <COND (<HELD? ,PLANK>
                          <FIRST-YOU "dropping" ,PLANK>
@@ -826,7 +842,7 @@ it. But it is very long." CR>)
                   <PERFORM ,V?PUT-IN ,PRSO ,PRSI>
                   <RTRUE>)>)
           (<VERB? THROW-AT THROW-THROUGH PUT-IN>
-           <TELL He+verb ,PRSO "tumble" " to the bottom of the chasm." CR>
+           <TELL CHE+VERB ,PRSO "tumble" " to the bottom of the chasm." CR>
            <MOVE ,PRSO ,DARK-CHASM>)>>
 
 
@@ -1021,8 +1037,10 @@ turning northwest after some time; as well as a northern path.")
 
 <ROUTINE HEAD-DOWN-STAIRS ()
     <TELL
-"You run down the stairs, feeling the patterns on the steps as
-you walk down. Once off the stairs, you head west, until you reach a" ,ELLIPSIS CR CR>
+"You run down the stairs, feeling the patterns on the steps as you walk down.
+Once off the stairs, you head very briefly west (it seems to be that you are
+spiraling inwards from the start of this glacier path), until you reach a"
+,ELLIPSIS CR CR>
     <FSET ,TELEPAD ,SEENBIT>
     ,TELEPAD>
 
@@ -1037,8 +1055,8 @@ you walk down. Once off the stairs, you head west, until you reach a" ,ELLIPSIS 
 <ROUTINE SNOW-STAIRS-F ()
     <COND (<VERB? EXAMINE LOOK>
            <TELL
-"The stairs appear quite simply-made at first, but as you start to look for a little longer,
-you notice beautiful patterns. The stairs head down to the north." CR>)
+"The stairs appear quite simply-made at first, but as you start to look for a
+little longer, you notice beautiful patterns. The stairs head down to the north." CR>)
           (<VERB? CLIMB-UP>
 		   <CANNOT-GO>)
 	      (<VERB? CLIMB-DOWN FOLLOW WALK-AROUND>
@@ -1061,7 +1079,7 @@ you notice beautiful patterns. The stairs head down to the north." CR>)
 ", as well. But essentially, this place hosts a big letter \"T\" right in the middle
 of the rock plain, like he said, where he is supposed to pick you up." CR>
            <COND (<NOT ,LOOK-COUNTER-B>
-                  <TELL CR "... Oh, no, that's right - ">
+                  <TELL CR ,ELLIPSIS " Oh, no, that's right - ">
                   <ITALICIZE "you're">
                   <TELL " supposed to say some magic word to get out." CR>)>)>>
 
@@ -1087,7 +1105,8 @@ around the building and ">
            <TELL "crumble the walls">)>
     <TELL ", you think to yourself:|">
     <ITALICIZE "Oh, well. I was so close, wasn't I?|">
-    <TELL "|... And the ceiling crashes down, killing you quickly and almost instantly, before the Dark returns permanently.">
+    <TELL CR ,ELLIPSIS
+" And the ceiling crashes down, killing you quickly and almost instantly, before the Dark returns permanently.">
     <SIXCR>
     <BOLDEN "
     ****  You were the wrong person at the wrong time  ****">
@@ -1101,18 +1120,20 @@ around the building and ">
            <TELL "To the east, t">)
           (ELSE
            <TELL "Up in the office, t">)>
-    <TELL
-        <PICK-ONE
-            <PLTABLE
-                "he phone is ringing"
-                "he phone begins to ring"
-                "he phone is ringing, but you can't be bothered to get it">> ,PAUSES>
+    <TELL <PICK-ONE
+              <PLTABLE
+                  "he phone is ringing"
+                  "he phone begins to ring"
+                  "he phone is ringing, but you can't be bothered to get it">> ,PAUSES>
     <FSET ,PHONE ,RADPLUGBIT> ;"Ringing"
     <THIS-IS-IT ,PHONE>
     <QUEUE I-END-PHONE <RANDOM 3>>>
 
 <ROUTINE I-END-PHONE ()
-    <TELL CR "Like it has been suddenly unplugged, the phone stops ringing." CR>
+    <TELL CR "Like it has been suddenly unplugged, the phone stops ringing.">
+    <COND (<NOT <FSET? ,PHONE ,SADRADIOBIT>>
+           <FSET ,PHONE ,SADRADIOBIT>
+           <TELL " (Which it hasn't been, because it isn't plugged into anything: it has its own battery.)">)>
     <FCLEAR ,PHONE ,RADPLUGBIT>
     <THIS-IS-IT ,PHONE>
     <QUEUE I-PHONE-RINGS <+ <RANDOM 3> 4>>>
@@ -1239,7 +1260,7 @@ could possibly be important when you escape Earth. You find a">
     (SYNONYM OPENER)
     (ADJECTIVE BOTTLE)
     ;(LDESC "There is a bottle opener here.")
-    (FLAGS TAKEBIT)>
+    (FLAGS TAKEBIT TRYTAKEBIT)>
 
 <OBJECT CHATTERBOX
     (LOC OFFICE)
@@ -1247,8 +1268,7 @@ could possibly be important when you escape Earth. You find a">
     (SYNONYM CHATTERBO BOX TELLER MESSAGE MESSAGES)
     (ADJECTIVE CHATTER FORTUNE FADED)
     (FDESC "On the floor is a chatterbox - also known as a fortune teller.")
-    (LDESC "You can see a chatterbox here - AKA the fortune teller.")
-    (FLAGS TAKEBIT OPENABLEBIT)
+    (FLAGS TAKEBIT OPENABLEBIT TRYTAKEBIT)
     (ACTION CHATTERBOX-F)>
 
 <ROUTINE CHATTERBOX-F ()
@@ -1306,8 +1326,9 @@ club at the University, that was at least ten months ago, and
 you have put on more than a little bit of weight over the past
 week while waiting for the sofa to be picked up - which it hasn't
 been - and you imagine yourself having succeeded at jumping over
-the and have now found yourself at the bottom of the stairs.|
-|...Then you return to reality, and you have made no progress." CR>)
+the and have now found yourself at the bottom of the stairs.||"
+,ELLIPSIS " Then you return to reality, and you have made no
+progress." CR>)
           (ELSE
            <TELL
 "You realise that the Vogons are about to destroy almost everything
@@ -1417,7 +1438,7 @@ now you're telling me you want to go back up??" CR>
                 <FSET? ,PARCEL ,CONTBIT>
                 <IOBJ? PARCEL>>
            <COND (<G? <WEIGHT ,PRSO> 5>
-                  <TELL He+verb ,PRSO "does" "n't fit." CR>
+                  <TELL CHE+VERB ,PRSO "does" "n't fit." CR>
                   <RTRUE>)
                  (<FIRST? ,PARCEL>
                   <TELL "Only one item fits in the parcel at a time." CR>
@@ -1465,7 +1486,7 @@ now you're telling me you want to go back up??" CR>
                   <TELL
 "You tear off the top of the parcel, and a " D ,UNBOTTLER
 " drops to the floor. You've been waiting for weeks to get
-hold of this, and now it has finally arrived. Or... maybe
+hold of this, and now it has finally arrived. Or" ,ELLIPSIS " maybe
 it arrived a week ago and you didn't know about it. Who knows?" CR>
                   <MOVE ,UNBOTTLER ,HERE>
                   <PUTP ,PARCEL ,P?SDESC "open parcel">

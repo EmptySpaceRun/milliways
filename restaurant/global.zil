@@ -44,6 +44,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <ADD-WORD YELLOW ADJ>
 <ADD-WORD WHITE ADJ>
 <ADD-WORD BLACK ADJ>
+<ADD-WORD GREY ADJ>
 <ADD-WORD PURPLE ADJ>
 <ADD-WORD TEAL ADJ>
 <SYNONYM TEAL TURQUOISE CYAN>
@@ -52,6 +53,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <SYNONYM BLUE NAVY AQUAMARINE INDIGO>
 <SYNONYM WHITE PALE GHOSTLY LIGHT>
 <SYNONYM BLACK DARK SHADE SHADY>
+<SYNONYM GREY GRAY SMOKE SMOKY ASH ASHEN>
 
 
 ;[<ADD-WORD HELLO NOUN>
@@ -139,11 +141,11 @@ of the " ,SCC ".\" ">>
            <CRLF>)>>
 
 <ROUTINE PART-OF (OB1 OB2 "OPT" STR)
-    <TELL That+verb .OB1 "seem" " to be a part of ">
+    <TELL CTHAT+VERB .OB1 "seem" " to be a part of ">
     <COND (.OB2
            <THE-J .OB2 T>)
           (ELSE
-           <TELL .STR>)>
+           <TELL "the " .STR>)>
     <TELL ,PAUSES>>
 
 <ROUTINE SIXCR ()
@@ -156,6 +158,8 @@ of the " ,SCC ".\" ">>
 
 
 <CONSTANT AGENCY "Galactic Security Agency">
+
+<CONSTANT ALREADY-IS "It already is!">
 
 <CONSTANT ALREADY-KNOW-THAT 
 " But then again you must already know that, since you bought one.">
@@ -223,7 +227,7 @@ impact to your body than multiple matter transference beams.">
 
 <CONSTANT IT-LOOKS-LIKE "It looks like ">
 
-<CONSTANT LOST-PLANET " the legendary lost planet of Magrathea">
+<CONSTANT LOST-PLANET "the legendary lost planet of Magrathea">
 
 <CONSTANT MARVIN-ANGRY
 "? Well, sorry, but it looks like that whole 'understanding' thing was all
@@ -288,6 +292,8 @@ several milliseconds later, while you process this information, you hit ">
 
 <CONSTANT TRY-HARD "No matter how hard you try, it just won't.">
 
+<CONSTANT UNPLUG "Unplugged. ">
+
 <CONSTANT WAITING "After waiting for a few minutes, you place the phone back down again.|">
 
 ;<CONSTANT WHICH-DIR "Which direction do you want to go in?">
@@ -327,6 +333,11 @@ Everything should be somewhere in your brain, just waiting to be found.">
 		" impatient"
         " bored">>
 
+<ROUTINE WHO-CARES ("AUX" N)
+	<SET N <RANDOM ,WHO-CARES-LENGTH>>
+	<HE-SHE-IT ,PRSI T <GET ,WHO-CARES-VERB .N>>
+	<TELL <GET ,WHO-CARES-TBL .N> ,PAUSES>>
+
 
 
 ; "STATUS LINE STUFF"
@@ -352,7 +363,7 @@ Everything should be somewhere in your brain, just waiting to be found.">
 <GLOBAL DONT-FLAG <>>
 <GLOBAL AWAITING-REPLY 0>
 <GLOBAL IN-FRONT-FLAG <>> 
-<GLOBAL UNDIED <>>
+;<GLOBAL UNDIED <>>
 
 
 ; "Tables"
@@ -378,7 +389,7 @@ Everything should be somewhere in your brain, just waiting to be found.">
 		"The wind whips at your face, making you shiver as it freezes your skull."
 		"The wind howls, chilling you to the bone."
 		;"Your toes must have hypothermia by this point. If only you had some shoes!"
-		"There's so much cold you handle, and the fact that you are shivering suggests this is too much."
+		"There's only so much cold you can handle, and the fact that you are shivering suggests this is too much."
         "You shiver, the icy air hanging around you like a deadline, slowly deteriorating your mind and body."
         "A stong gust knocks you over; you get back up again.">>
 
@@ -485,7 +496,7 @@ into ice-cold water without any protection whatsoever"
 	    "You may know how to do that, but I don't."
 	    "You must tell me how to do that."
 	    "How?"
-	    "Give me some more specifics, and I'll help."
+	    "Give me some more specifics on how to do that, and I'll help."
 	    "Please, explain.">>
 
 
@@ -496,7 +507,7 @@ mentioned in a table and return the place. Only first time.
 This also assumes the table is an LTABLE. If nothing, it
 returns the function as FALSE."
 
-<ROUTINE FIND-NUM-TBL (TBL VAL "OPT" (LIMIT <GET .TBL 0>) "AUX" (FINAL <>))
+;<ROUTINE FIND-NUM-TBL (TBL VAL "OPT" (LIMIT <GET .TBL 0>) "AUX" (FINAL <>))
     <DO (NUM 1 .LIMIT)
          <COND (<EQUAL? <GET .TBL .NUM> .VAL>
                 <SET FINAL .NUM>
@@ -504,6 +515,10 @@ returns the function as FALSE."
                ;(ELSE
                 <AGAIN>)>>
     <RETURN .FINAL>>
+
+;"Returns the number of indexes in an LTABLE"
+<ROUTINE LTBEG (TBL)
+    <RETURN <GET .TBL 0>>>
 
 
 ;"From Arthur: the Quest for Excalibur. Thank you!"
@@ -677,7 +692,7 @@ though. Anyway, no point in knowing any more about him, since ">
 	(ACTION INTNUM-F)>
 
 <ROUTINE INTNUM-F ()
-    <COND (<VERB? EXAMINE WHAT FIND TAKE>
+    <COND (<VERB? EXAMINE WHAT FIND ;TAKE>
         <TELL N ,P-NUMBER " is ">
         <COND (<=? ,P-NUMBER 0>
             <TELL "zilch">)
@@ -739,7 +754,7 @@ which included some postcards, a bottle of retsina, and a can of greek olive oil
 <OBJECT STAIRS
 	(LOC LOCAL-GLOBALS)
 	(DESC "stairs")
-	(SYNONYM STAIR STAIRS STAIRWAY GANGWAY STAIRCASE STEP STEPS STAIRWELL)
+	(SYNONYM STAIR STAIRS STAIRWAY GANGWAY STAIRCASE STEP STEPS STAIRWELL SET ROW)
 	(FLAGS NARTICLEBIT NDESCBIT)
     (GENERIC STAIRS-G)
 	(ACTION STAIRS-F)>
@@ -757,9 +772,11 @@ which included some postcards, a bottle of retsina, and a can of greek olive oil
                    <TELL "I'm sure you'll find some around here." CR>)>)
            (<VERB? FOLLOW WALK-AROUND>
             <COND (<AND <GETP ,HERE ,P?UP>
+                        <NOT <IN? ,PLAYER ,END>>
                         <GETP ,HERE ,P?DOWN>>
                    <TELL "Which direction do you want to go in?" CR>)
-                  (<GETP ,HERE ,P?UP>
+                  (<AND <GETP ,HERE ,P?UP>
+                        <NOT <IN? ,PLAYER ,END>>>
                    <DO-WALK ,P?UP>)
                   (<GETP ,HERE ,P?DOWN>
                    <DO-WALK ,P?DOWN>)
@@ -940,7 +957,19 @@ the desired direction." CR>)
     <COND (.X
            <FSET ,ESCAPE-POD ,SADRADIOBIT>)>
 	<RTRUE>)
-	   (<VERB? EXAMINE>
+	   (<VERB? DISEMBARK CLIMB-DOWN>
+    <COND (<OR <IN? ,PLAYER ,RAMP>
+               <DOBJ? ONRAMP>>
+           <DO-WALK ,P?DOWN>)
+          (ELSE
+           <TELL-ME-HOW>)>)
+       (<VERB? CLIMB-UP BOARD>
+    <COND (<OR <IN? ,PLAYER ,RAMP>
+               <DOBJ? ONRAMP>>
+           <DO-WALK ,P?UP>)
+          (ELSE
+           <TELL-ME-HOW>)>)
+       (<VERB? EXAMINE>
 	<TELL "Very uninteresting." CR>)
        (<VERB? LOOK-ON SEARCH SEARCH-FOR>
 	<START-SEARCH .OBJ>
@@ -1125,7 +1154,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 	(ADJECTIVE BARE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
                        ZAPHOD\'S TRILLIAN\'S TRICIA\'S
                        CAPTAIN\'S")
-	;(OWNER BODY-PART-OWNERS)
+	(OWNER PLAYER)
 	(DESC ;"your " "hands")
 	(FLAGS NDESCBIT TOUCHBIT NARTICLEBIT PLURALBIT BODYPARTBIT)
 	(ACTION HANDS-F)>
@@ -1186,7 +1215,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 
 <OBJECT HEAD
 	(LOC GLOBAL-OBJECTS)
-	;(OWNER YOURS)
+	(OWNER PLAYER)
 	(DESC ;"your " "head")
 	(SYNONYM HEAD FACE BARIN NOGGIN)
 	(ADJECTIVE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
@@ -1213,7 +1242,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 
 <OBJECT EYES
 	(LOC GLOBAL-OBJECTS)
-	;(OWNER YOURS)
+	(OWNER PLAYER)
 	(DESC ;"your " "eyes")
 	(SYNONYM EYE EYES)
 	(ADJECTIVE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
@@ -1239,7 +1268,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 <OBJECT TEETH
 	(LOC GLOBAL-OBJECTS)
 	(DESC ;"your " "teeth")
-	;(OWNER YOURS)
+	(OWNER PLAYER)
 	(SYNONYM TEETH MOUTH TOOTH)
 	(ADJECTIVE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
                   ZAPHOD\'S TRILLIAN\'S TRICIA\'S
@@ -1262,7 +1291,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 <OBJECT EARS
 	(LOC GLOBAL-OBJECTS)
 	(DESC ;"your " "ears")
-	;(OWNER YOURS)
+	(OWNER PLAYER)
 	(SYNONYM EAR EARS)
 	(ADJECTIVE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
                   ZAPHOD\'S TRILLIAN\'S TRICIA\'S
@@ -1273,7 +1302,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 <OBJECT FEET
 	(LOC GLOBAL-OBJECTS)
 	(DESC ;"your " "feet")
-	;(OWNER YOURS)
+	(OWNER PLAYER)
 	(SYNONYM FOOT FEET TOES TOE ANKLE ANKLES)
 	(ADJECTIVE MY ;"MARVIN\'S MARV\'S SLARTIBAR SLARTY\'S
                   ZAPHOD\'S TRILLIAN\'S TRICIA\'S
@@ -1287,7 +1316,7 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
 	(DESC "Earth")
 	(ADJECTIVE THIRD BLUE BLUE-GREEN GREEN SMALL)
 	(SYNONYM PLANET EARTH)
-	(FLAGS NDESCBIT INVISIBLE)
+	(FLAGS NDESCBIT ;INVISIBLE)
 	(ACTION THIRD-PLANET-F)>
 
 <ROUTINE THIRD-PLANET-F ()
@@ -1300,8 +1329,14 @@ D .P " says, \"Please don't leave us in the dark.\"" CR>)
                    <TELL ". It doesn't look exactly easy." CR>
                    <RTRUE>)>
 		    <TELL "You did!" CR>)
-	       (<VERB? EXAMINE>
-            <COND (<FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+	       (<VERB? FIND>
+            <COND (<OR <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
+                       <1? ,MY-NAME>>
+                   <TELL "Look around you." CR>)
+                  (ELSE
+                   <TELL "Somewhere in space and time. Nobody cares anymore, except maybe you." CR>)>)
+           (<VERB? EXAMINE>
+            <COND (<INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                    <V-LOOK>)
                   (<1? ,MY-NAME>
                    <TELL
@@ -1328,10 +1363,10 @@ of the sort where they probably still wear digital watches." CR>)>)>>
 (to name only one) the well-known planet of Kakrafoon." CR>)
 		          ;(<EQUAL? ,HERE ,DAIS ,SPEEDBOAT>
 		           <TELL "The sun is a smallish orange star." CR>)
-		          (<OR <FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+		          (<OR <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                        <1? ,MY-NAME>>
 		           <TELL "The sun is a smallish yellow star">
-                   <COND (<FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+                   <COND (<INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                           <TELL
 ", although it looks a lot brighter than it normally would. Also, even though it's
 freezing cold, you're getting burnt right now. Also, the snow (which is very pure
@@ -1912,6 +1947,7 @@ he wrote that name in the register." CR>
 	(SYNONYM WALLS WALL)
     (ADJECTIVE NORTH SOUTH EAST WEST NE SE NW SW)
 	(FLAGS INVISIBLE PLURALBIT SEENBIT TOUCHBIT)
+    (GENERIC WALLS-G)
 	(ACTION WALLS-F)>
 
 <ROUTINE WALLS-F ()
@@ -2177,6 +2213,9 @@ destroyed.|But oh well. You didn't.">)>)
 
 "GENERICS"
 
+<ROUTINE BLASTER-G ()
+    <RETURN ,BLASTER>>
+
 <ROUTINE CAPTAIN-G ()
     <COND (<AND <FSET? ,ARK ,SADRADIOBIT>
                 <OR <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
@@ -2214,7 +2253,7 @@ destroyed.|But oh well. You didn't.">)>)
     <RETURN ,RANDOM-THINGS>>
 
 <ROUTINE BEER-G ()
-    <COND (<FIND-NUM-TBL ,P-LEXV ,W?AREA>
+    <COND (<INTBL? ,W?AREA ,P-INBUF ,INBUF-LENGTH>
            <RETURN ,GLOBAL-HERE>)
           (ELSE
            <RETURN ,BEER>)>>
@@ -2242,10 +2281,10 @@ destroyed.|But oh well. You didn't.">)>)
            <RFALSE>)>>
 
 <ROUTINE FRUIT-G ()
-    <COND (<AND <FIND-NUM-TBL ,P-LEXV ,BOWL>
+    <COND (<AND <INTBL? ,W?BOWL ,P-INBUF ,INBUF-LENGTH>
                 <EVERYWHERE-VERB?>>
            <RETURN ,BOWL>)
-          (<FIND-NUM-TBL ,P-LEXV ,BOWL>
+          (<INTBL? ,W?BOWL ,P-INBUF ,INBUF-LENGTH>
            <RFALSE>)
           (ELSE
            <RETURN ,FRUIT>)>>
@@ -2298,11 +2337,74 @@ destroyed.|But oh well. You didn't.">)>)
           (ELSE
            <RFALSE>)>>
 
+<ROUTINE WALLS-G ()
+    <COND (<IN? ,PLAYER ,KITCHEN>
+           <ACTUALLY ,WALLS>)>
+    <RETURN ,WALLS>>
+
 <ROUTINE MAX-G ()
     <COND (<VERB? $CALL>
            <RETURN ,HALLWAY3>)
           (ELSE
            <RETURN ,MAXXY>)>>
+
+<ROUTINE CLYDE-G ("AUX" (SR ,ORPHAN-SR) (LEN <FIND-RES-COUNT .SR>)
+                        (SZ <FIND-RES-SIZE .SR>) (ENDI:OBJECT <>))
+    <COND (<OR <AND <EVERYWHERE-VERB?>
+                    <NOT <VISIBLE? ,MARVIN>>
+                    <FSET? ,DRESSING-ROOM-REU ,SEENBIT>>>
+           <ACTUALLY ,CLYDE>
+           <RETURN ,CLYDE>)
+          (<AND <VISIBLE? ,MARVIN>
+                <OR <NOT <VERB? ASK-ABOUT ASK-CONTEXT-ABOUT>>
+                    <NOT <DOBJ? MARVIN>>>>
+           <ACTUALLY ,MARVIN>
+           <RETURN ,MARVIN>)>
+    <REPEAT ((REM .LEN) (VEC <REST-TO-SLOT .SR FIND-RES-OBJ1>))
+		%<DEBUG-CODE 
+            <COND (<T? ,P-DBUG>
+                   <TELL !\ >
+		           <THE-J <ZGET .VEC 0> T>
+                   <COND (<==? .REM 2>
+		                  <COND (<NOT <==? .LEN 2>>
+			                     <TELL !\,>)>
+		                  <TELL " and">)
+		                 (<G? .REM 2>
+		                  <TELL !\,>)>)>>
+		<COND (<EQUAL? <ZGET .VEC 0> ,MARVIN>
+               %<DEBUG-CODE 
+                   <COND (<T? ,P-DBUG>
+                          <BOLDEN "|[DEBUG: Halting 'cause I found Marvin]|">)>>
+               <COND (<OR <VISIBLE? ,MARVIN>
+                          <AND <EVERYWHERE-VERB?>
+                               <T? ,PRSO>>>
+                      <ACTUALLY ,MARVIN>
+                      <SET ENDI ,MARVIN>
+                      <RETURN>)>)
+              (<EQUAL? <ZGET .VEC 0> ,CLYDE-PANEL>
+               %<DEBUG-CODE 
+                   <COND (<T? ,P-DBUG>
+                          <BOLDEN "|[DEBUG: Halting 'cause I found clyde-panel]|">)>>
+               <COND (<AND <VISIBLE? ,CLYDE>
+                           <NOT <VERB? ASK-ABOUT ASK-CONTEXT-ABOUT>>
+                           <NOT <DOBJ? CLYDE>>>
+                      <ACTUALLY ,CLYDE>
+                      <SET ENDI ,CLYDE>
+                      <RETURN>)
+                     (<OR <VISIBLE? ,CLYDE-PANEL>
+                          <AND <VERB? ASK-ABOUT ASK-CONTEXT-ABOUT>
+                               <DOBJ? CLYDE>>>
+                      <SET ENDI ,CLYDE-PANEL>
+                      <RETURN>)>)>
+        <COND (<L? <SET REM <- .REM 1>> 1>
+		       <RETURN>)
+		      (<L? <SET SZ <- .SZ 1>> 1>
+		       <COND (T ;<ZERO? <SET SR <FIND-RES-NEXT .SR>>>
+			      <RETURN>)>
+		       ;<SET SZ ,FIND-RES-MAXOBJ>
+		       ;<SET VEC <REST-TO-SLOT .SR OBJLIST-NEXT>>)
+		      (T <SET VEC <ZREST .VEC 2>>)>>
+    <RETURN .ENDI>>
 
 <ROUTINE PILLS-G ()
     <COND (<NOT <EVERYWHERE-VERB?>>
@@ -2403,7 +2505,8 @@ it because you thought you'd thrown it away. Like most gifts from your aunt,"
 "It falls to the ground with a light \"thunk.\" It doesn't do anything
 else at all." CR>)
            (<VERB? SEARCH LOOK-INSIDE>
-        <PUTP ,THING ,P?SDESC "Thing">)
+        <PUTP ,THING ,P?SDESC "Thing">
+        <PRINT-CONT ,THING <> 0 <> T>)
 	       (<VERB? CLOSE>
 		<TELL
 "Come to think of it, you vaguely remember an instruction booklet with
@@ -2418,17 +2521,19 @@ directions for that. You never read it and lost it ages ago." CR>)>>
 
 <ROUTINE SLEEVES-F ()
 	<COND (<NOT <VISIBLE? ,GOWN>>
-		<TELL ,NOPE "see any" D ,SLEEVES "here!" CR>)
+		<CANT-SEE ,SLEEVES>
+        <FUCKING-CLEAR>)
 	       (<VERB? WEAR TAKE>
 		<PERFORM ,PRSA ,GOWN>
 		<RTRUE>)>>
 
-		
+
+<GLOBAL LOOK-COUNTER-D <>>
+
 <OBJECT GOWN
 	(LOC HATCHWAY)
 	(DESC "gown")
     (OWNER PLAYER)
-    (FDESC "Your gown appears to have slipped through the hatchway, and is now on the floor.")
 	(DESCFCN GOWN-D)
 	(SYNONYM GOWN POCKET ROBE LOOP)
 	(ADJECTIVE MY ;YOUR DRESSING TATTY FADED BATTERED)
@@ -2438,7 +2543,16 @@ directions for that. You never read it and lost it ages ago." CR>)>>
 	(ACTION GOWN-F)>
 
 <ROUTINE GOWN-D ()
-    <TELL "Your gown is here." CR>
+    <COND (<NOT ,LOOK-COUNTER-D>
+           <SETG LOOK-COUNTER-D T>
+           <TELL
+"Your gown appears to have been left where you dropped
+it in the last game (which seems like quite an unlikely
+occurrence, considering the ship you are currently in
+is very likely to do unlikely things): in short, your
+gown is on the floor">)
+          (ELSE <TELL "Your gown is here">)>
+    <TELL ,PAUSES>
     <COND (<FSET? ,GOWN ,OPENBIT>
            <PRINT-CONT ,GOWN <> 0 <> T>)>>
 
@@ -2565,11 +2679,11 @@ high-tech machinery. However, thanks to SCC's ruthless marketing division, this
 junk accounts for over 95% of the high-tech machinery sold in the Galaxy.
 (SCC's marketing division will be the first against the wall when the
 revolution comes.)" CR>)
-			(<EQUAL? ,PRSI ,MARVIN>
+			(<EQUAL? ,PRSI ,MARVIN ,CLYDE>
 			<TELL
 ,GPP " are a misguided attempt by the " ,SCC " to make their machines behave
 more like people. Among the more miserable failures: paranoid-depressive
-robots and overprotective computers." CR>)
+robots and excitable androids who look like they could be called Floyd." CR>)
 			(<EQUAL? ,PRSI ,DARK>
 			<TELL
 "A must for the serious hitchhiker, peril-sensitive sunglasses darken at the "
@@ -2614,7 +2728,7 @@ across the galaxy as things which you might use every day. Try looking for one! 
 find a frob in in the bathroom, or maybe in the garden.|
 |Possible uses of the word FROB:|
     - Old man, give me the frob|
-    - \"She took the frob and threw it in the test tube.\""><CRLF>)
+    - \"She took the frob and threw it in the test tube.\"|">)
 			(<OR <EQUAL? ,PRSI ,ZAPHOD>>
 			<TELL D ,ZAPHOD " is the former" ,PRESIDENT ,PAUSES>)
             (<OR <EQUAL? ,PRSI ,FORD>>
@@ -2622,7 +2736,7 @@ find a frob in in the bathroom, or maybe in the garden.|
             (<EQUAL? ,PRSI ,MAXXY>
             <TELL
 D ,MAXXY " is one of the most famous celebrities in all of the known
-Universe; he is the host of " D ,RESTAURANT !\, !\t ,RATEOTU ,PAUSES>)
+Universe: he is the host of " D ,RESTAURANT ", t" ,RATEOTU ,PAUSES>)
             (<EQUAL? ,PRSI ,BAR ,BURGERS>
             <TELL
 D ,BAR " is a place where you can sit and watch the Big Bang"
@@ -2810,4 +2924,15 @@ consult the Guide." CR>)>)>
 Please report it to maxfouquetogarra@gmail.com .
 Thanks!||... Oh - and you'll have to restore or
 restart to leave this damned place, or just QUIT.")
-    (FLAGS LIGHTBIT ONBIT)>
+    (FLAGS LIGHTBIT ONBIT)
+    (ACTION FOO-ROOM-F)>
+
+<ROUTINE FOO-ROOM-F (RARG)
+    <COND (<AND <EQUAL? .RARG ,M-BEG>
+                ,FAIL-FJORD>
+           <JIGS-UP
+"Before you can do anything, the zeppelin glides less than a meter
+above a mountain with a violently razor-sharp peak. If you remember,
+you are dangling from the same side as the mountain. Therefore you
+hit the mountain with the speed of a moving zeppelin and are cut in
+half."> ;"You cannot undo here... Therefore you must restore.")>>

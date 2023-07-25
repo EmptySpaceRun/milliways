@@ -88,15 +88,16 @@ D ,TELEPORTER " to get in or out." CR>)
                          <TELL "You are in the middle of a large room. On one side of the room">)>
                   <COND (<FSET? ,PILLS ,NDESCBIT>
                          <TELL ", beside a jar of pills">)>
-                  <TELL ", there is a computer which seems
-to be stuck on a loading screen. Ignoring the nice lighting situation, you
-look to the other side, where there a cabinet along one wall and a tube rack.|
-|It appears that you can't leave - there are no exits. You can also see a notepad">
-<COND (<FSET? ,NOTEBOOK ,OPENBIT> <TELL" (open)">)><TELL ", but don't worry yourself
-just yet (if you have been doing so for some reason) - it doesn't look important.
-Also, a " D ,CABINET " along one wall ">
+                  <TELL ", there is a computer which seems to be stuck
+on a loading screen. Ignoring the nice lighting situation, you look to
+the other side, where a tube rack is visible - but looking at that rack,
+there's more magic taking place than science.||It appears that you can't
+leave - there are no exits. You can also see a notepad">
+<COND (<FSET? ,NOTEBOOK ,OPENBIT> <TELL" (open)">)><TELL ", but you should
+not worry yourself just yet (if you have been doing so for some reason)
+- it doesn't look important. Also, a " D ,CABINET " along one wall ">
                   <COND (<FIRST? ,CABINET>
-                         <TELL "contains ">
+                         <TELL "contains">
                          <PRINT-CONTENTS ,CABINET>)
                         (ELSE
                          <TELL "is empty">)>
@@ -106,8 +107,9 @@ Also, a " D ,CABINET " along one wall ">
                        <FSET? ,GLACIER-1 ,SADRADIOBIT>>
                   <TELL CR
 "\"Welcome back!\" Slarty says. He guides you over to the computer
-and tells you to put the red frob inside it, so that it can change
-its form using the word that you spoke on returning here." CR CR>
+and tells you to put the red frob on it, so that the computer can
+change the frob's form using the philosophical word that you spoke
+on returning here." CR CR>
                   <FSET ,PDW ,RADPLUGBIT>)>)>>
 
 <ROUTINE OUT-PDW ()
@@ -147,6 +149,8 @@ its form using the word that you spoke on returning here." CR CR>
            <COND (<NOT <FSET? ,COMPUTER ,BADRADIOBIT>>
                   <TELL " But at the moment, it looks quite stuck.">)>
            <CRLF>)
+          (<VERB? UNPLUG>
+           <TELL "That's weird - there's no plug! At least that you can see." CR>)
           (<VERB? PLAY FIX CHANGE>
            <COND (<NOT <FSET? ,COMPUTER ,BADRADIOBIT>>
                   <TELL "You can't seem to change it from the loading screen." CR>)
@@ -162,8 +166,8 @@ giving you a lecture on why accidentally smashing windows is not a hobby to be p
                 <IOBJ? COMPUTER>>
            <COND (<DOBJ? RED-FROB>
                   <TELL
-"You place it inside a compartment on the computer, and
-it disappears. Already the computer starts whirring." CR>
+"You place it on a compartment inside the computer, and
+the frob disappears. Already the computer starts whirring." CR>
                   <MOVE ,RED-FROB ,DARK-OBJECT>
                   <QUEUE I-COMPUTER 2>)>)>>
 
@@ -171,7 +175,7 @@ it disappears. Already the computer starts whirring." CR>
 
 <ROUTINE I-COMPUTER ()
     <COND (<NOT ,COMPUTER-BASH>
-           <TELL "The top line of the computer apears with the text:">
+           <TELL CR "The top line of the computer apears with the text:">
            <SIXCR>
            <TELL "    ****   Philosophy compiler online   ****" CR>
            <TELL "    ****      Accessing inner frob      ****" CR>
@@ -179,8 +183,8 @@ it disappears. Already the computer starts whirring." CR>
            <SETG COMPUTER-BASH T>
            <QUEUE I-COMPUTER 2>)
           (ELSE
-           <TELL
-"... And with that, the computer explodes, leaving no trace of a burn
+           <TELL CR
+"" ,ELLIPSIS " And with that, the computer explodes, leaving no trace of a burn
 mark or the computer itself, and only a red rhombicosidodecahedron." CR>
            <REMOVE ,COMPUTER>
            <MOVE ,RED-FROB ,HERE>
@@ -252,7 +256,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
 
 <ROUTINE CABINET-F ()
     <COND (<NOUN-USED? ,CABINET ,W?CUPBOARD>
-           <TELL "[Tut tut! It isn't a "><ITALICIZE "cupboard"><TELL ", it's a cabinet! Anyway...]" CR CR>)>
+           <TELL "[Tut tut! It isn't a "><ITALICIZE "cupboard"><TELL ", it's a cabinet! Anyway" ,ELLIPSIS "]" CR CR>)>
     <COND (<VERB? EXAMINE>
            <TELL "It is a " D ,CABINET " with no doors. All manner of objects can be found in here. ">
            <PERFORM ,V?SEARCH ,CABINET>)
@@ -273,9 +277,9 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
 <OBJECT TUBE-RACK
     (LOC PDW)
     (DESC "rack of tubes")
-    (SYNONYM TUBE TUBES RACK)
-    (ADJECTIVE ;TEST CRYSTAL CRYSTALLI)
-    (FLAGS NDESCBIT SURFACEBIT OPENBIT)
+    (SYNONYM ;TUBE TUBES RACK)
+    (ADJECTIVE ;TEST TUBE CRYSTAL CRYSTALLI)
+    (FLAGS NDESCBIT SURFACEBIT ;OPENBIT)
     (ACTION TUBE-RACK-F)>
 
 <ROUTINE TUBE-RACK-F ("AUX" BLU BUR GRE)
@@ -304,17 +308,17 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                   <RFALSE>)>)
           (<VERB? PUT PUT-IN>
            <COND (<DOBJ? BLUE-TUBE RED-TUBE GREEN-TUBE>
-                  <COND (<NOT <IN? ,PRSO ,TUBE-RACK>>
+                  <COND (<HELD? ,PRSO>
                          <TELL "Done." CR>
                          <MOVE ,PRSO ,TUBE-RACK>)
                         (ELSE
-                         <ALREADY ,PRSO>)>)
+                         <TELL "You aren't holding "><THE-J ,PRSO T><TELL !\! CR>)>)
                  (ELSE
                   <COND (<L? <GETP ,PRSO ,P?SIZE> 5>
-                         <TELL He+verb ,PRSO "fall" " right through, and " verb ,PRSO "land" " on the floor." CR>
+                         <TELL CHE+VERB ,PRSO "fall" " right through, and " verb ,PRSO "land" " on the floor." CR>
                          <MOVE ,PRSO ,HERE>)
                         (ELSE
-                         <TELL He+verb ,PRSO "do" "n't fit." CR>
+                         <TELL CHE+VERB ,PRSO "do" "n't fit." CR>
                          <RTRUE>)>)>)>>
 
 <OBJECT BLUE-TUBE
@@ -322,7 +326,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
     (DESC "blue test tube")
     (SYNONYM TUBE RIM)
     (ADJECTIVE BLUE BLUE-RIMM TEST)
-    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT)
+    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT TRYTAKEBIT)
     (ACTION BLUE-TUBE-F)>
 
 <ROUTINE BLUE-TUBE-F ("AUX" BLU)
@@ -338,19 +342,19 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                  (<L? <GETP ,PRSO ,P?SIZE> 5>
                   <THE-J ,PRSO T T><TELL verb ,PRSO "is" "n't meant to go in the tube." CR>)
                  (ELSE
-                  <TELL He+verb ,PRSO "do" "n't fit.">
+                  <TELL CHE+VERB ,PRSO "do" "n't fit.">
                   <COND (<DOBJ? RED-FROB GREEN-FROB>
                          <TELL "Plus, that isn't the right tube to put that in." CR>)>)>)
           (<VERB? SEARCH LOOK-INSIDE EXAMINE>
            <TELL "The " D ,BLUE-TUBE>
            <COND (<IN? ,BLUE-TUBE ,TUBE-RACK>
-                  <TELL "is on the " D ,TUBE-RACK>
+                  <TELL " is on the " D ,TUBE-RACK>
                   <COND (<FIRST? ,BLUE-TUBE>
                          <TELL ", and">)>)
                  (<IN? ,BLUE-TUBE ,SLARTY>
-                  <TELL "is being held by " D ,SLARTY>
-                  <COND (<FIRST? ,BLUE-TUBE>
-                         <TELL ", and">)>)>
+                  <TELL ", which is being held by " D ,SLARTY ", ">
+                  ;<COND (<FIRST? ,BLUE-TUBE>
+                         <TELL "and">)>)>
            <COND (<SET BLU <FIRST? ,BLUE-TUBE>>
                   <TELL " contains "><THE-J .BLU <>>)
                  (ELSE
@@ -366,14 +370,14 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
     (DESC "red test tube")
     (SYNONYM TUBE PLASTIC CONTAINER)
     (ADJECTIVE RED TINTED TINT RED-TINTE PINK TEST PLASTIC)
-    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT)
+    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT TRYTAKEBIT)
     (ACTION RED-TUBE-F)>
 
 <ROUTINE RED-TUBE-F ("AUX" BUR)
     <COND (<AND <VERB? PUT-IN>
                 <IOBJ? RED-TUBE>>
            <COND (<AND <DOBJ? RED-FROB>
-                       <EQUAL? <GETP ,RED-TUBE ,P?SDESC> "red frob">>
+                       <EQUAL? <GETP ,RED-FROB ,P?SDESC> "red frob">>
                   <TELL "\"First find its true form,\" calls " D ,SLARTY " from the other side of the room." CR>)
                  (<DOBJ? RED-FROB>
                   <TELL "It fits perfectly." CR>
@@ -381,13 +385,13 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                  (<L? <GETP ,PRSO ,P?SIZE> 10>
                   <THE-J ,PRSO T T><TELL verb ,PRSO "is" "n't meant to go in the tube." CR>)
                  (ELSE
-                  <TELL He+verb ,PRSO "do" "n't fit.">
+                  <TELL CHE+VERB ,PRSO "do" "n't fit.">
                   <COND (<DOBJ? BLUE-FROB GREEN-FROB>
                          <TELL "Plus, that isn't the right tube to put that in." CR>)>)>)
           (<VERB? SEARCH LOOK-INSIDE EXAMINE>
            <TELL "The " D ,RED-TUBE>
            <COND (<IN? ,RED-TUBE ,TUBE-RACK>
-                  <TELL "is on the " D ,TUBE-RACK>
+                  <TELL " is on the " D ,TUBE-RACK>
                   <COND (<FIRST? ,RED-TUBE>
                          <TELL ", but it also">)>)>
            <COND (<SET BUR <FIRST? ,RED-TUBE>>
@@ -405,7 +409,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
     (DESC "green test tube")
     (SYNONYM TUBE LABEL CUBE FLASK)
     (ADJECTIVE GREEN TEST CUBICAL)
-    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT)
+    (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT TRYTAKEBIT)
     (ACTION GREEN-TUBE-F)>
 
 <ROUTINE GREEN-TUBE-F ("AUX" GRE)
@@ -420,7 +424,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                  (<L? <GETP ,PRSO ,P?SIZE> 6>
                   <THE-J ,PRSO T T><TELL verb ,PRSO "is" "n't meant to go in the tube." CR>)
                  (ELSE
-                  <TELL He+verb ,PRSO "do" "n't fit.">
+                  <TELL CHE+VERB ,PRSO "do" "n't fit.">
                   <COND (<DOBJ? RED-FROB GREEN-FROB>
                          <TELL "Plus, that isn't the right tube to put that in." CR>)>)>)
           (<VERB? EXAMINE SEARCH LOOK-INSIDE READ>
@@ -434,7 +438,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                   <RTRUE>)>
            <TELL "The " D ,GREEN-TUBE>
            <COND (<IN? ,GREEN-TUBE ,TUBE-RACK>
-                  <TELL "is on the " D ,TUBE-RACK>
+                  <TELL " is on the " D ,TUBE-RACK>
                   <COND (<FIRST? ,GREEN-TUBE>
                          <TELL ", and you can see that it">)>)>
            <COND (<SET GRE <FIRST? ,GREEN-TUBE>>
@@ -473,7 +477,7 @@ the machine, and return to " D ,RESTAURANT ".\"" CR>
     (TEXT "WARNING: Use for cybrids only.")
     (SYNONYM PILL JAR WRITING ;PILLS)
     (ADJECTIVE PILL DRUG)
-    (FLAGS CONTBIT OPENABLEBIT READBIT TAKEBIT NDESCBIT)
+    (FLAGS CONTBIT OPENABLEBIT READBIT TAKEBIT NDESCBIT TRYTAKEBIT)
     (ACTION PILL-JAR-F)
     (GENERIC PILLS-G)
     (SIZE 4)
@@ -531,7 +535,7 @@ the machine, and return to " D ,RESTAURANT ".\"" CR>
 
 <ROUTINE PILLS-F ()
     <COND (<VERB? EAT LICK TAKE>
-           <TELL "You eat a pill, and find yourself growing woozy..." CR CR>
+           <TELL "You eat a pill, and find yourself growing woozy" ,ELLIPSIS CR CR>
            <V-FAINT T>)
           (<VERB? SMELL EXAMINE>
            <TELL "The normal sort. They have a very strong smell." CR>)
@@ -554,7 +558,7 @@ the machine, and return to " D ,RESTAURANT ".\"" CR>
     (LOC PDW)
     (DESC "wrench")
     (SYNONYM WRENCH TOOL)
-    (FLAGS TAKEBIT)
+    (FLAGS TAKEBIT TRYTAKEBIT)
     (SIZE 8)
     (ACTION WRENCH-F)>
 
@@ -579,9 +583,9 @@ the machine, and return to " D ,RESTAURANT ".\"" CR>
     (ACTION DEVICE-F)>
 
 <GLOBAL DIAL-SETTING:FIX 0>
-<GLOBAL CODE-NUM1 0>
-<GLOBAL CODE-NUM2 0>
-<GLOBAL CODE-NUM3 0>
+<GLOBAL CODE-NUM1 11>
+<GLOBAL CODE-NUM2 11>
+<GLOBAL CODE-NUM3 11>
 <GLOBAL CODES-DONE 0>
 <GLOBAL MANY-CHANGES:FIX 0>
 
@@ -612,10 +616,10 @@ the machine, and return to " D ,RESTAURANT ".\"" CR>
                   <ACTUALLY ,DEVICE>)>)>>
 
 <ROUTINE MORAL-FIDDLE ()
-    <COND (<FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+    <COND (<INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
            <TELL
 ,SUDDEN "are waiting for something to happen, " <PICK-ONE ,BETA-MORAL>
-". And the moral of that is... Well, don't fiddle with things and listen
+". And the moral of that is" ,ELLIPSIS " Well, don't fiddle with things and listen
 to what people tell you, especially if they're old and make planets">
            <JIGS-UP ".">)>>
 
@@ -673,7 +677,7 @@ is too much, and whisks itself away to the other end of the Universe">
                          <REMOVE ,DEVICE>
                          <RTRUE>)>
                   <TELL "Nothing happens, although you feel a little "
-                        <PICK-ONE <PLTABLE "cold" "warm" "tingly">> "." CR>)>)>>
+                        <PICK-ONE <PLTABLE "cold" "warm" "tingly">> ,PAUSES>)>)>>
 
 <ROUTINE BIG-CHANGE ("AUX" TIM OBJ)
     ;<SET TIM <RANDOM 3>> ;"BAD - 1; SAD - 2; RAD - 3"
@@ -737,24 +741,26 @@ it in the Fjords and never here? I can't remember..">)>
     (LOC CABINET)
     (DESC "weirdbox")
     (LDESC "There is a weirdbox here.")
-    (SYNONYM WEIRDBOX BOX)
-    (ADJECTIVE STRANGE)
+    (SYNONYM WEIRDBOX BOX HOLE KEYHOLE)
+    (ADJECTIVE STRANGE KEY SMALL)
     (FLAGS TAKEBIT TRYTAKEBIT LOCKED)
     (SIZE 15)
     (ACTION WEIRDBOX-F)
     (CAPACITY 10)>
 
 <ROUTINE WEIRDBOX-F ()
-    <COND (<AND <VERB? OPEN UNLOCK>
-                <DOBJ? WEIRDBOX>
-                <OR <IOBJ? WEIRDBOX-KEY>
-                    <AND <IN? ,PLAYER ,WEIRDBOX-KEY> ;"Directly holding it only"
-                         <TELL "(using "><THE-J ,WEIRDBOX T><TELL !\) CR>>>>
-           <TELL
-"The weirdbox starts to " <PICK-ONE <PLTABLE "melt" "evaporate">>
-"! But no. It's only shifting shape, slowly, slowly..." CR CR
-"A minute later, you look back at the box, but it's not there.
-In its place" ,GREENY>
+    <COND (<OR <AND <VERB? OPEN UNLOCK>
+                    <DOBJ? WEIRDBOX>
+                    <OR <IOBJ? WEIRDBOX-KEY>
+                        <AND <IN? ,PLAYER ,WEIRDBOX-KEY> ;"Directly holding it only"
+                             <TELL "(using "><THE-J ,WEIRDBOX T><TELL !\) CR>>>>
+               <AND <VERB? PUT-IN>
+                    <DOBJ? WEIRDBOX-KEY>
+                    <IOBJ? WEIRDBOX>>>
+           <TELL "The key fits into the small keyhole well. You turn it in the lock.|
+The weirdbox starts to " <PICK-ONE <PLTABLE "melt" "evaporate">> "! But no. It's only
+shifting shape, slowly, slowly" ,ELLIPSIS CR CR "A minute later, you look back at the
+box, but it's not there. In its place" ,GREENY>
            <REMOVE ,WEIRDBOX>
            <THIS-IS-IT ,GREEN-FROB>
            <FCLEAR ,GREEN-FROB ,INVISIBLE>
@@ -763,7 +769,7 @@ In its place" ,GREENY>
                 <DOBJ? WEIRDBOX>>
            <TELL ,TRY-HARD CR>)
           (<VERB? EXAMINE>
-           <TELL "A weirdbox. A weird... box. Weirdbox." CR>)>>
+           <TELL "A weirdbox. A weird" ,ELLIPSIS " box. Weirdbox. With a mini keyhole." CR>)>>
 
 <OBJECT EGG
     (LOC CABINET)
@@ -781,7 +787,7 @@ In its place" ,GREENY>
                 <DOBJ? EGG>
                 <IOBJ? CLAW>>
            <TELL
-"You prise open the egg with the mechanical claw, and inside" ,GREENY CR "Wait. Where's that egg? Never mind..." CR>
+"You prise open the egg with the mechanical claw, and inside" ,GREENY CR "Wait. Where's that egg? Never mind" ,ELLIPSIS "" CR>
            <REMOVE ,EGG>
            <THIS-IS-IT ,GREEN-FROB>
            <FCLEAR ,GREEN-FROB ,INVISIBLE>
@@ -884,7 +890,7 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
                   <COND (<FSET? ,PEANUT-PACKET ,OPENBIT>
                          ;[<TELL "You eat the peanuts in one big scoff. That felt good." CR>
                          <COND (<NOT ,SCOREMAD>
-                                <TELL CR "...And yet, you're still hungry." CR>)>
+                                <TELL CR "" ,ELLIPSIS "And yet, you're still hungry." CR>)>
                          <FSET ,PEANUT-PACKET ,SADRADIOBIT>]
                          <TELL "It's bad ">
                          <COND (<IN-REST? ,PLAYER>
@@ -917,10 +923,11 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
     (ADJECTIVE TELEPORT TELEPORTE TELEPORTA TELEPORTI BIG)
     (ACTION TELEPORTER-F)
     (GENERIC DEVICE-G)
+    (CAPACITY 200)
     (FLAGS ;VEHBIT CONTBIT TRANSBIT OPENBIT NDESCBIT
-                     SADRADIOBIT    ;"BROKEN"
-                    ;RADPLUGBIT     ;"ENTER-NOW"
-                    ;BADRADIOBIT    ;"GOING-NOWHERE")>
+                   SADRADIOBIT    ;"BROKEN"
+                  ;RADPLUGBIT     ;"ENTER-NOW"
+                  ;BADRADIOBIT    ;"GOING-NOWHERE")>
 
 <ROUTINE TELEPORTER-F (;RARG)
     <COND (<AND <NOUN-USED? ,TELEPORTER ,W?DEVICE ,W?MACHINE ,W?MECHANISM>
@@ -928,6 +935,25 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
            <ACTUALLY ,TELEPORTER>)>
     <COND (<VERB? LEAVE DISEMBARK CLIMB-DOWN>
            <DO-WALK ,P?OUT>)
+          (<VERB? LAMP-ON FIX>
+           <COND (<FSET? ,TELEPORTER ,SADRADIOBIT>
+                  <COND (<FSET? ,TELEPORTER ,RADPLUGBIT>
+                         <TELL
+"It's technically on, but it has a very low power. You can't reach Milliways like this." CR>)
+                        (ELSE
+                         <TELL "You'll have to do what " D ,SLARTY " says, then." CR>)>)
+                 (ELSE
+                  <TELL ,ALREADY-IS CR>)>)
+          (<VERB? LAMP-OFF MUNG>
+           <COND (<FSET? ,TELEPORTER ,SADRADIOBIT>
+                  <COND (<FSET? ,TELEPORTER ,RADPLUGBIT>
+                         <TELL
+"What? Ruin your only chance of survival? (Sounds like something an idiot would do.)" CR>)
+                        (ELSE
+                         <TELL ,ALREADY-IS CR>)>)
+                 (ELSE
+                  <TELL
+"No thanks. The point is, you're trying to get out of here. And you have the means currently." CR>)>)
           (<AND <VERB? PUT PUT-IN>
                 <IOBJ? TELEPORTER>>
            <COND (<FSET? ,TELEPORTER ,BADRADIOBIT>
@@ -944,14 +970,15 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
            ;"<PERFORM ,V?BOARD ,TELEPORTER>)
           (<AND <EQUAL? .RARG ,M-ENTER>
                 <FSET? ,TELEPORTER ,RADPLUGBIT>>"
-           <TELL He+verb ,WINNER "step" " inside the chamber. ">
+           <TELL CHE+VERB ,WINNER "step" " inside the chamber. ">
            <COND (<FSET? ,TELEPORTER ,BADRADIOBIT>
                   <TELL "Nothing interesting happens, so you step out again." CR>
                   <RTRUE>)
                  (<FSET? ,TELEPORTER ,RADPLUGBIT>
                   <TELL "Only a few seconds inside pass before Slarty waves at you, and nods.">)
                  (ELSE
-                  <TELL "\"No!\" calls " D ,SLARTY ". \"It isn't ready!\" But it's too late.">)>
+                  <TELL "\"No!\" calls " D ,SLARTY ". \"It isn't ready!\" But it's too late.">
+                  <SETG FAIL-FJORD T>)>
            <COND (<NOT <FSET? ,GLACIER-1 ,SADRADIOBIT>> ;<FSET? ,TELEPORTER ,SADRADIOBIT>
                   <SETG DARK-FLAG ,GLACIER-1>
                   <SETG IMMOVABLE T>)>
@@ -985,6 +1012,55 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
 
 "PART 6 - MORPHER SHIP"
 
+<OBJECT MORPHER-SHIP
+    (LOC LOCAL-GLOBALS)
+    (DESC "small spaceship")
+    (SYNONYM SPACESHIP SHIP)
+    (ADJECTIVE SMALL STRANGE MORPHER SPACE)
+    (ACTION MORPHER-SHIP-F)>
+
+<ROUTINE MORPHER-SHIP-F ("AUX" X)
+    <COND (<OR <AND <VERB? WALK>
+                    <VERB-WORD? ,W?DRIVE ,W?STEER>>
+               <AND <VERB? MOVE>
+                    <VERB-WORD? ,W?MOVE>>
+               <AND <VERB? FIX>
+                    <VERB-WORD? ,W?CONTROL>>>
+           <COND (<IN? ,PLAYER ,PRES-BRIDGE>
+                  <TELL
+"The funny thing is: there are no controls that appear to do
+anything. You randomly push the buttons, and it isn't making
+any progress. Take this ">
+                  <COND (<AND <VISIBLE? ,ORANGE-BUTTON>
+                              <PROB 65>>
+                         <TELL D ,ORANGE-BUTTON>
+                         <JIGS-UP
+", for example... Wrong example! That button appears to have
+turned the spaceship into a ball of flames that is put out in
+the vacuum as quickly as it started.">)
+                        (<AND <VISIBLE? ,GREEN-BUTTON>
+                              <FSET? ,GREEN-BUTTON ,RADPLUGBIT>
+                              <PROB 65>>
+                         <TELL D ,GREEN-BUTTON>
+                         <JIGS-UP
+", the one that just turned into the captain - hold on - you've just
+been stunned by him.|Oh, now you're being dragged somewhere. Alright,
+now you're floating through space.|But there's something else that's
+wrong with this scene. Something like...||Of course!">)
+                        (ELSE
+                         <SET X <PICK-ONE <PLTABLE RED-BUTTON BLUE-BUTTON WHITE-BUTTON>>>
+                         <TELL D .X
+                               " as an example... ">
+                         <PERFORM ,V?PUSH .X>)>)
+                 (ELSE
+                  <TELL "Well maybe it's because you're in the " D ,HERE ", instead of ">
+                  <COND (<FSET? ,PRES-BRIDGE ,SEENBIT>
+                         <TELL "the " D ,PRES-BRIDGE " like would make sense!">)
+                        (ELSE
+                         <TELL "bothering to find a control room or bridge, which is the most logical thing to do.">)>
+                  <CRLF>)>)>>
+
+
 <ROOM ENTRY-HALL
     (LOC ROOMS)
     (DESC "Entry Passageway")
@@ -992,16 +1068,17 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
     (SOUTH PER SOUTH-ENTRY-HALL)
     (THINGS (ENTRANCE ENTRY SOUTH) (HALL PASSAGE PASSAGEWAY) GLOBAL-ROOM-F)
     (ACTION ENTRY-HALL-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE ENTRY-HALL-F (RARG)
     <COND (<EQUAL? .RARG ,M-LOOK>
            <COND (<EQUAL? ,VERBOSITY 2>
                   <TELL
-"It might have a mildly odd name but hey, it's an alien ship. At least,
-it probably is. There is little to see, as the entrance has been cleaned recently.
-The thing that makes this area even stranger is that there seems to be quite a lot
-of junk in the room leading from the ">
+"It might have a mildly odd name but hey, it's an alien spaceship. At least,
+it probably is. There is little to see around here, as the entrance appears
+to have been cleaned recently. The thing that makes this area even stranger
+is that there seems to be quite a lot of junk in the room leading from the ">
                   <COND (,S-ENTRY-HALL
                          <TELL "one exit of the two exits which leads to other parts">)
                         (ELSE
@@ -1017,7 +1094,7 @@ so this is less of an entrance and more of a dead end of some sort">)>
 |In the corner of the ceiling is a television, which looks like it is switched off." CR>)
                  (ELSE
                   <TELL
-"Being quite spacious and uninteresting, the only direction you can go is north">
+"Being quite a spacious and uninteresting entrance to a spaceship, the only direction you can go is north">
                   <COND (,S-ENTRY-HALL
                          <TELL " (except for a strange portal to the south)">)>
                   <TELL ". On the wall is a television." CR>)>)>
@@ -1071,13 +1148,32 @@ way you entered), there isn't any entrance now. Surely there's a hatch or exit f
     (ACTION TV-F)>
 
 <GLOBAL ANNOYED-TV <>>
+<GLOBAL OBJECT-AT-TV:OBJECT <>>
 
 <ROUTINE TV-F ()
-    <COND (<AND <TOUCHING?>>
+    <COND (<AND <VERB? THROW>
+                <IOBJ? TV>
+                <NOT <DOBJ? TV>>>
+           <COND (,OBJECT-AT-TV
+                  <TELL "You already cracked the screen. What more do you want? Sympathy?" CR>)
+                 (<OR <AND <G? <GETP ,PRSO ,P?SIZE> 4>
+                           <NOT <DOBJ? RED-DYE>>>
+                      <DOBJ? UNBOTTLER>>
+                  <TELL "The screen cracks as you do this!" CR>
+                  <MOVE ,PRSO ,HERE>
+                  <SETG OBJECT-AT-TV ,PRSO>)
+                 (ELSE
+                  <RFALSE>)>)
+          (<TOUCHING?>
            <TELL "You can't reach it. It's fixed in place in the corner of the ceiling." CR>
            <SET ANNOYED-TV T>)
           (<VERB? EXAMINE>
-           <TELL "What did you expect? It's a TV." CR>)>>
+           <TELL "What did you expect? It's a TV.">
+           <COND (,OBJECT-AT-TV
+                  <TELL " The screen, however, is a little cracked from when you threw ">
+                  <THE-J ,OBJECT-AT-TV T>
+                  <TELL " at it.">)>
+           <CRLF>)>>
 
 <GLOBAL S-ENTRY-HALL <>>
 <GLOBAL MESSY? <>>
@@ -1094,6 +1190,7 @@ you can go in one of in the four cardinal directions.")
     (WEST TO GALLEY)
     (EAST TO DORM)
     (THINGS <> (CORRIDOR JUNCTION) GLOBAL-ROOM-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <OBJECT BRICK
@@ -1123,15 +1220,18 @@ you can go in one of in the four cardinal directions.")
     (ACTION STUN-GUN-F)>
 
 <ROUTINE STUN-GUN-D ()
-    <TELL "There is "><THE-J ,STUN-GUN <>><TELL " here - not unlike the Beast-killing gun, although this
-one couldn't ever do so much damage." CR>>
+    <TELL "There is ">
+    <THE-J ,STUN-GUN <>>
+    <TELL
+" here - not unlike the Beast-killing gun, although
+this one couldn't ever do so much damage." CR>>
 
 <ROUTINE STUN-GUN-F ()
     <COND (<VERB? EXAMINE>
            <THE-J ,STUN-GUN <> T>
            <COND (<EQUAL? <GETP ,STUN-GUN ,P?SDESC> "strange gun">
-                  <TELL ". On closer examination, you can tell that it can be used to stun people,
-possibly because of the text on the side saying \"STUN GUN\"">
+                  <TELL
+". On closer examination, you can read text on the side saying \"STUN GUN\" ">
                   <PUTP ,STUN-GUN ,P?SDESC "stun gun">)>
            <TELL ". It">
            <FINE-PRODUCT>
@@ -1141,13 +1241,17 @@ possibly because of the text on the side saying \"STUN GUN\"">
 
 <ROUTINE STUN-OBJ (;["AUX" FIZZLE])
     <COND (<L? ,STUN-CHARGE 1>
-           <THE-J ,STUN-GUN T T><TELL " vibrates and then falls silent. It must be out of charge.">
+           <THE-J ,STUN-GUN T T><TELL " vibrates and then falls silent. It must be out of charge." CR>
            <RFALSE>)>
     <COND (<OR <AND <VERB? SHOOT>
                     <NOT <FSET? ,PRSO ,INVISIBLE>>
                     <FSET? ,PRSO ,CAPTAINBIT>>>
            <TELL "As you zap "><THE-J ,PRSO T><TELL ", you see it change into the form of the captain.
 He slumps to the floor, stunned." CR>
+           <COND (<NOT <FSET? ,PRSO ,RADPLUGBIT>>
+                  <TELL CR "[It's funny - you never even looked around to be able to notice ">
+                  <THE-J ,PRSO T>
+                  <TELL ". So how did you know?]" CR>)>
            <FSET ,MORPHER-CAPTAIN ,MUNGBIT>
            <FCLEAR ,MORPHER-CAPTAIN ,SECRETBIT>
            <FCLEAR ,MORPHER-CAPTAIN ,NDESCBIT>
@@ -1159,7 +1263,7 @@ He slumps to the floor, stunned." CR>
            <INCREMENT-SCORE 25>)
           (<OR <AND <VERB? SHOOT> <DOBJ? BRICK>>>
            <COND (<EQUAL? <GETP ,BRICK ,P?SDESC> "broken brick">
-                  <TELL He+verb ,PRSO "fizzle"
+                  <TELL CHE+VERB ,PRSO "fizzle"
 " a little. Otherwise, nothing happens. It's in such a bad state that it can't get too much worse." CR>)
                  (ELSE
                   <TELL "It falls apart." CR>
@@ -1185,6 +1289,7 @@ He slumps to the floor, stunned." CR>
             ;[(MOLDY RUBBISH) (ROPE COIL LOOP) JUNK-F]
             (MESSY UGLY GROSS USELESS RANDOM) (JUNK WASTE RUBBISH) JUNK-F)
     (ACTION GALLEY-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE GALLEY-F (RARG "AUX" (SPOON-DESC 50))
@@ -1212,12 +1317,14 @@ was destroyed by the Vogons, so it means nothing anymore).|
                        <IN? ,SPOON ,GALLEY>
                        <PROB .SPOON-DESC>>
                   <TELL ", "><THE-J ,SPOON <>>
-                  <SET SPOON-DESC 0>)>
+                  <SET SPOON-DESC 0>
+                  <FSET ,SPOON ,RADPLUGBIT>)>
            <TELL ", another brick (like the one you found earlier in the junction to the east)">
            <COND (<AND <NOT <FSET? ,SPOON ,INVISIBLE>>
                        <IN? ,SPOON ,GALLEY>
                        <NOT <0? .SPOON-DESC>>>
-                  <TELL ", "><THE-J ,SPOON <>>)>
+                  <TELL ", "><THE-J ,SPOON <>>
+                  <FSET ,SPOON ,RADPLUGBIT>)>
            <TELL " and other random junk." CR>)>>
 
 <OBJECT OTHER-BRICK
@@ -1239,7 +1346,8 @@ was destroyed by the Vogons, so it means nothing anymore).|
 <OBJECT TIN
     (LOC GALLEY)
     (DESC "tin of anchovies")
-    (SYNONYM TIN ANCHOVY ANCHOVIES CAN)
+    (SYNONYM TIN ANCHOVY ANCHOVIES CAN SARDINES)
+    (ADJECTIVE ANCHOVY TINNED CANNED SARDINE)
     (FLAGS NDESCBIT TRYTAKEBIT TAKEBIT)
     (ACTION TIN-F)>
 
@@ -1315,6 +1423,7 @@ through most materials, you can't get the proper technique." CR>)>)
             ;[(BAD SORT MUTANT) (BAD SOME CAT PAINTING ;"bad painting of some sort of mutant cat") JUNK-F]
             (MESSY UGLY GROSS USELESS RANDOM CLUTTERED) (JUNK WASTE RUBBISH) JUNK-F)
     (ACTION DORM-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE DORM-F (RARG "AUX" (PILLOW-DESC 50))
@@ -1336,12 +1445,14 @@ can find in dorms (oddly enough, they are circular instead of rectangular)">)
                        ;<IN? ,PILLOW ,DORM>
                        <PROB .PILLOW-DESC>>
                   <TELL " and a " D ,PILLOW>
-                  <SET PILLOW-DESC 0>)>
+                  <SET PILLOW-DESC 0>
+                  <FSET ,PILLOW ,RADPLUGBIT>)>
            <TELL " to a bad painting of some sort of mutant cat">
            <COND (<AND <NOT <FSET? ,PILLOW ,INVISIBLE>>
                        ;<IN? ,PILLOW ,DORM>
                        <NOT <0? .PILLOW-DESC>>>
-                  <TELL " and a " D ,PILLOW>)>
+                  <TELL " and a " D ,PILLOW>
+                  <FSET ,PILLOW ,RADPLUGBIT>)>
            <TELL ", among other junk. You can exit to the west and south-east." CR>)>>
 
 <OBJECT CAT-PAINTING
@@ -1368,6 +1479,7 @@ can find in dorms (oddly enough, they are circular instead of rectangular)">)
     (THINGS SHIP (BATHROOM TOILET) GLOBAL-ROOM-F
             <> SHOWER JUNK-F
             (MESSY UGLY GROSS USELESS RANDOM CLUTTERED) (JUNK WASTE RUBBISH) JUNK-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE BATHROOM-SHIP-F (RARG)
@@ -1386,7 +1498,8 @@ The junk in the room includes ">)
 "You can only go northwest. You can see ">)>
            <COND (<AND <NOT <FSET? ,STICKER ,INVISIBLE>>
                        ;<IN? ,STICKER ,BATHROOM-SHIP>>
-                  <TELL "a " D ,STICKER ", ">)>
+                  <TELL "a " D ,STICKER ", ">
+                  <FSET ,STICKER ,RADPLUGBIT>)>
            <TELL "a shower and a discarded plug">
            <COND (<AND <NOT <FSET? ,BATHROOM-SHIP ,BADRADIOBIT>>
                        <IN? ,MORPHER-CAPTAIN ,BATHROOM-SHIP>>
@@ -1419,11 +1532,12 @@ CR CR "The strange man shoves you aside, and dashes out of the room">
     (SOUTH TO JUNCTION)
     (THINGS <> BRIDGE GLOBAL-ROOM-F
             ;"(RED BLUE WHITE) (BUTTONS BUTTON) BUTTON-MEH"
-            (GREY GRAY) (LEVER SWITCH FLIP) BUTTON-MEH
+            GREY (LEVER SWITCH FLIP) BUTTON-MEH
             BLACK DIAL BUTTON-MEH
             (ANOTHER PART OTHER) (ANOTHER PART OTHER CONSOLE) BUTTON-MEH
             (MESSY UGLY GROSS USELESS RANDOM CLUTTERED) (JUNK WASTE RUBBISH) JUNK-F)
     (ACTION PRES-BRIDGE-F)
+    (GLOBAL MORPHER-SHIP)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE PRES-BRIDGE-F (RARG)
@@ -1504,6 +1618,14 @@ dial, a grey switch, ">)
 <ROUTINE BUTTON-MEH ()
     <COND (<VERB? TAKE MOVE>
            <PART-OF ,PRSO <> "console">)
+          (<OR <VERB? SLAP PUSH>
+               <AND <VERB? ATTACK>
+                    <VERB-WORD? ,W?HIT>>>
+           <TELL "Nothing happens">
+           <COND (<NOT <FSET? ,RED-BUTTON ,SADRADIOBIT>>
+                  <TELL ". A little anticlimactic, if you ask me">
+                  <FSET ,RED-BUTTON ,SADRADIOBIT>)>
+           <TELL ,PAUSES>)
           (<TOUCHING?>
            <HACK-HACK "Doing that with">)
           (ELSE

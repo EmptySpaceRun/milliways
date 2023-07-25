@@ -1,0 +1,6 @@
+r2.04 (24/07/2023) - Some annoying debugging after the holidays, but now it's a clean game.
+		     Found by John Ziegler & Peter MJ. Gross, plus myself.
+			ERRORS: - Odd printing of a word before responding, eg:
+					("What do you want to take?"
+					 > MARVIN
+					 "MarvinYou can't take Marvin!")

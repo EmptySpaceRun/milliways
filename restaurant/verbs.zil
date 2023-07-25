@@ -197,6 +197,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
            <TELL " touched.">)>
     <COND (<FSET? ,PRSO ,SEENBIT>
            <TELL " seen.">)>
+    <COND (<FSET? ,PRSO ,MUNGBIT>
+           <TELL " munged.">)>
     <CRLF>>
 
 <ROUTINE V-MOVEME ()
@@ -367,13 +369,13 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
         - 'I can't be bothered.' * Sips tea *
 "
 
-<ROUTINE THE-J (OBJ THE-A "OPT" CAP? (NOWN <>) "AUX" (STR <>) (OWNS <>))
+<ROUTINE THE-J (OBJ THE-A "OPT" CAP? ;(NOWN <>) "AUX" (STR <>) (OWNS <>))
 	<COND (<AND <EQUAL? .OBJ ,PLAYER>
 				.CAP?>
 	       <TELL "You">
 		   <RTRUE>)>
-	<COND (<AND <NOT .NOWN>
-                <SET OWNS <GETP .OBJ ,P?OWNER>>>
+	<COND (<AND <SET OWNS <GETP .OBJ ,P?OWNER>>
+                <NOT <EQUAL? .OWNS .OBJ>>>
            <COND (<EQUAL? .OWNS ,PLAYER>
                   <COND (.CAP?
                          <TELL !\Y>)
@@ -383,46 +385,46 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
                  (ELSE
                   <THE-J .OWNS .THE-A .CAP?>
                   <TELL "'s ">)>
-           <THE-J .OBJ .THE-A .CAP? T>)
-		  (ELSE 
-           <COND (<AND <NOT <FSET? .OBJ ,NARTICLEBIT>>
-                       <NOT .NOWN>>
-		   		  <COND (.THE-A
-				  		 <COND (.CAP?
-						 		<TELL !\T>)
-							   (ELSE
-							    <TELL !\t>)>
-						 <TELL "he ">)
-						(ELSE
-                         <COND (<FSET? .OBJ ,PLURALBIT>
-                                <COND (.CAP?
-						           	   <TELL !\S>)
-						              (ELSE
-						               <TELL !\s>)>
-                                <TELL "ome">)
-                               (ELSE
-                                <COND (.CAP?
-						           	   <TELL !\A>)
-						              (ELSE
-						               <TELL !\a>)>
-						        <COND (<FSET? .OBJ ,VOWELBIT>
-						        	   <TELL !\n>)>)>
-						 <TELL !\ >)>)>
-		   <COND (<SET .STR <GETP .OBJ ,P?SDESC>>
-                  <TELL .STR>)
-		         (ELSE
-		          <D-J .OBJ>)>)>>
+           <D-J .OBJ>
+           <RTRUE>)>
+    <COND (<AND <NOT <FSET? .OBJ ,NARTICLEBIT>>
+                ;<NOT .NOWN>>
+           <COND (.THE-A
+                  <COND (.CAP?
+    			 		 <TELL !\T>)
+    				    (ELSE
+    				     <TELL !\t>)>
+    			  <TELL "he ">)
+    			 (ELSE
+                  <COND (<FSET? .OBJ ,PLURALBIT>
+                         <COND (.CAP?
+    			           	    <TELL !\S>)
+    			               (ELSE
+    			                <TELL !\s>)>
+                         <TELL "ome">)
+                        (ELSE
+                         <COND (.CAP?
+    			           	    <TELL !\A>)
+    			               (ELSE
+    			                <TELL !\a>)>
+    			         <COND (<FSET? .OBJ ,VOWELBIT>
+    			         	    <TELL !\n>)>)>
+    			  <TELL !\ >)>)>
+    <COND (<SET .STR <GETP .OBJ ,P?SDESC>>
+           <TELL .STR>)
+          (ELSE
+           <D-J .OBJ>)>>
 
 <ROUTINE D-J (OBJ "AUX" STR)
 	<COND (<SET .STR <GETP .OBJ ,P?SDESC>>
 		   <TELL .STR>)
 		  (ELSE
-		   <TELL D .OBJ>)>>
+		   <PRINTD .OBJ>)>>
 
 <ROUTINE V-WEAR ()
     <COND (<FSET? ,PRSO ,WEARBIT>
            <COND (<FSET? ,PRSO ,WORNBIT>
-                  <TELL "You are already wearing " him ,PRSO ,PAUSES>
+                  <TELL "You are already wearing" him ,PRSO ,PAUSES>
                   <RFALSE>)>
 	       <COND (<AND ,KILL-NOW?
                        <NOT <RUNNING? I-MOUSE-BLAB>>>
@@ -436,7 +438,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
            <TELL ,NOPE "wear that!" CR>)>
     <RTRUE>>
 
-<ROUTINE V-QUIT ("OPT" (ASK? T))
+<ROUTINE V-QUIT ("OPT" (ASK? <>))
 	 <V-SCORE>
 	 <COND (<NOT .ASK?> <TELL "Thanks for playing." CR> <QUIT>)>
 	 <TELL
@@ -450,14 +452,12 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	 <COND (<YES?>
 		<TELL "Restarting." CR>
 		<RESTART>
-		<TELL-FAILED>)
+		<TELL-FAILED "RESTART">)
            (ELSE
         <TELL "Ok." CR>)>>
 
-<ROUTINE TELL-FAILED ()
-	<TELL "Suddenly, you recieve a brief message from the Galactic Compendium:" CR CR>
-    <BOLDEN "        Failed.">
-    <CRLF>>
+<ROUTINE TELL-FAILED (TEX)
+    <TELL "[" .TEX " failed.]" CR>>
 
 <ROUTINE V-SAVE ("AUX" X)
 	 <PUTB ,G-INBUF 1 0>
@@ -467,7 +467,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		    <BTST <LOWCORE FLAGS> 4>>
 		<V-$REFRESH>)>
 	 <COND (<ZERO? .X>
-		<TELL-FAILED>
+		<TELL-FAILED "SAVE">
 		<FUCKING-CLEAR>)
 	       (T
 	        <TELL "OK." CR>
@@ -477,7 +477,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <ROUTINE V-RESTORE ()
 	 <COND (<NOT <RESTORE>>
-		<TELL-FAILED>
+		<TELL-FAILED "RESTORE">
 		<RFALSE>)>>
 
 <ROUTINE V-FIRST-LOOK ()
@@ -496,9 +496,10 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 An interactive fiction by Max Fog|
 Based on the book by Douglas Adams|
 Sequel to the original game by Douglas Adams & Steve Meretzky|
+Programmed in ZIL using ZILF 0.9|
 Release number " N <BAND <LOWCORE ZORKID> *3777*> " / Serial number ">
-	 <LOWCORE-TABLE SERIAL 6 PRINTC>
-	 <CRLF>>
+	<LOWCORE-TABLE SERIAL 6 PRINTC>
+	<CRLF>>
 
 <ROUTINE V-ABOUT ()
 	<SETG CLOCK-WAIT T>
@@ -508,22 +509,31 @@ Release number " N <BAND <LOWCORE ZORKID> *3777*> " / Serial number ">
 	<TELL "These are some of the people who helped with the game:" CR CR>
 	<BOLDEN "SPECIAL MENTIONS">
 	<TELL CR "
- STU GALLEY        -  began the programming of Magrathea|
-  ADAM SOMMERFIELD  -  programmed some of Magrathea, finished off the first design|
-  ANDY GALILEE      -  fixed the inventory and updated the game to V5|
-  HENRIK ÅSMAN      -  helped shift the code from the old parser to the new parser, as well as bug-fixing|
-  TARA McGREW       -  worked with bug-fixing and other" CR CR>
+ Stu Galley        -  began the programming of Magrathea|
+  Adam Sommerfield  -  programmed some of Magrathea before I even knew about the project,
+finished off the first design for the game|
+  Andy Galilee      -  fixed the inventory and updated the game to V5|
+  Henrik Åsman      -  helped shift the code from the old parser to the new parser, as well as bug-fixing|
+  Tara McGrew       -  worked with bug-fixing and other
+|Finally, Douglas Adams and Steve Meretzky for creating the original game,
+and being like role models to me." CR CR>
 	<BOLDEN "TESTERS">
 	<TELL CR "
- MATHBRUSH (intfiction.org)    Gold-level tester|
-  LARRY HORSFIELD" CR>
-    <BOLDEN "REGISTER NAMES">
+ Mathbrush (intfiction.org)|
+  John Ziegler|
+  David Griffith|
+  Larry Horsfield|
+  Peter M.J. Gross|";"
+  Stephen (intfiction.org)|
+  James Presley
+  Andrew Wang" CR CR>
+    <BOLDEN "BIG BANG BURGER BAR REGISTER NAMES">
     <TELL " (from intfiction.org)" CR "
- JOEY \"JESS\" CRAMSEY
-  MANON
-  ONNO BROUWER
-  JINX
-  BRIAN RUSHTON (mathbrush)">>
+ Joey \"Jess\" Cramsey|
+  Manon|
+  Onno Brouwer|
+  Jinx|
+  Brian Rushton (mathbrush)" CR>>
 
 <ROUTINE V-SHUSH ()
 	<TELL "That isn't happening any time soon." CR>>
@@ -686,7 +696,7 @@ N <SCORE-COUNT> "00 points. In " N ,MOVES " turns." CR>
 
 <ROUTINE NO-NEED ("OPTIONAL" (STR <>) (OBJ <>))
 	<SETG CLOCK-WAIT T>
-	<TELL He+verb ,WINNER "do" "n't need to ">
+	<TELL CHE+VERB ,WINNER "do" "n't need to ">
 	<COND (.STR <TELL .STR>) (T <VERB-PRINT>)>
 	<COND (<EQUAL? .STR "go" "drive">
 	       <TELL " in that " D ,INTDIR>)
@@ -697,7 +707,7 @@ N <SCORE-COUNT> "00 points. In " N ,MOVES " turns." CR>
 
 <ROUTINE YOU-CANT ("OPTIONAL" (STR <>) (WHILE <>) (STR1 <>))
 	<SETG CLOCK-WAIT T>
-	<TELL He ,WINNER " can't ">
+	<TELL CHE ,WINNER " can't ">
 	;<TELL ,NOPE>
 	<COND (<VERB? DIAGNOSE>
 		   <TELL "do">)
@@ -714,17 +724,16 @@ N <SCORE-COUNT> "00 points. In " N ,MOVES " turns." CR>
 		      <TELL " the ground">)
 		     (T <TELL !\ ><THE-J ,PRSO T>)>
 	       <COND (.STR1
-		      <TELL " while">
+		      <TELL " while ">
 		      <COND (.WHILE
-			     <TELL he+verb .WHILE "is">)
-			    (T <TELL he+verb ,PRSO "is">)>
-		      <TELL !\  .STR1>)
-		     ;(T <TELL " now">)>)>
+			       <THE-J .WHILE T><TELL verb .WHILE "is">)
+			    (T <THE-J ,PRSO T><TELL verb ,PRSO "is">)>
+		      <TELL !\  .STR1>)>)>
 	<TELL !\! CR>>
 
 <ROUTINE YOU-SHOULDNT ("OPT" (PREP <>))
 	<SETG CLOCK-WAIT T>
-	<TELL He ,WINNER " shouldn't ">
+	<TELL CHE ,WINNER " shouldn't ">
 	<VERB-PRINT>
 	<TELL !\ >
 	<THE-J ,PRSO T>
@@ -1128,7 +1137,7 @@ His ,WINNER " light reveals">)
 	<COND (<AND <NOT <IN? .OBJ ,WINNER>>
 		    <NOT <IN? <LOC .OBJ> ,WINNER>>>
 	       <SETG CLOCK-WAIT T>
-	       <TELL He+verb ,WINNER "is" "n't holding" him .OBJ ,PAUSES>)>>
+	       <TELL CHE+VERB ,WINNER "is" "n't holding" him .OBJ ,PAUSES>)>>
 
 <ROUTINE GOTO (RM "OPTIONAL" (TEST <>) (FOLLOW? T) "AUX" X)
 	;<COND (<EQUAL? <LOC ,PLAYER ;,WINNER> .RM>
@@ -1203,10 +1212,10 @@ His ,WINNER " light reveals">)
         " walk along with you">>
 
 <ROUTINE DIR-FROM (HERE THERE "AUX" (V <>) P D)
- <COND (<DIR-FROM-TEST .HERE .THERE ,P?UP>	<RETURN ,P?UP>)
+ <COND (<DIR-FROM-TEST .HERE .THERE ,P?UP>	    <RETURN ,P?UP>)
        (<DIR-FROM-TEST .HERE .THERE ,P?DOWN>	<RETURN ,P?DOWN>)
-       (<DIR-FROM-TEST .HERE .THERE ,P?IN>	<RETURN ,P?IN>)
-       (<DIR-FROM-TEST .HERE .THERE ,P?OUT>	<RETURN ,P?OUT>)>
+       (<DIR-FROM-TEST .HERE .THERE ,P?IN>	    <RETURN ,P?IN>)
+       (<DIR-FROM-TEST .HERE .THERE ,P?OUT>	    <RETURN ,P?OUT>)>
  <SET P 0>
  <REPEAT ()
 	 <COND (<L? <SET P <NEXTP .HERE .P>> ,LOW-DIRECTION>
@@ -1234,7 +1243,7 @@ His ,WINNER " light reveals">)
 			<COND ;(<EQUAL? .OBJ ,HANDS ,HEAD ,EYES>
 			       <RTRUE>)
                   (<OR <AND <FSET? .OBJ ,BODYPARTBIT>
-						    <FIND-NUM-TBL ,BODY-PARTS-OWNERS .CONT>>
+						    <INTBL? .CONT ,BODY-PARTS-OWNERS <LTBEG ,BODY-PARTS-OWNERS>>>
                        <AND <EQUAL? .OBJ ,HEAD ,FEET>
                             <EQUAL? .CONT ,MICE ,BENJY ,PERCY>>>
 				   <RTRUE>)
@@ -1280,6 +1289,7 @@ His ,WINNER " light reveals">)
 		<FCLEAR ,PRSO ,WORNBIT>
 		<FCLEAR ,PRSO ,NDESCBIT>
 		<FCLEAR ,PRSO ,INVISIBLE>
+        <FSET ,PRSO ,TRYTAKEBIT>
 		<RTRUE>)>>
 
 ;<GLOBAL INDENTS
@@ -1351,9 +1361,9 @@ His ,WINNER " light reveals">)
 		;<TOO-BAD-BUT>
 		<THE-J .OBJ T T>
         <TELL
-" slips from" his ,WINNER " arms while " he+verb ,WINNER "is"
+" slips from" HIS ,WINNER " arms while " HE+VERB ,WINNER "is"
 " taking" him .OB ", and both tumble " <GROUND-DESC> !\. !\ 
-He+verb ,WINNER "is" " carrying too many things." CR>
+CHE+VERB ,WINNER "is" " carrying too many things." CR>
 		<MOVE .OBJ ,HERE>
 		<MOVE .OB ,HERE>
 		<FUCKING-CLEAR>
@@ -1370,6 +1380,7 @@ He+verb ,WINNER "is" " carrying too many things." CR>
 		<FCLEAR .OB ,NDESCBIT>
 		<FCLEAR .OB ,INVISIBLE>
 		<FCLEAR .OB ,SECRETBIT>
+        <FCLEAR .OB ,TRYTAKEBIT>
 		;<COND (<==? ,WINNER ,PLAYER> <SCORE-OBJ .OB>)>
 		;<SETG ITAKE-LOC <>>
 		<COND (<AND <NOT <VERB? TAKE>>
@@ -1482,7 +1493,7 @@ them to do.]" CR>
 	      (T <TELL "\"">)>
 	<TELL "OK">
 	<COND (.OBJ
-	       <TELL ", " he .OBJ>
+	       <TELL ", "HE .OBJ>
 	       <COND (.STR <TELL " is now " .STR>)>
 	       <COND (<=? .STR "on">		<FSET .OBJ ,ONBIT>)
 				 (<=? .STR "off">		<FCLEAR .OBJ ,ONBIT>)
@@ -1492,7 +1503,7 @@ them to do.]" CR>
 				 (<=? .STR "unlocked">	<FCLEAR .OBJ ,LOCKED>)>)>
 	<COND (<OR .STR <NOT .OBJ>>
 	       <COND (<NOT <==? ,WINNER ,PLAYER>>
-		      <TELL ",\" says "><THE-J ,WINNER T><TELL !\. !\  He ,WINNER " does so." CR>
+		      <TELL ",\" says "><THE-J ,WINNER T><TELL !\. !\  CHE ,WINNER " does so." CR>
 		      <RTRUE>)>
 	       <TELL ,PAUSES>)>
 	<COND (<AND <ZERO? ,LIT>
@@ -1571,11 +1582,6 @@ them to do.]" CR>
 		<ACCESSIBLE? .L>)
 	       (T
 		<RFALSE>)>>
-
-<ROUTINE WHO-CARES ("AUX" N)
-	<SET N <RANDOM ,WHO-CARES-LENGTH>>
-	<HE-SHE-IT ,PRSI T <GET ,WHO-CARES-VERB .N>>
-	<TELL <GET ,WHO-CARES-TBL .N> ,PAUSES>>
 
 "SUBTITLE REAL VERBS"
 
@@ -1618,14 +1624,14 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
        (<FSET? ,PRSO ,PERSONBIT> <TELL-ME-HOW>)
        ;(<FSET? ,PRSO ,LIGHTBIT> <CHECK-ON-OFF>)
        (<FSET? ,PRSO ,DOORBIT> <CHECK-DOOR ,PRSO> <CRLF>)
-       (T <TELL He+verb ,PRSO "look" " normal." CR> ;<YOU-CANT "check">)>>
+       (T <TELL CHE+VERB ,PRSO "look" " normal." CR> ;<YOU-CANT "check">)>>
 
 <ROUTINE V-ANSWER ()
 	 <COND (<T? ,AWAITING-REPLY>
-		    <COND (<FIND-NUM-TBL ,P-LEXV ,W?YES>
+		    <COND (<NOUN-USED? ,PRSO ,W?YES>
 		           <PERFORM ,V?YES>
                    <RTRUE>)
-		          (<FIND-NUM-TBL ,P-LEXV ,W?NO>
+		          (<NOUN-USED? ,PRSO ,W?NO>
 		           <PERFORM ,V?NO>
                    <RTRUE>)>)>
      <NOT-CLEAR-WHOM>
@@ -1642,7 +1648,7 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
 	       (T <YOU-CANT ;"answer">)>> 
 
 <ROUTINE WAITING-FOR-YOU-TO-SPEAK ()
-	<TELL He+verb ,PRSO "seem" " to be waiting for you to speak." CR>>
+	<TELL CHE+VERB ,PRSO "seem" " to be waiting for you to speak." CR>>
 
 <ROUTINE V-ASK ()
  <COND (<AND ;<T? ,P-CONT>
@@ -1706,20 +1712,21 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
 	<TELL "" CR>>
 
 <ROUTINE V-ASK-ABOUT ()
-	 <RESET-WINNER>
+	 ;<RESET-WINNER>
 	 <COND (<EQUAL? ,PRSI <>>
+            <RESET-WINNER>
             <TELL "You can't think of anything to say." CR>)
            (<AND <FSET? ,PRSO ,PERSONBIT>
 		     	 <NOT <EQUAL? ,PRSO ,PLAYER>>>
-			<TELL
-"A long silence tells you that"><TELL !\ ><THE-J ,PRSO T><TELL " isn't interested in talking about ">
-			<COND (<OR <IN? ,PRSI ,ROOMS>
-				   	   <EQUAL? ,PRSI ,PRSO>>
-		       	   <TELL that ,PRSI>)
-                  (<EQUAL? ,PRSI ,PLAYER>
-                   <TELL "you. Not many people are">)
-		    	  (T
-		           <THE-J ,PRSI T>)>
+			<RESET-WINNER>
+            <TELL
+"A long silence tells you that "><THE-J ,PRSO T><TELL " isn't interested in talking about">
+			<COND (<EQUAL? ,PRSI ,PLAYER>
+                   <TELL " you. Not many people are">)
+		    	  (ELSE
+		       	   <TELL THAT ,PRSI>
+                   <COND (<EQUAL? ,PRSI ,PRSO>
+                          <TELL "self">)>)>
 		    <TELL ,PAUSES>)
 	       (T
 		    <PERFORM ,V?TELL ,PRSO>
@@ -1769,14 +1776,14 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
 	      (<NOT <GRAB-ATTENTION .P>>
 	       <RTRUE>)
 	      (T
-	       <TELL He .P !\ >
+	       <TELL CHE .P !\ >
 	       <COND (<FSET? .P ,FEMALEBIT> <TELL "curtsey">) (T <TELL "bow">)>
 	       <TELL "s back to you." CR>)>>
 
 <ROUTINE PRE-BRUSH ()
 	 <COND (<AND ,KILL-NOW?
                  <NOT <RUNNING? I-MOUSE-BLAB>>>
-	 		<TELL ,SUDDEN "attempt to brush"><TELL !\ ><THE-J ,PRSO T>
+	 		<TELL ,SUDDEN "attempt to brush "><THE-J ,PRSO T>
 			<TELL ", Perc" ,HEADSHOT>
 			<JIGS-UP "">)>
  <COND (<AND <DOBJ? ROOMS>
@@ -1818,7 +1825,7 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
                   (ELSE
                    <TELL "Why?" CR>)>)
            (<NOT ,PRSI>
-		    <TELL "You have nothing to brush">
+		    <TELL "You have nothing to brush ">
 		    <THE-J ,PRSO T>
 		    <TELL " with." CR>)
            (<IOBJ? TOWEL>
@@ -1837,7 +1844,7 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
 "You try for a minute and then decide it's an endless task." CR>>
 
 <ROUTINE V-BUY ()
-	 <TELL "Sorry,"><TELL !\ ><THE-J ,PRSO T><TELL " isn't for sale." CR>>
+	 <TELL "Sorry, "><THE-J ,PRSO T><TELL " isn't for sale." CR>>
 
 ;<ROUTINE REMOVE-CAREFULLY ("OPTIONAL" (OBJ <>) "AUX" OLIT)
 	 <SET OLIT ,LIT>
@@ -1869,16 +1876,18 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
                               <AND <NOT ,PRSI>
                                    <VISIBLE? ,PHONE>
                                    <TELL "(with the phone)" CR>>>
-                          <TELL "You don't know " his ,PRSO " number." CR>)
+                          <TELL "You don't know " HIS ,PRSO " number." CR>)
                          (ELSE
-                          <TELL "You don't know " his ,PRSO " number, and even if you did, you have no phone." CR>)>)>)
+                          <TELL "You don't know " HIS ,PRSO " number, and even if you did, you have no phone." CR>)>)>)
 	       (T
             <COND (<OR <EQUAL? ,PRSI ,PHONE>
                        <AND <NOT ,PRSI>
                             <VISIBLE? ,PHONE>
                             <TELL "(with the phone)" CR>>>
                    <COND (<EQUAL? ,PRSO ,LIP1>
-		                  <TELL "Police? You think they're going to stop Vogons from destroying Earth?" CR>)
+		                  <TELL "Police? You think they're going to stop Vogons from destroying Earth?" CR>
+                          <SETG AWAITING-REPLY 17>
+                          <QUEUE I-REPLY 2>)
 	                     (<EQUAL? ,PRSO ,HALLWAY2>
 		                  <TELL "Who do you think you are, E.T.?" CR>)
 	                     (<EQUAL? ,PRSO ,HALLWAY3>
@@ -1890,7 +1899,8 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
                             <VISIBLE? ,MICROPHONE>
                             <TELL "(on the microphone)" CR>>>
                    <COND (<EQUAL? ,PRSO ,HALLWAY3>
-		                  <COND (<FSET? ,LOUDSPEAKER ,RADPLUGBIT>
+		                  <FSET ,MICROPHONE ,RADPLUGBIT> ;"Spoken"
+                          <COND (<FSET? ,LOUDSPEAKER ,RADPLUGBIT>
                                  <TELL
 "Out of the radio comes a voice: \"Yes, yes. I can hear you.\" A brief pause. \"The code is ">
                                  <VOICE>)
@@ -1910,9 +1920,9 @@ activation--- or even better, brain scan--- is the preferred option nowadays." C
 	<FCLEAR .PER ,MUNGBIT>
 	<SET RM <META-LOC .PER>>
 	<COND (<AND <IN? .PER ,HERE> <ZERO? .NO-TELL?>>
-	       <TELL He .PER " wakes up first. ">
+	       <TELL CHE .PER "wake" " up first. ">
 	       <COND (<NOT <FSET? .RM ,LIGHTBIT>>
-		      <TELL He .PER " turns on the light. ">)>)>
+		      <TELL CHE .PER "turn" " on the light. ">)>)>
 	<FSET .RM ,LIGHTBIT>
 	<RTRUE>)>>
 
@@ -1943,10 +1953,10 @@ him ,PRSO " nor any other preposition.]" CR>)>
           (<FSET? ,PRSO ,VEHBIT>
     	<COND (<EQUAL? <LOC ,WINNER> ,PRSO>
     	    <ALREADY ,PLAYER>
-    	    <TELL "in"><TELL !\ ><THE-J ,PRSO T><TELL ,PAUSES>)
+    	    <TELL "in "><THE-J ,PRSO T><TELL ,PAUSES>)
     	      (T
     	    <MOVE ,WINNER ,PRSO>
-    	    <TELL He+verb ,WINNER "is" " now ">
+    	    <TELL CHE+VERB ,WINNER "is" " now ">
     	    <COND (<FSET? ,PRSO ,SURFACEBIT>
     		    <TELL "o">)
     		      (T
@@ -2021,30 +2031,30 @@ him ,PRSO " nor any other preposition.]" CR>)>
        (ELSE
 	   	<COND (,SCOREMAD
 			   <COND (<EQUAL? ,SCOREOUT 32>
-			   		  <TELL He+verb ,PRSO "is" " wide awake and in good health." CR>)
+			   		  <TELL CHE+VERB ,PRSO "is" " wide awake and in good health." CR>)
 					 (ELSE
-					  <COND (<EQUAL? ,PRSO ,PLAYER>
+					  <COND (<EQUAL? ,PRSO ,PLAYER ,ROOMS <>>
 					  		 <TELL "You feel powerful, and yet... depressed." CR>)
 							(ELSE
 							 <TELL "Who cares about others when you have your own knowledge?" CR>)>)>)
 			  (ELSE
 			   <COND (<EQUAL? ,PRSO ,PLAYER ,ROOMS <>>
-                      <COND (<AND <FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>   ;"Are you in Norway?"
+                      <COND (<AND <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>   ;"Are you in Norway?"
                                   <FSET? ,CHANNEL1 ,SEENBIT>           ;"Are you wet?"
                                   <NOT <EQUAL? <LOC ,PLAYER> ,CHANNEL1 ,CHANNEL2 ,CHANNEL3>>>
                              <TELL "You're wet and very, very cold." CR>)
                             (<EQUAL? <LOC ,PLAYER> ,CHANNEL1 ,CHANNEL2 ,CHANNEL3>
                              <TELL "You're wet, but the water's warm, so you're fine." CR>)
-                            (<FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+                            (<INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                              <TELL "You're freezing!" CR>)
                             (ELSE
                              <TELL "You're hungry." CR>)>)
 			   		 (ELSE
-					  <TELL He+verb ,PRSO "is" " wide awake and in good health." CR>)>)>)>>
+					  <TELL CHE+VERB ,PRSO "is" " wide awake and in good health." CR>)>)>)>>
 
 <ROUTINE TELL-NOT-IN (OBJ)
 	<SETG CLOCK-WAIT T>
-	<TELL He+verb ,WINNER "is" " not in" him .OBJ "!" CR>>
+	<TELL CHE+VERB ,WINNER "is" " not in " him .OBJ "!" CR>>
 
 <ROUTINE V-DRINK () <YOU-CANT ;"drink">>
 
@@ -2084,18 +2094,18 @@ him ,PRSO " nor any other preposition.]" CR>)>
 <ROUTINE V-EAT ()
 	 <COND (<AND ,KILL-NOW?
                  <NOT <RUNNING? I-MOUSE-BLAB>>>
-	 		<TELL ,SUDDEN "attempt to eat"><TELL !\ ><THE-J ,PRSO T>
+	 		<TELL ,SUDDEN "attempt to eat "><THE-J ,PRSO T>
 			<TELL ", Perc" ,HEADSHOT>
 			<JIGS-UP "">)>
-	 <TELL
-"Stuffing"><TELL !\ ><THE-J ,PRSO T><TELL " in your mouth would do little to help at this point."
-CR>>
+	 <TELL "Stuffing ">
+     <THE-J ,PRSO T>
+     <TELL " in your mouth would do little to help at this point." CR>>
 
 <ROUTINE V-ENJOY ()
 	 <COND (<FSET? ,PRSO ,PERSONBIT>
 		<V-KISS>)
 	       (T <TELL
-"Not difficult at all, considering how enjoyable"><TELL !\ ><THE-J ,PRSO T><TELL " is." CR>)>>
+"Not difficult at all, considering how enjoyable "><THE-J ,PRSO T><TELL " is." CR>)>>
 
 <ROUTINE PRE-THROUGH ("AUX" VEH)
  <COND (<DOBJ? ROOMS GLOBAL-HERE>
@@ -2144,7 +2154,7 @@ CR>>
 		   	   <==? ,PRSO ,PSEUDO-OBJECT>>
 		   <HAR-HAR>)
 	      (<NOT <FSET? ,PRSO ,TAKEBIT>>
-	       <TELL He+verb ,WINNER "bang" " into "><THE-J ,PRSO T>
+	       <TELL CHE+VERB ,WINNER "bang" " into "><THE-J ,PRSO T>
 	       <THIS-IS-IT ,PRSO>
 	       <TELL " while trying to go through" him ,PRSO ,PAUSES>)
 	      (<IN? ,PRSO ,WINNER>
@@ -2246,7 +2256,7 @@ but you don't know about any of this, you're an NPC!">
 		<RTRUE>)>>
 
 <ROUTINE BITE-YOU ()
-	<TELL "If "><THE-J ,PRSO T><TELL " were any closer, " he ,PRSO "'d hit you!" CR>>
+	<TELL "If "><THE-J ,PRSO T><TELL " were any closer, " HE ,PRSO "'d hit you!" CR>>
 
 <ROUTINE FAR-AWAY? (L)
  <COND ;(<ZERO? <GETP ,HERE ,P?LINE>>
@@ -2302,7 +2312,7 @@ but you don't know about any of this, you're an NPC!">
 		         <FSET? .L ,CONTBIT>
 		         <IN? .L ,ROOMS>>>
 		<THIS-IS-IT .L>
-		<TELL He ,PRSO "is" " probably ">
+		<TELL CHE+VERB ,PRSO "is" " probably ">
 		<COND (<FSET? .L ,SURFACEBIT> <TELL !\o>) (T <TELL !\i>)>
         <TELL !\n !\ >
 		<THE-J .L T>
@@ -2347,7 +2357,7 @@ but you don't know about any of this, you're an NPC!">
 <ROUTINE FOLLOW-LOC? ("AUX" L)
 	 <SET L <GETP ,PRSO ,P?CHARACTER>>
 	 <COND (<SET L <GET ,FOLLOW-LOC .L>>
-		<TELL "The last you knew, " he ,PRSO " was ">
+		<TELL "The last you knew, " HE ,PRSO " was ">
 		<COND (<FSET? .L ,SURFACEBIT>
 		       <TELL "on">)
 		      (T <TELL "in">)>
@@ -2367,7 +2377,7 @@ but you don't know about any of this, you're an NPC!">
 		     <NOT <FSET? ,PRSO ,PERSONBIT>>>
 		<IMPOSSIBLE>)
 	       (<==? ,HERE <META-LOC ,PRSO>>
-		<TELL "You're in the same place as " him ,PRSO "!" CR>)
+		<TELL "You're in the same place as" him ,PRSO "!" CR>)
 	       ;(<SET L <GET ,FOLLOW-LOC <GETP ,PRSO ,P?CHARACTER>>
 		       ;<FOLLOW-LOC?>>
 		<PERFORM ,V?WALK-TO .L>)
@@ -2472,7 +2482,7 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
            <TELL "This begins a transcript of ">
            <V-VERSION>
            <RTRUE>)
-          (ELSE <TELL-FAILED>)>>
+          (ELSE <TELL-FAILED "TRANSCRIPT ON">)>>
 
 <ROUTINE V-UNSCRIPT ()
     <COND (<NOT <BTST <LOWCORE FLAGS> 1>>
@@ -2480,12 +2490,14 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
           (<AND <TELL CR "End of transcript." CR>
                 <DIROUT -2>
                 <BTST <LOWCORE FLAGS> 1>>
-           <TELL-FAILED>)>>
+           <TELL-FAILED "TRANSCRIPT OFF">)>>
 
 <ROUTINE I-REPLY ()
-	 <SETG AWAITING-REPLY <>>>
+    <COND (<NOT <OR <RUNNING? I-TENSE-SCENE>
+                    <IN? ,PLAYER ,INTERVIEW-ROOM>>>
+           <SETG AWAITING-REPLY 0>)>>
 
-<GLOBAL AWAITING-REPLY <>>
+;<GLOBAL AWAITING-REPLY <>>
 
 <ROUTINE PRE-GIVE ()
 	 <COND (<AND <NOT <EQUAL? ,PRSI ,PLAYER ,YOUR-NAME>>
@@ -2508,9 +2520,9 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
            (<ZERO? ,PRSI>
 		<YOU-CANT ;"give">)
 	       (<NOT <FSET? ,PRSI ,PERSONBIT>>
-		<TELL He ,WINNER " can't give "><THE-J ,PRSO <>><TELL " to "><THE-J ,PRSI <>><TELL "!" CR>)
+		<TELL CHE ,WINNER " can't give "><THE-J ,PRSO <>><TELL " to "><THE-J ,PRSI <>><TELL "!" CR>)
 	       ;(<FSET? ,PRSI ,MUNGBIT>
-		<TELL He+verb ,PRSI "do" "n't respond." CR>)
+		<TELL CHE+VERB ,PRSI "do" "n't respond." CR>)
            (<AND <EQUAL? ,PRSI ,PLAYER>
                  <ORDERING?>>
 		<PERFORM ,V?ASK-FOR ,WINNER ,PRSO>
@@ -2522,7 +2534,7 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
 		<TELL "Politely,"><TELL !\ ><THE-J ,PRSI T><TELL " refuses your offer." CR>)
 	       ;(T
 		<MOVE ,PRSO ,PRSI>
-		<TELL He+verb ,PRSI "accept" " your gift." CR>
+		<TELL CHE+VERB ,PRSI "accept" " your gift." CR>
 		<RTRUE>)>>
 
 <ROUTINE PRE-SGIVE ("AUX" X)
@@ -2574,13 +2586,13 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
 	           <TELL "Marvin ignores you." CR>
                <RTRUE>)
               (<IN? ,PLAYER ,INTERVIEW-ROOM>
-               <TELL "\"Hello. I'm " D ,PRSO !\.>
+               <TELL "\"Hello. I'm " D ,PRSO>
                <COND (<NOT <FSET? ,INTERVIEW-ROOM ,RADPLUGBIT>>
-                      ;<CRLF>
+                      <TELL ", and w">
                       <DEQUEUE I-ASK-DEATH>
-                      <I-ASK-DEATH>)
+                      <I-ASK-DEATH T>)
                      (ELSE
-                      <TELL !\" CR>)>)
+                      <TELL !\. !\" CR>)>)
               (<EQUAL? ,PRSO ,ZAPHOD>
 	           <TELL "Zaphod nods at you coolly. \"What's up?\"" CR>
                <RTRUE>)
@@ -2599,7 +2611,8 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
 	   	  <TELL "Hello." CR>)>>
 
 <ROUTINE V-HELP ()
-    <COND (<EQUAL? ,PRSO <> ,PLAYER>
+    <COND (<AND <EQUAL? ,PRSO <> ,PLAYER>
+                <NOT <VERB-WORD? ,W?SAVE>>>
 		   ;<HELP-TEXT>
 		   <V-HINTS>)
           (<EQUAL? ,PRSO ,THIRD-PLANET>
@@ -2608,7 +2621,7 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
                   <SETG AWAITING-REPLY 16>)
                  (<IN-REST? ,PLAYER>
                   <TELL "That was a few million - billion - whatever - years ago. It doesn't matter anymore." CR>)
-                 (<FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+                 (<INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                   <TELL "That is in a long time to come." CR>)
                  (<IN? ,PLAYER ,PDW>
                   <TELL "That already happened. Focus on making a new planet, or something." CR>)
@@ -2626,15 +2639,17 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
 		<PERFORM ,V?WHAT ,PRSO>
 		<RTRUE>)
 	       (T
-		<TELL "That's not a person!" CR>)>>
+		<TELL CTHAT+VERB ,PRSO "is" "n't a person!" CR>)>>
 
 <ROUTINE V-WHY ()
 	 <TELL "Why not?" CR>>
 	
 <ROUTINE V-WHAT ()
-    <COND (<EQUAL? ,PRSO ,TIME>
-        <V-WHAT-TIME>
-        <RTRUE>)>
+    <COND (<DOBJ? TIME>
+           <V-WHAT-TIME>
+           <RTRUE>)
+          (<DOBJ? PLAYER>
+           <PERFORM ,V?WHAT ,YOUR-NAME>)>
 	<TELL "Good question." CR>>
 
 <ROUTINE V-WHAT-TIME ()
@@ -2646,14 +2661,11 @@ footnotes? Or did you look at the hints? Or... did you - you didn't surely - did
 <ROUTINE V-WHAT-ABOUT ()
 	<TELL "Well, what about ">
     <COND (<EQUAL? ,PRSO ,PLAYER>
-        <TELL "you">)
-    (<FSET? ,PRSO ,PERSONBIT>
-        <COND (<FSET? ,PRSO ,FEMALEBIT>
-            <TELL "her">)
-        (T
-            <TELL "him">)>)
-    (ELSE
-        <TELL "it">)>
+           <TELL "you">)
+          (<FSET? ,PRSO ,PERSONBIT>
+           <TELL him ,PRSO>)
+          (ELSE
+           <TELL "it">)>
     <TELL "?" CR>>
 
 <ROUTINE V-KILL ()
@@ -2700,7 +2712,7 @@ relax a little." CR>>
 	       <FSET ,PRSO ,ONBIT>
 	       <UNSNOOZE .P>
 	       <THIS-IS-IT .P>
-	       <TELL He .P " opens the door, then retreats into the room."
+	       <TELL CHE .P " opens the door, then retreats into the room."
 			  ;"Someone shouts \"Come!\"" CR>)
 	      (T <TELL "Nobody's home." CR>)>)
        (T
@@ -2791,7 +2803,18 @@ relax a little." CR>>
        (T <PRE-ASK>)>>
 
 <ROUTINE V-LISTEN ()
- <COND (<VISIBLE? ,RADIO>
+ <COND (<IN? ,PLAYER ,STUNT-SHIP>
+    <COND (<NOT <FSET? ,STUNT-SHIP ,LIGHTBIT>>
+        <COND (<DOBJ? FORD ZAPHOD TRILLIAN>
+            <COND (<L? ,STUNT-COUNTER 4>
+                <TELL "You can't hear " D ,PRSO " here!" CR>)
+                  (<L? ,STUNT-COUNTER 7>
+                <TELL "You listen." CR>)
+                  (ELSE
+                <TELL "They aren't talking!" CR>)>)
+              (<DOBJ? HUMMING>
+            <TELL "It's very loud." CR>)>)>)
+       (<VISIBLE? ,RADIO>
     <TELL ,YOU-HEAR>
  	<COND (<FSET? ,RADIO ,BADRADIOBIT>
         <TELL "static">)
@@ -2807,7 +2830,7 @@ relax a little." CR>>
 	<WAITING-FOR-YOU-TO-SPEAK>
 	<RTRUE>)
        (T
-	<TELL "At the moment, "><THE-J ,PRSO T><TELL " makes no sound." CR>)>>
+	<TELL "At the moment, "><THE-J ,PRSO T><TELL " makes no unexpected sounds." CR>)>>
 
 <ROUTINE V-LOCK ()
  <COND ;(<FSET? ,PRSO ,DOORBIT>
@@ -2835,7 +2858,8 @@ relax a little." CR>>
 
 <ROUTINE V-LOOK-DOWN ()
  <COND (<==? ,PRSO ,ROOMS>
-	<PERFORM ,V?EXAMINE ,FLOOR>
+	<TELL "You look " <GROUND-DESC> !\. !\ >
+    <PERFORM ,V?EXAMINE ,FLOOR>
 	<RTRUE>)
        (T
 	<PERFORM ,V?LOOK-INSIDE ,PRSO>
@@ -2891,6 +2915,7 @@ relax a little." CR>>
 		       <TELL ,PAUSES>)
 		      (T <TELL "Unfotunately, there's nothing inside." CR>
 			  ;<TOO-BAD-BUT ,PRSO "empty">)>)
+           (<FSET? ,PRSO ,PERSONBIT> <TELL "You forgot to bring your X-ray glasses." CR>)
 	       (<==? .DIR ,P?IN> <YOU-CANT "look inside">)
 	       (T ;<==? .DIR ,P?OUT> <YOU-CANT "look outside">)>>
 
@@ -2989,7 +3014,7 @@ relax a little." CR>>
 		<SETG LIT .OLIT>
 		<RTRUE>)>>
 
-<ROUTINE SEE-INTO? (THERE "OPTIONAL" (TELL? T) (IGNORE-DOOR <>)"AUX" P L TBL O)
+<ROUTINE SEE-INTO? (THERE "OPTIONAL" (TELL? T) (IGNORE-DOOR <>) "AUX" P L TBL O)
  ;<COND (<CORRIDOR-LOOK .THERE>
 	<RTRUE>)>
  <SET P 0>
@@ -3043,6 +3068,8 @@ relax a little." CR>>
 <ROUTINE V-LOOK-UNDER ()
 	 <COND (<DOBJ? EYES HANDS HEAD EARS TEETH>
 		<WONT-HELP>)
+           (<DOBJ? PLAYER>
+        <PERFORM ,V?LOOK-DOWN>)
 	       (<HELD? ,PRSO>
 		<TELL "You're ">
 		<COND (<FSET? ,PRSO ,WORNBIT>
@@ -3081,11 +3108,7 @@ relax a little." CR>>
 	       (T 
 			<COND (<EQUAL? ,PRSO ,UP ,DOWN ,INTDIR
 						   ,P?UP ,P?DOWN ,P?NORTH ,P?SOUTH ,P?EAST ,P?WEST ,P?NW ,P?NE ,P?SW ,P?SE>
-                   <COND (<DOBJ? UP>
-                          <SETG ,PRSO ,P?UP>)
-                         (<DOBJ? DOWN>
-                          <SETG ,PRSO ,P?DOWN>)>
-				   <DO-WALK ,PRSO>)
+                   <TELL "Please use WALK to move around." CR>)
 				  (ELSE
 				   <YOU-CANT "move">)>)>>
 
@@ -3427,40 +3450,43 @@ relax a little." CR>>
 
 
 <ROUTINE FIRSTER (OBJ LEVEL "OPT" SEARCHING OPENING? "AUX" F)
-	<COND (<EQUAL? .OBJ ,PLAYER>
-		<TELL "You have:" CR>
-		<RTRUE>)
-    (<NOT <IN? .OBJ ,ROOMS>>
-        <COND (<NOT .SEARCHING>
-            <TELL ;CR <GET ,INDENTS .LEVEL>>)>
-        <SET F <FIRST? .OBJ>>
-        <COND (<EQUAL? .OBJ ,CABINET>
-               <TELL "Of the more interesting things in the cabinet, you can see:" CR>
-               <RTRUE>)
-              (<NOT .F>
-            <COND (<FSET? .OBJ ,SURFACEBIT>
-                <TELL "There is nothing on "><THE-J .OBJ T><TELL ,PAUSES>)
-            (<FSET? .OBJ ,PERSONBIT>
-                <TELL He+verb .OBJ "is" " holding nothing.">)
-            (T
-				<COND  (.OPENING?
-						<TELL "There is nothing inside of "><THE-J .OBJ T><TELL ,PAUSES>
-						<FSET .OBJ ,OPENBIT>)
-                	   (ELSE
-						<TELL He+verb .OBJ "contain" " nothing." CR>)>)>
-            <RFALSE>)>
-            <COND (<FSET? .OBJ ,SURFACEBIT>
-                <TELL "Sitting on "><THE-J .OBJ T><TELL " is:" CR>)
-            (<FSET? .OBJ ,PERSONBIT>
-                <TELL ,IT-LOOKS-LIKE><THE-J .OBJ T><TELL verb .OBJ "is" " holding: " CR>)
-            (T
-				<COND  (.OPENING?
-						<TELL "You open "><THE-J .OBJ T><TELL " and see:" CR>
-						<FSET .OBJ ,OPENBIT>)
-                	   (ELSE
-                        <PUTP ,THING ,P?SDESC "Thing">
-						<TELL ,IT-LOOKS-LIKE><THE-J .OBJ T><TELL verb .OBJ "contain" !\: CR>
-                        <PUTP ,THING ,P?SDESC "thing your aunt gave you which you don't know what it is">)>)>)>>
+    <COND (<EQUAL? .OBJ ,PLAYER>
+		   <TELL "You have:" CR>
+		   <RTRUE>)
+          (<NOT <IN? .OBJ ,ROOMS>>
+           <SET F <FIRST? .OBJ>>
+           <COND (<AND <EQUAL? .F ,BLASTER-ON-TRAY>
+                       <NOT <NEXT? .F>>>
+                  <RTRUE>)>
+           <COND (<NOT .SEARCHING>
+                  <TELL <GET ,INDENTS .LEVEL>>)>
+           <COND (<EQUAL? .OBJ ,CABINET>
+                  <TELL "Of the more interesting things in the cabinet, you can see:" CR>
+                  <RTRUE>)
+                 (<NOT .F>
+                  <COND (<FSET? .OBJ ,SURFACEBIT>
+                         <TELL "There is nothing on "><THE-J .OBJ T><TELL ,PAUSES>)
+                        (<FSET? .OBJ ,PERSONBIT>
+                         <TELL CHE+VERB .OBJ "is" " holding nothing.">)
+                        (T
+          		         <COND (.OPENING?
+          		         	    <TELL "There is nothing inside of "><THE-J .OBJ T><TELL ,PAUSES>
+          		         	    <FSET .OBJ ,OPENBIT>)
+                           	   (ELSE
+          		         	    <TELL CHE+VERB .OBJ "contain" " nothing." CR>)>)>
+                  <RFALSE>)>
+           <COND (<FSET? .OBJ ,SURFACEBIT>
+                  <TELL "Sitting on "><THE-J .OBJ T><TELL " is:" CR>)
+                 (<FSET? .OBJ ,PERSONBIT>
+                  <TELL ,IT-LOOKS-LIKE><THE-J .OBJ T><TELL verb .OBJ "is" " holding: " CR>)
+                 (T
+                  <COND (.OPENING?
+               	         <TELL "You open "><THE-J .OBJ T><TELL " and see:" CR>
+               	         <FSET .OBJ ,OPENBIT>)
+                        (ELSE
+                         <PUTP ,THING ,P?SDESC "Thing">
+               	         <TELL ,IT-LOOKS-LIKE><THE-J .OBJ T><TELL verb .OBJ "contain" !\: CR>
+                         <PUTP ,THING ,P?SDESC "thing your aunt gave you which you don't know what it is">)>)>)>>
 
 <ROUTINE DESCRIBE-OBJECT (OBJ V? LEVEL "OPT" SHUSH "AUX" (STR <>) AV (BACK? <>))
 	 <COND (<AND <EQUAL? .LEVEL 0>
@@ -3476,7 +3502,8 @@ relax a little." CR>>
 	       (<AND <EQUAL? .LEVEL 0>>
 		    <TELL "There is "><THE-J .OBJ <>><TELL " here.">)
 	       (T
-            <COND (.SHUSH
+            <COND (<OR .SHUSH
+                       <EQUAL? .OBJ ,BLASTER-ON-TRAY>>
                    <RTRUE>)>
             <COND (<NOT <EQUAL? .LEVEL -1>>
                <TELL <GET ,INDENTS .LEVEL>>)>
@@ -3555,7 +3582,10 @@ relax a little." CR>>
            %<DEBUG-CODE <COND (<T? ,P-DBUG> <BOLDEN "|RUNNING POUR 2|">)>>
            <COND (ELSE ;<HELD? ,PLATE>
                   <SETG USING-SPORFE T>
-                  <PERFORM ,V?PUT ,BLASTER ,PLATE>
+                  <SETG PRSA ,V?PUT>
+                  <SETG PRSO ,BLASTER>
+                  <SETG PRSI ,PLATE>
+                  <PLATE-F>
                   ;<INCREMENT-SCORE 15>
                   <SETG USING-SPORFE <>>
                   <RTRUE>)>)
@@ -3580,10 +3610,11 @@ relax a little." CR>>
 		<MAP-CONTENTS (F N .FROM)
 			<D-J .F><TELL !\: !\ >
 			<SET R
-			     <COND (.TO
-				    <PERFORM ,V?PUT .F .TO>)
-				   (ELSE
-				    <PERFORM ,V?DROP .F>)>>
+			     <COND (<AND .TO
+                             <NOT <EQUAL? .TO ,FLOOR ,GLOBAL-HERE>>>
+				        <PERFORM ,V?PUT .F .TO>)
+				       (ELSE
+				        <PERFORM ,V?DROP .F>)>>
 			<COND (<EQUAL? .R ,M-FATAL> <RTRUE>)>>
 		<RTRUE>)>>
 
@@ -3592,7 +3623,7 @@ relax a little." CR>>
 <ROUTINE V-PUSH () <HACK-HACK "Pushing">>
 
 <ROUTINE YOU-MASHER ("OPT" WHOM)
-    <TELL "I don't think " he+verb <OR .WHOM ,PRSO> " would appreciate that." CR>>
+    <TELL "I don't think " HE+VERB <OR .WHOM ,PRSO> " would appreciate that." CR>>
 
 <ROUTINE V-PULL-APART ()
     <COND (<EQUAL? ,PRSO ,WINNER>
@@ -3604,10 +3635,12 @@ relax a little." CR>>
 <ROUTINE PRE-PLUG ()
     <COND (<AND <NOT <EQUAL? ,LOUDSPEAKER ,PRSO>>
                 <NOT <IN? ,PRSO ,PLAYER>>>
-           <TELL "You aren't holding "><THE-J ,PRSO T><TELL !\! CR>)
+           <TELL "You aren't holding "><THE-J ,PRSO T><TELL !\! CR>
+           <RTRUE>)
           (<AND <NOT <EQUAL? ,LOUDSPEAKER ,PRSI>>
                 <NOT <IN? ,PRSI ,PLAYER>>>
-           <TELL "You aren't holding "><THE-J ,PRSI T><TELL !\! CR>)>>
+           <TELL "You aren't holding "><THE-J ,PRSI T><TELL !\! CR>
+           <RTRUE>)>>
 
 <ROUTINE V-PLUG ()
 	<TELL ,NOPE "seem to plug "><THE-J ,PRSO T><TELL " into "><THE-J ,PRSI T><TELL ,PAUSES>>
@@ -3616,13 +3649,21 @@ relax a little." CR>>
     <COND (<AND <EQUAL? ,PRSO ,PLANT ,RADIO>
             <FSET? ,PLANT ,RADPLUGBIT>>
         <FCLEAR ,PLANT ,RADPLUGBIT>
-        <TELL "Unplugged." CR>)
+        <TELL ,UNPLUG>
+        <COND (<NOT <FSET? ,RADIO ,BADRADIOBIT>>
+            <THE-J ,RADIO T>
+            <TELL
+" stops playing the sad tune and starts playing a jolly
+song that you might find at Christmas in a supermarket.
+Supermarkets are gone, of course. But that's what it
+reminds you of.">)>
+        <CRLF>)
           (<AND <EQUAL? ,PRSO ,LOUDSPEAKER ,RADIO>
             <FSET? ,LOUDSPEAKER ,RADPLUGBIT>>
         <FCLEAR ,LOUDSPEAKER ,RADPLUGBIT>
-        <TELL "Unplugged." CR>)
+        <TELL ,UNPLUG CR>)
     (ELSE
-        <TELL ,NOT-PLUGGED>)>>
+        <TELL ,NOT-PLUGGED CR>)>>
 
 <ROUTINE UNPLUG-HELD-STUFF (OBJECT)
 	;<TELL "(unplugging"><TELL !\ ><THE-J .OBJECT T><TELL "first)" CR>
@@ -3658,20 +3699,23 @@ relax a little." CR>>
              ;<FSET? ,PRSO ,WEARBIT>>
         <PERFORM ,V?WEAR ,PRSO>)
 	       (<AND <IN? ,PRSO ,GLOBAL-OBJECTS>
-		   	 <NOT <DOBJ? WHALE-CRATER-BOX CHASM WALLS FLOOR CEILING>>>
+		   	 <OR <NOT <DOBJ? WHALE-CRATER-BOX CHASM WALLS FLOOR CEILING>>
+                 <NOT <FSET? ,PRSI ,BODYPARTBIT>>>>
 		<NOT-HERE ,PRSO>
 		<RTRUE>)
 	       (<IOBJ? FLOOR GLOBAL-HERE <> ;POCKET>
 		<RFALSE>)
 	       (<AND <IN? ,PRSI ,GLOBAL-OBJECTS>
-		   	 <NOT <IOBJ? WHALE-CRATER-BOX CHASM WALLS FLOOR CEILING>>>
+		   	 <OR <NOT <IOBJ? WHALE-CRATER-BOX CHASM WALLS FLOOR CEILING>>
+                 <NOT <FSET? ,PRSI ,BODYPARTBIT>>>>
 		<NOT-HERE ,PRSI>
 		<RTRUE>)
 	       (<HELD? ,PRSI ,PRSO>
         <PUTP ,THING ,P?SDESC "Thing">
 		<YOU-CANT "put" ,PRSI "in it">
         <PUTP ,THING ,P?SDESC "thing your aunt gave you which you don't know what it is">)
-           (<FSET? ,PRSO ,WORNBIT>
+           (<AND <FSET? ,PRSO ,WORNBIT>
+             <NOT <DOBJ? BABEL-FISH>>>
         <TELL "You'll have to remove it first." CR>
         <RTRUE>)>>
 
@@ -3715,11 +3759,11 @@ relax a little." CR>>
 	<WONT-HELP>
 	<RFATAL>)
        (<AND <NOT <FSET? ,PRSI ,CONTBIT>>
-         <NOT <EQUAL? ,PRSI ,REGISTER ,CELL-PHONE ,SPORFE>>>
+         <NOT <EQUAL? ,PRSI ,REGISTER ,CELL-PHONE ,SPORFE ,COMPUTER>>>
 	<TELL-FIND-NONE "an opening in" ,PRSI>
 	<RFATAL>)
        (<AND <NOT <FSET? ,PRSI ,OPENBIT>>
-         <NOT <EQUAL? ,PRSI ,REGISTER ,CELL-PHONE ,PLATE ,SPORFE ,BLUE-TUBE ,RED-TUBE ,GREEN-TUBE>>>
+         <NOT <EQUAL? ,PRSI ,REGISTER ,CELL-PHONE ,PLATE ,SPORFE ,BLUE-TUBE ,RED-TUBE ,GREEN-TUBE ,COMPUTER>>>
 	<FIRST-YOU "opening" ,PRSI>
 	;<TOO-BAD-BUT ,PRSI "closed">)>
  <PRE-PUT>>
@@ -3754,11 +3798,11 @@ relax a little." CR>>
 	       (<AND <NOT <HELD? ,PRSO>>
 		     <NOT <ITAKE>>>
 		<RTRUE>)
-		   (<AND <EQUAL? ,PRSO ,PLANT ,RADIO>
-            	 <FSET? ,PLANT ,RADPLUGBIT>>
-        	<UNPLUG-HELD-STUFF ,PRSO>)
 	       (T
-		<MOVE ,PRSO ,PRSI>
+		<COND (<AND <EQUAL? ,PRSO ,PLANT ,RADIO>
+            	 <FSET? ,PLANT ,RADPLUGBIT>>
+        	<UNPLUG-HELD-STUFF ,PRSO>)>
+        <MOVE ,PRSO ,PRSI>
 		<FSET ,PRSO ,TOUCHBIT>
 		<COND (<AND <FSET? ,PRSI ,PERSONBIT>
 			    <FSET? ,PRSO ,WEARBIT>>
@@ -3855,7 +3899,7 @@ relax a little." CR>>
                  (ELSE
                   <PUTP ,MRKUG-OBJECT ,P?SDESC "Mrkug">)>)>
     <TELL "You say \"" ;<RESTORE-INPUT ,MRKUG-BUFFER>><D-J ,MRKUG-OBJECT><TELL "\", ">
-    <COND (<AND <FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+    <COND (<AND <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                 <NOT <FSET? ,TELEPAD ,SEENBIT>>>
            <TELL "a word which you could not have known, since you
 had never reached the end of the Fjords created by " D ,SLARTY " -
@@ -3871,7 +3915,7 @@ ruling the Universe; this God didn't even create it - this was just
 a higher tier god). Its cultists drive it to destroy itself, bringing
 down the part of the galaxy that you are in along with it. This kills
 789 billion people, including you.">)
-          (<AND <FIND-NUM-TBL ,NORWAY-ROOMS ,HERE>
+          (<AND <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>
                 <NOT <IN? ,PLAYER ,TELEPAD>>>
            <JIGS-UP
 "and all the molecules in your body are wrenched apart. When it comes
@@ -3963,7 +4007,8 @@ only the red frob of philosophy." CR>
             <COND (<FIRST? ,PRSO>
                    <TELL !\ ,IT-LOOKS-LIKE "there might be something else, though.">)>
             <CRLF>
-            <COND (<AND <IOBJ? FIRST-CLASS-IDIOT>
+            <COND (<AND <DOBJ? FIRST-CLASS-IDIOT>
+                        <EQUAL? .OBJ ,FIRST-CLASS-CARD>
                         <NOT <FSET? ,FIRST-CLASS-CARD ,SADRADIOBIT>>
 				        <FSET? ,FIRST-CLASS-IDIOT ,MUNGBIT>>
                    <INCREMENT-SCORE 20>
@@ -4006,16 +4051,16 @@ only the red frob of philosophy." CR>
 		;<START-SEARCH>)
 	       (<FSET? ,PRSO ,PERSONBIT>
 		<COND (<IN? ,PRSI ,PRSO>
-		       <TELL "Indeed," he+verb ,PRSO "has" him ,PRSI ,PAUSES>)
+		       <TELL "Indeed, " HE+VERB ,PRSO "has" !\  him ,PRSI ,PAUSES>)
 		      (T
-		       <THE-J ,PRSO T T><TELL " doesn't have">
+		       <THE-J ,PRSO T T><TELL verb ,PRSO "do" "n't have ">
 		       <COND (<IN? ,PRSI ,GLOBAL-OBJECTS>
 			      <THE-J ,PRSI T><TELL ,PAUSES>)
 			     (<ZERO? ,PRSI>
 			      <TELL " that." CR>)
 			     (T
 				  <THE-J ,PRSI T>
-			      <TELL " hidden on" his ,PRSO " person." CR>)>)>
+			      <TELL " hidden on " HIS ,PRSO " person." CR>)>)>
 		<RTRUE>)
 	       (<AND <FSET? ,PRSO ,CONTBIT> <NOT <FSET? ,PRSO ,OPENBIT>>>
 		<TELL "You'll have to open" him ,PRSO " first." CR>)
@@ -4023,13 +4068,13 @@ only the red frob of philosophy." CR>
 		<COND ;(<FSET? ,PRSI ,SECRETBIT>
 		       <DISCOVER ,PRSI>)
 		      (T <TELL
-"How observant you are! There" he+verb ,PRSI "is" "!" CR>)>)
+"How observant you are! There " HE+VERB ,PRSI "is" !\! CR>)>)
 	       (<ZERO? ,PRSI> <YOU-CANT ;"search">)
 	       (T
-		<TELL "You don't find">
+		<TELL "You don't find ">
 		<COND (<FSET? ,PRSI ,SECRETBIT>
 		       ;<==? <GET ,P-NAMW 1> ,W?EVIDENCE>
-		       <TELL " it" ;" any evidence">)
+		       <TELL "it" ;" any evidence">)
 		      (T <TELL him ,PRSI>)>
 		<TELL " there." CR>)>>
 
@@ -4198,7 +4243,7 @@ only the red frob of philosophy." CR>
 	<IF-SPY>)
        (<FSET? ,PRSO ,MUNGBIT>
 	<TELL
-"If" he ,PRSO " could," he ,PRSO " would slap you right back." CR>)
+"If " HE ,PRSO " could, " HE ,PRSO " would slap you right back." CR>)
        (T <FACE-RED>)>>
 
 <ROUTINE IF-SPY ()
@@ -4210,7 +4255,7 @@ only the red frob of philosophy." CR>
 		      <TELL "kick">)
 		     (T <TELL "hand chop">)>)
 	      (T <TELL "You swing" him ,PRSI " at" him ,PRSO>)>
-	<TELL ", but" he ,PRSO " seems indestructible." CR>>
+	<TELL ", but " HE ,PRSO " seems indestructible." CR>>
 
 <ROUTINE FACE-RED ("OPTIONAL" (P 0) "AUX" X)
 	<COND (<ZERO? .P> <SET P ,PRSO>)>
@@ -4223,20 +4268,20 @@ only the red frob of philosophy." CR>
 			    4 ;"looking at you with suspicion">>
 	       ;<EQUAL? .P ,FRIEND>
 	       <PUTP .P ,P?LDESC 20 ;"ignoring you">)>
-	<TELL He .P>
+	<TELL CHE .P>
 	<COND ;(<ZERO? .X>
 	       <TELL " looks at you as if you were insane." CR>)
 	      (T <TELL " gives you a good slap. It hurts, too!"
 		       ;" slaps you right back. Wow, is your face red!" CR>)>>
 
 <ROUTINE V-SMELL ()
-	;<COND (<IN? ,PLAYER ,DARK>
-		   <SETG PRSO ,DARK-OBJECT>
-		   <DARK-FUNCTION>
-		   <RFALSE>)>
-	<TELL He+verb ,PRSO "smell" " just like "><THE-J ,PRSO <>><TELL "!" CR>>
+	<TELL CHE+VERB ,PRSO "smell" " just like "><THE-J ,PRSO <>><TELL "!" CR>>
 
-<ROUTINE V-SMILE () <TELL "How nice." CR>>
+<ROUTINE V-SMILE ()
+    <TELL "How nice.">
+    <COND (<DOBJ? MARVIN>
+           <TELL " Then again, how nice could it be when it's directed at Marvin?">)>
+    <CRLF>>
 
 <ROUTINE V-SORRY ()
  <COND ;(<==? ,PRSO ,CONFESSED>
@@ -4279,7 +4324,7 @@ only the red frob of philosophy." CR>
         <TELL "You paddle about for a bit." CR>
         <RTRUE>)>
 	 <SETG CLOCK-WAIT T>
-	 <TELL He ,WINNER " can't swim ">
+	 <TELL CHE ,WINNER " can't swim ">
 	 <COND (<T? ,PRSO>
 	    <TELL "in" him ,PRSO>)
 	       (T
@@ -4302,7 +4347,8 @@ only the red frob of philosophy." CR>
            (<IN? ,PRSO ,WINNER>
 		<ALREADY ,PLAYER>
 		<TELL "holding"><TELL !\ ><THE-J ,PRSO T><TELL "!" CR>)
-	       (<==? <SET L <LOC ,PRSO>> ,GLOBAL-OBJECTS>
+	       (<AND <==? <SET L <LOC ,PRSO>> ,GLOBAL-OBJECTS>
+              <NOT <FSET? ,PRSI ,BODYPARTBIT>>>
 		<NOT-HERE ,PRSO>)
 	       (<EQUAL? ,PRSO <LOC ,WINNER>>
 		<TELL "You are in it!" CR>)
@@ -4322,7 +4368,7 @@ only the red frob of philosophy." CR>
 		       <TOO-BAD-BUT ,PRSI "closed">
 		       <RTRUE>)
 		      (<NOT <==? ,PRSI .L>>
-		       <TELL He+verb ,PRSO "is" "n't ">
+		       <TELL CHE+VERB ,PRSO "is" "n't ">
 		       <COND (<AND <FSET? ,PRSI ,PERSONBIT>
 				   ;<NOT <EQUAL? ,PRSI ,NUTRIMAT ,SCREENING-DOOR>>>
 			      <TELL "being held by">)
@@ -4348,7 +4394,8 @@ only the red frob of philosophy." CR>
 		   <PERFORM ,V?TAKE ,PRSO ,PRSI>)>>
 
 <ROUTINE PRE-APART ()
-    <COND (<AND <FSET? ,PRSO ,TRYTAKEBIT>
+    <>
+    ;<COND (<AND <FSET? ,PRSO ,TRYTAKEBIT>
             <NOT <IN? ,PRSO ,PLAYER>>>
         <RFALSE>)>>
 
@@ -4368,14 +4415,14 @@ only the red frob of philosophy." CR>
 	       (<AND <IN? ,WINNER ,PRSO>
 		     <NOT <NOUN-USED? ,PRSO ,W?DOOR ;,W?KEYHOLE>>>
 		<SETG CLOCK-WAIT T>
-		<TELL He+verb ,WINNER "is" " in" him ,PRSO ", nitwit!" CR>)>>
+		<TELL CHE+VERB ,WINNER "is" " in" him ,PRSO ", nitwit!" CR>)>>
 
 <ROUTINE V-TAKE ()
  <COND (<==? <ITAKE> T>
 	<COND (<EQUAL? ,WINNER ,PLAYER>
 		<TELL "Taken." CR>)
 	(ELSE
-		<TELL He+verb ,WINNER "is" " now holding "><THE-J ,PRSO T><TELL ,PAUSES>)>)>>
+		<TELL CHE+VERB ,WINNER "is" " now holding "><THE-J ,PRSO T><TELL ,PAUSES>)>)>>
 
 <ROUTINE V-TAKE-OFF ()
 	 <COND ;(<DOBJ? NOW-WEARING>
@@ -4386,11 +4433,11 @@ only the red frob of philosophy." CR>
 		<RTRUE>)
 	       (<FSET? ,PRSO ,WORNBIT>
 		<FCLEAR ,PRSO ,WORNBIT>
-		<TELL "OK, " he+verb <LOC ,PRSO> "is" " no longer wearing">
+		<TELL "OK, " HE+VERB <LOC ,PRSO> "is" " no longer wearing">
 		<MOVE ,PRSO ,WINNER>
 		<TELL him ,PRSO ,PAUSES>)
 	       (T
-		<TELL He+verb <LOC ,PRSO> "is" "n't wearing" him ,PRSO "!" CR>)>>
+		<TELL CHE+VERB <LOC ,PRSO> "is" "n't wearing" him ,PRSO "!" CR>)>>
 
 <ROUTINE V-TAKE-TO ()	;"Parser should have ITAKEn PRSO."
 	<PERFORM ,V?WALK-TO ,PRSI>
@@ -4415,7 +4462,7 @@ only the red frob of philosophy." CR>
 "You don't need to take" him ,PRSO " out to use" him ,PRSO ,PAUSES>)
 	       ;(<==? <LOC ,PRSO> ,POCKET>
 		<MOVE ,PRSO ,WINNER>
-		<TELL He+verb ,WINNER "is" " now holding" him ,PRSO ,PAUSES>)
+		<TELL CHE+VERB ,WINNER "is" " now holding" him ,PRSO ,PAUSES>)
 	       (<AND <NOT <==? <LOC ,WINNER> ,PRSO>>
 		     <NOT <IN? ,PLAYER ,PRSO>>
 		     ;<NOT <EQUAL? ,PLAYER-SEATED ,PRSO <- 0 ,PRSO>>>>
@@ -4564,7 +4611,7 @@ only the red frob of philosophy." CR>
 <ROUTINE V-THROW-AT ("AUX" CURLOC)
 	 <COND (<EQUAL? ,PRSO ,UP ,P?UP ,SKY ,CEILING>
             <COND (<IDROP>
-                   <TELL He+verb ,PRSO "fli" "up, and then " verb ,PRSO "land" <GROUND-DESC> ,PAUSES>
+                   <TELL CHE+VERB ,PRSO "fli" "up, and then " verb ,PRSO "land" <GROUND-DESC> ,PAUSES>
                    <RTRUE>)
                   (ELSE
                    <RTRUE>)>)
@@ -4603,7 +4650,7 @@ only the red frob of philosophy." CR>
  <COND (<AND <FSET? ,PRSO ,DOORBIT> <FSET? ,PRSO ,OPENBIT>>
 	<PERFORM ,V?CLOSE ,PRSO>
 	<RTRUE>)
-       (T <TELL "What do you want that to do?" CR>)>>
+       (T <TELL "Nothing peculiar happens, and apparently nothing at all happens as well." CR>)>>
 
 <ROUTINE V-UNLOCK ()
 	 <COND (<OR <FSET? ,PRSO ,DOORBIT>
@@ -4622,7 +4669,7 @@ only the red frob of philosophy." CR>
                <TELL-ME-HOW>)>)
 	       (T
 		<SETG CLOCK-WAIT T>
-		<TELL  He+verb ,PRSO "is" "n't locked!" CR>)>>
+		<TELL  CHE+VERB ,PRSO "is" "n't locked!" CR>)>>
 
 <ROUTINE V-USE () <MORE-SPECIFIC>>
 
@@ -4650,7 +4697,7 @@ only the red frob of philosophy." CR>
 				  ;(ELSE
 				   <TELL "A bit specific, but okay." CR>)>)>
 	 <COND (<==? -1 .NUM>
-		<SET NUM 10>)>
+		<SET NUM 1>)>
 	 <COND (<AND <ZERO? .INT>
 		     <AND <NOT <FSET? ,PRSO ,PERSONBIT>>
 			  <NOT <DOBJ? INTNUM TURN>>>>
@@ -4909,7 +4956,7 @@ only the red frob of philosophy." CR>
 				   <SETG NEAR-EXIT T>)>)
 	 	   (<OR <IN? ,PRSO ,HERE>
 		    	<GLOBAL-IN? ,PRSO ,HERE>>
-			<TELL He ,PRSO "'s here!" CR>)
+			<TELL CHE+VERB ,PRSO "is" " here!" CR>)
 		   (<EQUAL? ,PRSO ,P?UP ,UP>
 		   	<V-CLIMB-UP>)
 		   (<EQUAL? ,PRSO ,P?DOWN ,DOWN>
@@ -4971,11 +5018,11 @@ He saunters out of the room to the southwest, and leaves via the teleporter." CR
                          <RTRUE>)>)
                  (<DOBJ? GL-BEAST>
                   <TELL
-"The policeman glances sidelong at you, but accepts it with half a smile on his face." CR CR
-"In a few minutes, the Beast will get a call about what you did,
-hitches a ride on a starcruiser (after ravenously devouring the
-passengers), travels over to the Restaurant, and then eats you.
-Not to mention a lot of slavering fangs." CR>
+"The policeman glances sidelong at you, but accepts it with half
+a smile on his face." CR CR "In a few minutes, the Beast will get
+a call about what you did, hitches a ride on a starcruiser (after
+ravenously devouring the passengers), travels over to the Restaurant,
+and then eats you. Not to mention a lot of slavering fangs." CR>
                   <JIGS-UP
 "Although that is in about 25 minutes, so I'll skip quickly to that
 part, and immediately past it. Anyway, what was I saying? Oh yes.">)
@@ -5032,7 +5079,7 @@ landed on a few minutes ago. It can save lives." CR>
                          <TELL "You don't need to specify what you're writing in. I can do that." CR>
                          <RTRUE>)>)
                  (ELSE
-                  <TELL "You can't write on that!" CR>)>)>>
+                  <TELL "You can't write on " THAT ,PRSI "!" CR>)>)>>
 
 ;<ROUTINE V-WRITE-IN-WHAT ()
     <TELL "Think of something to write in first." CR>>
@@ -5181,7 +5228,11 @@ your brain for an NPC's.">
                 <TELL "\"Yay! Oh boy!\"" CR>)
             (ELSE
                 <TELL "Clyde isn't here." CR>)>)
-	(T
+	(<EQUAL? ,AWAITING-REPLY 16>
+        <TELL
+"Alright, then. Live with your hopes and dreams. It'll
+never happen. At least, not in this game it won't.">)
+    (T
 		<RHETORICAL T>
         <RTRUE>)>
     <SETG AWAITING-REPLY 0>
@@ -5201,17 +5252,20 @@ your brain for an NPC's.">
     (<EQUAL? ,AWAITING-REPLY 6>
         <RHETORICAL <>>)
 	(<EQUAL? ,AWAITING-REPLY 7>
-		<TELL "The mice, confused at your turning down of their 'perfectly reasonable' offer, look briefly at
-each other, then turn on you. \"What do you mean, no?\"" CR>
+		<TELL
+"The mice, confused at your turning down of their 'perfectly reasonable' offer,
+look briefly at each other, then turn on you. \"What do you mean, no?\"" CR>
 		<DEQUEUE I-REPLY>
-		<I-TENSE-SCENE>)
+		<I-TENSE-SCENE>
+        <RTRUE>)
 	(<EQUAL? ,AWAITING-REPLY 8>
 		<COND (<NOT <IN? ,PLAYER ,INTERVIEW-ROOM>>
 		   <I-TENSE-SCENE>
 		   <RHETORICAL <>>
 		   <RFALSE>)>
-		<TELL "That's it. You keep contradicting yourself. Why should I deal with this sort of rubbish? It's
-up to you now..." CR>
+		<TELL
+"That's it. You keep contradicting yourself. Why should I
+deal with this sort of rubbish? It's up to you now..." CR>
 		<QUEUE I-ASKED-NICELY 2>
 		<DEQUEUE I-TENSE-SCENE>
 		<DEQUEUE MOUSE-BANG>)
@@ -5220,8 +5274,9 @@ up to you now..." CR>
 		   <I-TENSE-SCENE>
 		   <RHETORICAL <>>
 		   <RFALSE>)>
-		<TELL "The mice are even more puzzled than you about why you refused such a simple offer.
-Nevertheless, you continue." CR>
+		<TELL
+"The mice are even more puzzled than you about why you
+refused such a simple offer. Nevertheless, you continue." CR>
 		<QUEUE I-TENSE-SCENE 2>
 		<DEQUEUE MOUSE-BANG>
 		<SETG KILL-NOW? <>>)
@@ -5237,10 +5292,11 @@ Nevertheless, you continue." CR>
         <TELL "Then why are you doing it?">)
     (<EQUAL? ,AWAITING-REPLY 12>
         <TELL
-"The man looks scared for a moment. \"Oh, dear, you may be stuck here then.\"
-He looks around, glances at the pill jar, and then looks back at you. ">
+"The man looks scared for a moment. \"Oh, dear, you may
+be stuck here then.\" He looks around, glances at the
+pill jar, and then looks back at you. ">
         <PERFORM ,V?ASK-ABOUT ,SLARTY ,RAMP>
-        <TELL D ,SLARTY " scratches his head. \"Oh well, it's a shame.\"" CR>
+        <TELL D ,SLARTY " scratches his head. \"That's a shame.\"" CR>
         <FSET ,SLARTY ,RADPLUGBIT> ;"Lied about the blue frob (if you did)")
     (<EQUAL? ,AWAITING-REPLY 13>
         <TELL
@@ -5264,6 +5320,9 @@ D ,BAR " - will start playing until the forms have all been signed.\"" CR>
                 <TELL "\"Awww...\"" CR>)
             (ELSE
                 <TELL "Clyde isn't here." CR>)>)
+    (<EQUAL? ,AWAITING-REPLY 16>
+        <TELL
+"I thought you were finally going crazy! Oh, well, they can't all be gems." CR>)
     (T
 		<RHETORICAL <>>
         <RTRUE>)>
@@ -5293,7 +5352,8 @@ D ,BAR " - will start playing until the forms have all been signed.\"" CR>
 	 <FINISH>>
 
 <ROUTINE FINISH ("OPT" (REPEATING <>) VAL)
-	 %<DEBUG-CODE <COND (<T? ,P-DBUG>
+	 %<DEBUG-CODE <COND (<AND <T? ,P-DBUG>
+                              <NOT <EQUAL? ,HERE ,FOO-ROOM ,STUNT-SHIP>>>
                          <TELL CR CR CR
 "Okay. Seeing as you're testing, I will help you.
 You can continue playing, but it may cause errors
@@ -5308,49 +5368,55 @@ Well... What do you think?" CR>
                                (ELSE   <TELL "Wise choice, tester..." CR>)>)>>
 	 <SIXCR>
 	 <COND (<NOT .REPEATING>
-		<V-SCORE>
-		<CRLF>)>
+		    <V-SCORE>
+		    <CRLF>)>
 	 <TELL "Would you like to:|">
-	 <COND (<T? ,P-CAN-UNDO>
-		<TELL
+	 <COND (<AND <T? ,P-CAN-UNDO>
+                 <NOT <IN? ,PLAYER ,FOO-ROOM>>>
+		    <TELL
 "   UNDO your last action,|">)>
 	 <TELL
 "   RESTORE your place from where you saved it,|
    RESTART the story from the beginning, or|
    QUIT for now?" CR>
-	<REPEAT ()
-	 <TELL !\>>
-	 <PUTB ,P-INBUF 1 0>
-	 <READ ,P-INBUF ,P-LEXV>
-	 <SET VAL <GET ,P-LEXV ,P-LEXSTART>>
-	 <COND (<AND <NOT <0? .VAL>>
-		     <SET VAL <WORD-VERB-STUFF .VAL>>
-		     <L=? 0 <SET VAL <VERB-ZERO .VAL>>>>
-		;<SET VAL <WT? .VAL ,PS?VERB ,P1?VERB>>
-		<COND (<AND <T? ,P-CAN-UNDO>
-			    <EQUAL? .VAL ,ACT?UNDO ,W?UNDO ,V?UNDO>>
-		       <V-UNDO>
-		       ;<FINISH T>)
-		      (<EQUAL? .VAL ,ACT?RESTART ,W?RESTART ,V?RESTART>
-		       <RESTART>
-		       ;<TELL-FAILED>
-		       <FINISH T>)
-		      (<EQUAL? .VAL ,ACT?RESTORE ,W?RESTORE ,V?RESTORE>
-		       <COND (<V-RESTORE> <RETURN>)>
-		       <FINISH T>)
-		      (<EQUAL? .VAL ,ACT?QUIT ,W?QUIT ,V?QUIT>
-		       <TELL "Thanks for playing." CR> <QUIT>)>)>
-	 <TELL "[Please type ">
-	 <COND (<T? ,P-CAN-UNDO>
-		<TELL "UNDO, ">)>
-	 <TELL "RESTORE, RESTART, or QUIT.] ">>>
+     <REPEAT ()
+      <TELL !\>>
+      <PUTB ,P-INBUF 1 0>
+      <READ ,P-INBUF ,P-LEXV>
+      <SET VAL <GET ,P-LEXV ,P-LEXSTART>>
+      <COND (<AND <NOT <0? .VAL>>
+                  <SET VAL <WORD-VERB-STUFF .VAL>>
+                  <L=? 0 <SET VAL <VERB-ZERO .VAL>>>>
+             ;<SET VAL <WT? .VAL ,PS?VERB ,P1?VERB>>
+             <COND (<AND <T? ,P-CAN-UNDO>
+                          <NOT <IN? ,PLAYER ,FOO-ROOM>>
+             	        <EQUAL? .VAL ,ACT?UNDO ,W?UNDO ,V?UNDO>>
+                    <V-UNDO>
+                    ;<FINISH T>)
+                   (<EQUAL? .VAL ,ACT?RESTART ,W?RESTART ,V?RESTART>
+                    <RESTART>
+                    ;<TELL-FAILED>
+                    <FINISH T>)
+                   (<EQUAL? .VAL ,ACT?RESTORE ,W?RESTORE ,V?RESTORE>
+                    <COND (<V-RESTORE> <RETURN>)>
+                    <FINISH T>)
+                   (<EQUAL? .VAL ,ACT?QUIT ,W?QUIT ,V?QUIT>
+                    <TELL "Thanks for playing." CR> <QUIT>)>)>
+      <TELL "[Please type ">
+      <COND (<AND <T? ,P-CAN-UNDO>
+                  <NOT <IN? ,PLAYER ,FOO-ROOM>>>
+     	     <TELL "UNDO, ">)>
+      <TELL "RESTORE, RESTART, or QUIT.] ">>>
 
 <ROUTINE V-UNDO ("AUX" X)
 	<COND (<T? ,P-CAN-UNDO>
 	       <SETG OLD-HERE <>>
-           <TELL "Undoing..." CR>
+           <ITALICIZE "WARNING: This will clear your screen.">
+           <TELL " Undoing..." CR CR>
+           <TELL "[Press any key.]" CR>
+           <SET X <INPUT 1>>
            <COND (<EQUAL? <IRESTORE> -1>
-	              <TELL "[UNDO failed.]" CR>
+	              <TELL-FAILED "UNDO">
                   <RTRUE>)>)>
     <TELL
 "Sorry, the Galactic Compendium on Interactive

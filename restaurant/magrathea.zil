@@ -61,8 +61,9 @@ if anyone knows how to simplify it..."
 
 <ROUTINE HATCHWAY-F (RARG)
 	<COND (<EQUAL? .RARG ,M-LOOK>
-		   <TELL "You are at the bottom of a gangway. A hatch below you,
-which leads out to" ,LOST-PLANET ", is open." CR>)>>
+		   <TELL
+"You are at the bottom of a gangway. A hatch below you,
+which leads out to " ,LOST-PLANET ", is open." CR>)>>
 
 <OBJECT HATCH
 	(LOC LOCAL-GLOBALS)
@@ -141,7 +142,7 @@ want to close. That is exactly what you're up against." CR>)>>
 		   <COND (<EQUAL? ,VERBOSITY 2>
 		          <TELL
 "You are on the ramp leading from the starship Heart of Gold down to
-the surface of" ,LOST-PLANET ", which isn't. Lost, that is. It isn't
+the surface of " ,LOST-PLANET ", which isn't. Lost, that is. It isn't
 lost because if it were, you wouldn't be here, but you are, so it isn't.
 If the logic of all that is too much for you, just go down to the
 surface or up to the hatchway. Go anywhere else and you'll just get
@@ -150,8 +151,8 @@ just don't say you weren't warned." CR>)
                  (ELSE
                   <TELL
 "You are on the ramp leading down from the starship Heart
-of Gold to the surface of" ,LOST-PLANET ". To the north is
-the hatchway, and down leads the Blighted Ground." CR>)>)>
+of Gold to the surface of " ,LOST-PLANET ". To the north
+is the hatchway, and down leads the Blighted Ground." CR>)>)>
 	<COND (<NOT ,WITHOUT-A-WORD>
 		   <TELL
 "Without a word, your friends return to the ship, leaving you (once again)
@@ -212,7 +213,8 @@ unhealthy-looking crater.")
 	(NW PER WANDER-AROUND)
 	(SW PER WANDER-AROUND)
 	(GLOBAL HEART-OF-GOLD MAGRATHEA)
-    (THINGS (BLIGHTED COLD BARREN MISERABLE) (GROUND LAND) GLOBAL-ROOM-F)
+    (THINGS (BLIGHTED COLD BARREN MISERABLE) (GROUND LAND) GLOBAL-ROOM-F
+            (FISHY OILY OIL) (SMELL ODOR ODOUR WHIFF) UNIMPORTANT-THING-F)
 	(FLAGS ONLANDBIT ONBIT LIGHTBIT OUTSIDEBIT ;GUIDEBIT)>
 
 <OBJECT BLUE-FROB
@@ -275,7 +277,8 @@ unhealthy-looking crater.")
         (ELSE
             <TELL
 "Apparently, it's a blue Frob of Power, but it looks more like a small penknife to you." CR>)>)
-    (<AND <VERB? PULL-APART MOVE OPEN>>
+    (<AND <VERB? PULL-APART MOVE OPEN>
+          <DOBJ? BLUE-FROB>>
         <COND (<EQUAL? <GETP ,BLUE-FROB ,P?SDESC> "blue frob">
             <TELL "You pull the thing in two along the ridge. Surprisingly it turns
 into a flimsy penknife with a blue handle. The frob will never be the same again." CR>
@@ -287,7 +290,8 @@ into a flimsy penknife with a blue handle. The frob will never be the same again
         (T
             <TELL "Doesn't seem like you can do that now." CR>
             <RTRUE>)>)
-    (<AND <VERB? RUB>>
+    (<AND <VERB? RUB>
+          <NOT ,PRSI>>
         <COND (<EQUAL? <GETP ,BLUE-FROB ,P?SDESC> "blue frob">
             <TELL
 "There's something odd about the ridge halfway along it, as if it could pull apart." CR>)
@@ -309,13 +313,17 @@ into a flimsy penknife with a blue handle. The frob will never be the same again
     (FLAGS ;TOUCHBIT TAKEBIT TRYTAKEBIT CONTBIT OPENBIT)
     (SIZE 11)>
 
-;<GLOBAL RAD-EXAMINE <>>
+<GLOBAL RAD-EXAMINE 0>
 
 <ROUTINE RADIO-F ()
 	<COND (<VERB? EXAMINE>
 		   <COND (<NOT <FSET? ,RADIO ,TOUCHBIT>>
-			      <TELL "You can't really see it from here." CR>
-			      <FSET ,RADIO ,RADPLUGBIT>
+                  <COND (<=? ,RAD-EXAMINE 3 5 8 12 17 23>
+                         <TELL "Look, it's just... You need to pick it up. That's it." CR>)
+                        (ELSE
+                         <TELL "You can't really see it from here." CR>)>
+			      <SETG RAD-EXAMINE <+ ,RAD-EXAMINE 1>>
+                  <FSET ,RADIO ,RADPLUGBIT>
                   <RTRUE>)>
 		   <TELL "It's an old radio, which">
 		   <FINE-PRODUCT>
@@ -327,8 +335,8 @@ into a flimsy penknife with a blue handle. The frob will never be the same again
                 <NOT <FSET? ,RADIO ,TOUCHBIT>>>
            <TELL
 "Alright, it's not that you're far away from it. You just
-can't see it well. Maybe you could try picking it up first?" CR
-           <RTRUE>>)
+can't see it well. Maybe you could try picking it up first?" CR>
+           <RTRUE>)
           (<AND <VERB? EXAMINE LISTEN>>
 		   <TELL "It plays a">
            <COND (<FSET? ,RADIO ,BADRADIOBIT>
@@ -350,8 +358,8 @@ It looks like something is missing - you just can't tell what.">)>
                   <RTRUE>)
 		         (ELSE
 		          <RFALSE>)>)
-	(<VERB? LAMP-OFF LAMP-ON>
-		<TELL "You fiddle around for a few seconds with "><THE-J ,RADIO T><TELL " but find no switch." CR>)>>
+	      (<VERB? LAMP-OFF LAMP-ON>
+		   <TELL "You fiddle around for a few seconds with "><THE-J ,RADIO T><TELL " but find no switch." CR>)>>
 
 <ROUTINE RADIO-D ()
 	<COND (<AND <NOT <EQUAL? <GETP ,RADIO ,P?SDESC> "radio">>
@@ -381,12 +389,12 @@ shock of realising that the radio's music could be harmful to you." CR>)
 		         (<EQUAL? ,MAD-RADIO-COUNTER 30>
 		          <TELL CR "The ground around you dips and sways, tripping over itself." CR>)
 		         (<EQUAL? ,MAD-RADIO-COUNTER 32>
-		          <TELL CR "You begin to lose consciousness..." CR>)
+		          <TELL CR "You begin to lose consciousness" ,ELLIPSIS CR>)
 		         (<EQUAL? ,MAD-RADIO-COUNTER 33>
 		          <TELL CR
 "You collapse on the floor, and the tunes act as anaesthetic to everything but your
 head. This could mean more to you, but you aren't really thinking about that - much
-less anything, to be honest. This is because...">
+less anything, to be honest. This is because" ,ELLIPSIS>
 			      <JIGS-UP "">)>)
 	      (ELSE
 		   <COND (<AND <G? ,MAD-RADIO-COUNTER 0>
@@ -487,7 +495,7 @@ to go north to the Heart of Gold or south-east to the crater.">)
 	(FLAGS RLANDBIT ONBIT LIGHTBIT OUTSIDEBIT ;GUIDEBIT)
 	(GLOBAL WHALE-CRATER-BOX MAGRATHEA)
     (GENERIC POLICE-G)
-	(THINGS (GROSS DISGUSTIN MESSY WHALE FISHY) (BLUBBER MEAT SCENE WHALE BONE WHALEBONE BONES) GROSS-F)
+	(THINGS (GROSS DISGUSTIN MESSY WHALE FISHY) (BLUBBER MEAT SHARDS SHARD SCENE WHALE BONE WHALEBONE BONES) GROSS-F)
 	(ACTION LIP1-F)>
 
 <ROUTINE LIP1-F (RARG)
@@ -543,7 +551,7 @@ you, but there's no way down.")
 	(DOWN PER HAR-HAR)
 	;(UP PER CANNOT-GO)
 	(FLAGS RLANDBIT ONBIT LIGHTBIT OUTSIDEBIT ;GUIDEBIT)
-	(THINGS (GROSS DISGUSTIN MESSY WHALE FISHY) (BLUBBER MEAT SCENE WHALE BONE WHALEBONE BONES) GROSS-F)
+	(THINGS (GROSS DISGUSTIN MESSY WHALE FISHY) (BLUBBER MEAT SCENE WHALE BONE WHALEBONE BONES SHARDS SHARD) GROSS-F)
 	(GLOBAL WHALE-CRATER-BOX MAGRATHEA)>
 
 <ROOM LIP3
@@ -623,7 +631,7 @@ slope down to the crater floor.")
 	(LDESC
 "This ledge lies halfway between the crater lip and the floor of
 the whale crater itself.")
-    (SYNONYM QUESTION ANSWER FORTY-TWO)
+    (SYNONYM QUESTION QUESTIONS ANSWER FORTY-TWO)
     (ADJECTIVE GREAT COOL UNANSWERE)
 	(NORTH PER DEATH-BY-BLUBBER)
 	(NE PER DEATH-BY-BLUBBER)
@@ -637,7 +645,7 @@ the whale crater itself.")
 	(DOWN PER DOWN-TO-CRATER)
 	(FLAGS ONLANDBIT ONBIT LIGHTBIT ;ONTOPBIT OUTSIDEBIT)
 	(GLOBAL WHALE-CRATER-BOX MAGRATHEA)
-	(THINGS (IVORY MARBLE LARGE) (PILLAR PILLARS) UNIMPORTANT-THING-F
+	(THINGS (IVORY MARBLE LARGE) (PILLAR PILLARS COLUMN) UNIMPORTANT-THING-F
 			(STEEP BUT SURVIVABLE) (SLOPE SLIDE) STAIRS-F
 			(GROSS DISGUSTIN MESSY WHALE FISHY) (BLUBBER MEAT TEETH WHALE BONE WHALEBONE BONES) GROSS-F
 			(IVORY MARBLE RATHER NICE) (WALLS WALL) WALLS-F
@@ -645,77 +653,85 @@ the whale crater itself.")
 
 <OBJECT PLANT
 	(LOC LEDGE)
-	(DESC "small plant")
+	(SDESC "small plant")
 	(FDESC "A small plant is poking out of the ground, through the dislodged soil.")
 	;(LDESC "There is a small plant here.")
-	(SYNONYM PLANT CLOVER STEM PLUG ROOT LEAF)
+	(SYNONYM PLANT XZZZP STEM XZZZQ XZZZR XZZZS LEAF)
 	(ADJECTIVE FOUR-LEAF ;FOUR-LEAV SMALL GREEN)
 	(ACTION PLANT-F)
 	(FLAGS TAKEBIT TRYTAKEBIT ;CANPLUGBIT)
 	(SIZE 1)>
 
+<ADD-WORD CLOVER NOUN>
+<ADD-WORD ROOT NOUN>
+<ADD-WORD ROOTS NOUN ;"<> PLURALBIT">
+
 <ROUTINE PLANT-F ()
 	<COND (<AND <IN? ,PLANT ,HERE>
-			<NOT <FSET? ,PLANT ,TOUCHBIT>>>
-		<THIS-IS-IT ,PLANT>)>
-		;<COND (<FSET? ,PLANT ,RADPLUGBIT>
-			<SETG ,PLANT-TO-RADIO T>)
-		(T <SETG ,PLANT-TO-RADIO <>>)>
+			    <NOT <FSET? ,PLANT ,TOUCHBIT>>>
+		   <THIS-IS-IT ,PLANT>)>
 		<COND (<AND <VERB? TAKE>
                     <DOBJ? PLANT>
                     <ITAKE>>
-			<COND (<EQUAL? ,TAKE-COUNTER-A 0>
-				<TELL "What a selfish person you are. Taken anyway." CR><NOTES 1 T>
-				<SETG TAKE-COUNTER-A <+ ,TAKE-COUNTER-A 1>>
-				<INCREMENT-SCORE 5>
-				<FSET ,PLANT ,TOUCHBIT>)
-			(ELSE 
-				<TELL "Taken." CR>)>
-		;<MOVE ,PLANT ,PLAYER>)
+			   <COND (<EQUAL? ,TAKE-COUNTER-A 0>
+			          <TELL "What a selfish person you are. Taken anyway." CR><NOTES 1 T>
+			          <SETG TAKE-COUNTER-A <+ ,TAKE-COUNTER-A 1>>
+			          <INCREMENT-SCORE 5>
+			          <FSET ,PLANT ,TOUCHBIT>)
+			         (ELSE 
+			          <TELL "Taken." CR>)>)
 	(<VERB? EAT>
-		<COND (<AND <FSET? ,PLANT ,RADPLUGBIT>>
-        	<UNPLUG-HELD-STUFF ,PLANT>)>
-		<TELL "You eat it. It doesn't satisfy your hunger." CR>
-		<REMOVE ,PLANT>)
+	 <COND (<AND <FSET? ,PLANT ,RADPLUGBIT>>
+            <UNPLUG-HELD-STUFF ,PLANT>)>
+	 <TELL "You eat it. It doesn't satisfy your hunger." CR>
+	 <REMOVE ,PLANT>)
 	(<VERB? EXAMINE>
-		<TELL "A small, four-leafed - what do you call it - clover. ">
-		<COND 
-            (<FSET? ,PLANT ,RADPLUGBIT>
-		    	<TELL "It is plugged into the radio.">)
-		    (<NOT ,TAKE-COUNTER-A>)
-		    (<FSET? ,PLANT ,TOUCHBIT>
-		    	<TELL
+     <TELL "A small, four-leafed ">
+     <COND (<EQUAL? <GETP ,PLANT ,P?SDESC> "small plant">
+            <TELL "- what do you call it - ">
+            <PUTP ,PLANT ,P?SDESC "clover">
+            <REPLACE-NOUN? ,PLANT ,W?XZZZP ,W?CLOVER>
+            <REPLACE-NOUN? ,PLANT ,W?XZZZQ ,W?ROOT>
+            <REPLACE-NOUN? ,PLANT ,W?XZZZR ,W?ROOTS>)>
+     <TELL "clover. ">
+     <COND (<FSET? ,PLANT ,RADPLUGBIT>
+            <TELL "It is plugged into the radio.">)
+           (<NOT ,TAKE-COUNTER-A>)
+           (<FSET? ,PLANT ,TOUCHBIT>
+            <TELL
 "The roots seem to form a plug - quite like one of the ones
 that you sold when you were still working at the little radio
-station at the end of your lane, back when Earth was around.">)>
-		<CRLF>
-		<RTRUE>)
+station at the end of your lane, back when Earth was around.">
+            <REPLACE-NOUN? ,PLANT ,W?XZZZS ,W?PLUG>)>
+     <CRLF>
+     <RTRUE>)
 	(<VERB? PLUG PUT-IN>
-		<COND (<EQUAL? ,PRSI ,RADIO>
-			<COND (<AND <HELD? ,RADIO>
-                    <HELD? ,PLANT>>
-                <COND (<EQUAL? <GETP ,RADIO ,P?SDESC> "black metallic box">
-                    <TELL "Perhaps you should look at "><THE-J ,RADIO T><TELL " first." CR>
-                    <FUCKING-CLEAR>
-                    <RTRUE>)>
-				<COND (<AND <NOT <FSET? ,PLANT ,RADPLUGBIT>>>
-					<FSET ,PLANT ,RADPLUGBIT>
-					<TELL "You plug it in. The music changes its mood, becoming sadder and more meaningful." CR>
-					<COND (<NOT ,PLUG-POINT>
-						<INCREMENT-SCORE 15>
-						<SETG PLUG-POINT T>
-						<TELL CR
+     <COND (<IOBJ? RADIO>
+            <COND (<AND <HELD? ,RADIO>
+                        <HELD? ,PLANT>>
+                   <COND (<EQUAL? <GETP ,RADIO ,P?SDESC> "black metallic box">
+                          <TELL "Perhaps you should look at "><THE-J ,RADIO T><TELL " first." CR>
+                          <FUCKING-CLEAR>
+                          <RTRUE>)>
+                   <COND (<AND <NOT <FSET? ,PLANT ,RADPLUGBIT>>>
+                          <FSET ,PLANT ,RADPLUGBIT>
+                          <TELL "You plug it in. The music changes its mood, becoming sadder and more meaningful." CR>
+                          <COND (<NOT ,PLUG-POINT>
+                                 <INCREMENT-SCORE 15>
+                                 <SETG PLUG-POINT T>
+                                 <TELL CR
 "Marvin trudges over to you. \"Oh well,\" he drones, \"I might as well join
 you. Don't ask. It's just that I am interested - it is not that like it, I
 am merely interested - in that music on your radio.\" Marvin remains motionless." CR>
-						<MOVE ,MARVIN ,HERE>
-						<RTRUE>)
-					;(ELSE
-						<RTRUE>)>)
-				(ELSE
-					<TELL "But it's aready plugged in!" CR>)>)>)
-		(ELSE
-			<TELL ,NOPE "seem to plug it into "><THE-J ,PRSI T><TELL ,PAUSES>)>)>>
+                                 <MOVE ,MARVIN ,HERE>
+                                 <RTRUE>)>)
+				         (ELSE
+					      <TELL "But it's aready plugged in!" CR>)>)>)
+		   (ELSE
+            <COND (<VERB? PUT-IN>
+                   <RFALSE>)
+                  (ELSE
+                   <TELL ,NOPE "seem to plug it into "><THE-J ,PRSI T><TELL ,PAUSES>)>)>)>>
 
 
 <ROUTINE DOWN-TO-CRATER ()
@@ -747,8 +763,8 @@ on a shard of bone. This means...">)>>
 				<IDROP>>
 		   <TELL "You chuck "><THE-J ,PRSO T>
 		   <TELL
-" down into the crater, and " he+verb ,PRSO "tumble"
-"down to the bottom, out of sight. Oh, well." CR>
+" down into the crater, and " HE+VERB ,PRSO "tumble"
+" down to the bottom, out of sight. Oh, well." CR>
 		   <MOVE ,PRSO ,WHALE-CRATER>)
 		  (<VERB? SEARCH LOOK-INSIDE EXAMINE>
 		   <TELL "It's too dark down there." CR>)
@@ -778,14 +794,21 @@ on a shard of bone. This means...">)>>
 <ROUTINE WHALE-CRATER-F (RARG)
 	<FSET ,CEILING ,INVISIBLE>
 	<FCLEAR ,SKY ,INVISIBLE>
+    <COND
+        (<EQUAL? .RARG ,M-BEG>
+            <COND 
+                (<IN? ,MARVIN ,WHALE-CRATER>
+                    <FSET ,WHALE-CRATER ,LIGHTBIT>)
+                (ELSE
+                    <FCLEAR ,WHALE-CRATER ,LIGHTBIT>)>)>
     <COND 
         (<AND <EQUAL? .RARG ,M-BEG>
-              <NOT <IN? ,MARVIN ,WHALE-CRATER>>>
+              <NOT <FSET? ,WHALE-CRATER ,LIGHTBIT>>>
             <FCLEAR ,GRUES ,INVISIBLE>
 		    <COND 
                 (<VERB? LOOK>
                     <BOLDEN "Somewhere in the Whale Crater">
-                    <TELL CR "It is pitch dark. Any grues down here were killed by the whale crash." CR>)
+                    <TELL CR "It is pitch dark. Any grues down here were killed by the whale." CR>)
                 (ELSE
                     <COND 
                         (<EQUAL? ,GRUES ,PRSI ,PRSO>
@@ -866,14 +889,22 @@ Scene 1 - The 'Interview'
 <GLOBAL KILL-NOW? <>>
 
 ; "INTERRUPT ROUTINES"
-<ROUTINE I-ASK-DEATH ()
+<ROUTINE I-ASK-DEATH ("OPT" (PER <>))
     <FSET ,INTERVIEW-ROOM ,RADPLUGBIT>
 	<SETG KILL-NOW? <>>
-	<TELL CR
-"\"Welcome to the Testing Lab of Magrathea!\" Percy says. \"Please, have
-something to eat.\" He gestures vaguely towards the fruit bowl on the table." CR>
-	<SETG AWAITING-REPLY 7>
-	;<DEQUEUE I-REPLY>
+    <COND (<NOT .PER>
+           <TELL CR !\" !\W>)>
+    <TELL "elcome to the Testing Lab of Magrathea!">
+    <COND (<NOT .PER>
+           <TELL "\" Percy says. \"">)
+          (ELSE
+           <TELL !\ >)>
+    <TELL
+"Please, have something to eat.\" He gestures vaguely towards
+the fruit bowl on the table, but doesn't look at it at all." CR>
+	<THIS-IS-IT ,BOWL>
+    <SETG AWAITING-REPLY 7>
+	<DEQUEUE I-REPLY>
 	<QUEUE I-REPLY 4>
 	<QUEUE I-ASKED-NICELY 4>
 	<QUEUE I-ASK-AGAIN 9>>
@@ -881,9 +912,10 @@ something to eat.\" He gestures vaguely towards the fruit bowl on the table." CR
 <ROUTINE I-ASK-AGAIN ()
 	<TELL CR
 "The mice turn to stare at you. \"Ahem... As I was saying, you are welcome
-to have something to eat.\" He glances towards the fruit bowl on the table." CR>
+to have something to eat.\" He glances towards the fruit bowl on the table,
+but does nothing else." CR>
 	<SETG AWAITING-REPLY 7>
-	;<DEQUEUE I-REPLY>
+	<DEQUEUE I-REPLY>
 	<QUEUE I-REPLY 4>
 	<DEQUEUE I-ASKED-NICELY>
 	<QUEUE I-ASKED-NICELY 4>
@@ -965,23 +997,32 @@ whatever you had been doing, now send you to the darkness. Wait, no, that's just
 <GLOBAL MOUSE-BLAB 0>
 
 <ROUTINE I-MOUSE-BLAB ()
-    <DEQUEUE I-MOUSE-BLAB>
-    <QUEUE I-MOUSE-BLAB 3>
     <COND (<1? ,MOUSE-BLAB>
-           <TELL CR
-"\"And the painter had another famous painting, ...\"
+           <DEQUEUE I-ASKED-NICELY>
+           <QUEUE I-ASKED-NICELY 4>)>
+    <COND (<1? ,MOUSE-BLAB>
+           <COND (<RUNNING? I-MOUSE-BLAB>
+                  <TELL CR "\"And ">)>
+           <TELL
+"the painter had another famous painting, ...\"
 The talking goes on and on, and I don't think that they
 even remember you're still here." CR>)
           (<EQUAL? ,MOUSE-BLAB 2>
-           <TELL CR
-"\"Do you know, it's quite funny because ...\"
-You can't even focus on what they're saying." CR>)
+           <COND (<RUNNING? I-MOUSE-BLAB>
+                  <TELL CR "\"Do you know, ">)>
+           <TELL
+"it's quite funny because ...\" You can't even focus on what they're saying." CR>)
           (<EQUAL? ,MOUSE-BLAB 3>
-           <TELL CR
-"\"... And that's all that we know. Well, I hope you like it.\"" CR>
+           <COND (<RUNNING? I-MOUSE-BLAB>
+                  <TELL CR "\"... And ">)>
+           <TELL
+" that's all that we know about the painting. Well, I hope you like it.\"" CR>
            <FSET ,MOUSE-PAINTING ,BADRADIOBIT>
-           <DEQUEUE I-MOUSE-BLAB>)>
-    <SETG MOUSE-BLAB <+ ,MOUSE-BLAB 1>>>
+           <DEQUEUE I-MOUSE-BLAB>
+           <RTRUE>)>
+    <SETG MOUSE-BLAB <+ ,MOUSE-BLAB 1>>
+    <QUEUE I-MOUSE-BLAB 1>
+    <RTRUE>>
 
 <ROUTINE I-KILL-NOW ()
     <SETG KILL-NOW? T>>
@@ -1019,9 +1060,12 @@ bright white against the also bright white walls.">
 		   <CRLF>)>
 	<COND (<AND <EQUAL? .RARG ,M-END>
 				<FSET? ,INTERVIEW-ROOM ,SADRADIOBIT>> ;"SADRADIOBIT means that you've visited the room - for Dark..."
-		   <TELL CR "As you open your eyes, you notice the mice (in robotic bodies) are standing over you,
-holding tools. You attempt to move, but are restrained. Then you notice the needle in the hand of the suit,
-and you close your eyes again.">
+		   <TELL CR
+"As you open your eyes, you notice the mice (in robotic bodies)
+are standing over you, holding tools. You soon realise you can't
+move either!||And only then do you notice the needle in the hand
+of the suit, and you close your eyes again, for you know you may
+just die.">
 		   <GO-TO-DARK>
 		   <RTRUE>)>
 	;<SETG KILL-NOW? T>
@@ -1048,14 +1092,14 @@ and into another passage. An alarm starts blaring." CR CR>
 				      <TELL "You walk up to the door, ">
                       <COND (<FSET? ,EMERGENCY-EXIT ,OPENBIT>
                              <TELL
-", and dash straight out of the room, through the Emergency
+"and dash straight out of the room, through the Emergency
 Exit into another passage. An alarm starts blaring." CR CR>
                              <INCREMENT-SCORE 20>
                              <CHOOSE-PASSAGES>
                              <QUEUE I-MICE-CHASE -1>
 		                     <RETURN ,HALLWAY1>)
                             (ELSE
-                             <TELL ", but since the door's closed, you move no further." CR>
+                             <TELL "but since the door's closed, you move no further." CR>
                              <SETG NEAR-EXIT T>
                              <RFALSE>)>)>)
               (ELSE
@@ -1089,7 +1133,7 @@ Exit into another passage. An alarm starts blaring." CR CR>
 		   <TELL "On the table is a bowl full of fruit">
 		   <COND (<IN? ,SPORFE ,TABLE>
 		   		  <TELL
-", and beside it a sporfe (intended to be used for consumption
+", and beside the bowl a sporfe (intended to be used for consumption
 - not to commit suicide with, which is its general purpose)">)>
 		   <TELL ", and the two mice: Benjy and Percy." CR>)>>
 
@@ -1189,21 +1233,31 @@ look accompanied by a Kill-O-Zap gun giving you the same intimidating stare." CR
 	(SYNONYM FRUIT BOWL APPLE ORANGE PEAR GRAPEFRUI)
 	(ADJECTIVE FRUIT)
 	(LDESC "On the table is a bowl of fruit.")
-	;(FDESC "On the table is a bowl of fruit.")
-	(FLAGS ;EATBIT NARTICLEBIT TRYTAKEBIT CONTBIT OPENBIT TRANSBIT)
+	(FLAGS ;EATBIT ;NARTICLEBIT TAKEBIT ;TRYTAKEBIT CONTBIT OPENBIT TRANSBIT)
     (GENERIC FRUIT-G)
-	(ACTION FRUIT-BOWL-F)>
+	(ACTION BOWL-F)>
 
-<ROUTINE FRUIT-BOWL-F ()
-	<COND (<VERB? TAKE>
-		   <TELL "Benjy says, \"Only take the fruit, not the BOWL. Duh.\"" CR>)>>
+<ROUTINE BOWL-F ()
+    <COND (<AND <VISIBLE? ,FRUIT>
+                <OR <NOUN-USED? ,BOWL ,W?FRUIT>
+                    <ADJ-USED? ,BOWL ,W?FRUIT>>
+                <NOT <NOUN-USED? ,BOWL ,W?BOWL>>>
+           %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: running from BOWL to FRUIT...]|">)>>
+           <COND (<DOBJ? BOWL>
+                  <PERFORM ,PRSA ,FRUIT ,PRSI>)
+                 (<IOBJ? BOWL>
+                  <PERFORM ,PRSA ,PRSO ,FRUIT>)>
+           <RTRUE>)
+          (<VERB? TAKE>
+		   <TELL "Benjy says, \"Only take the fruit, not the BOWL. Duh.\"" CR>
+           <RTRUE>)>>
 
 <OBJECT FRUIT
     (LOC BOWL)
     (DESC "piece of fruit")
     (SYNONYM FRUIT VEG VEGETABLE FROOT APPLE ORANGE PEAR LEMON PIECE)
     (ADJECTIVE PIECE FRUIT)
-    (FLAGS TAKEBIT)
+    (FLAGS TAKEBIT TRYTAKEBIT)
     (GENERIC FRUIT-G)
     (ACTION FRUIT-F)>
 
@@ -1243,13 +1297,13 @@ shout. \"What was that for?\" and look over at the fruit you just threw." CR>
 <ROUTINE EMERGENCY-EXIT-F ()
 	<COND (<VERB? EXAMINE>
 		   <TELL
-"A grand emergency exit along the south wall, which you doesn't make any sense because emergency
-exits generally aren't grand. Also, with mice as small as these, why would they need it that big?
-|Next to the exit is an emergency button." CR>
+"A grand emergency exit along the south wall, which doesn't make much sense because emergency
+exits generally aren't grand. Also, with mice as small as these, why would they need it that
+big?|Next to the exit is an emergency button." CR>
 		   <THIS-IS-IT ,EMERGENCY-BUTTON>)
 		  (<VERB? OPEN>
 		   <COND (<FSET? ,EMERGENCY-EXIT ,OPENBIT>
-		   		  <TELL "It already is!" CR>
+		   		  <TELL ,ALREADY-IS CR>
 				  <FUCKING-CLEAR>)
 				 (ELSE
 				  <TELL "There's no door handle! Although, next to it is an emergency button." CR>
@@ -1267,7 +1321,14 @@ exits generally aren't grand. Also, with mice as small as these, why would they 
 	(ACTION MOUSE-PAINTING-F)>
 
 <ROUTINE MOUSE-PAINTING-F ()
-    <COND (<VERB? EXAMINE READ>
+    <COND (<AND <TOUCHING?>
+                <FSET? ,MOUSE-PAINTING ,NDESCBIT>
+                <NOT ,NEAR-EXIT>>
+           <TELL "Preferably, you should be ">
+           <ITALICIZE "near">
+           <TELL " the painting before you can do that." CR>
+           <RTRUE>)
+          (<VERB? EXAMINE READ>
            <COND (<VERB? EXAMINE>
                   <TELL
 "You look at the painting, which could have been done by yours truly
@@ -1327,7 +1388,7 @@ growls. \"Prepare to give us your brain in the name of science and revenge.\"" C
                   <TELL
 "\"Well, it's a very old painting, and it's of our owner,
 ....\" And they just keep talking. Blah blah blah." CR>
-                  <QUEUE I-MOUSE-BLAB -1>)>)>>
+                  <QUEUE I-MOUSE-BLAB 1>)>)>>
 
 <OBJECT EMERGENCY-BUTTON
 	(LOC INTERVIEW-ROOM)
@@ -1363,7 +1424,8 @@ growls. \"Prepare to give us your brain in the name of science and revenge.\"" C
                                (ELSE
                                 <TELL "and the mice begin to become extremely suspicious of your behaviour">)>
 						 <TELL ,PAUSES>
-                         <FSET ,EMERGENCY-EXIT ,OPENBIT>)>)>)
+                         <FSET ,EMERGENCY-EXIT ,OPENBIT>)>
+                  <RTRUE>)>)
 		  ;(<VERB? WALK-TO>
 		   <PERFORM ,V?WALK-TO ,EMERGENCY-EXIT>)>>
 
@@ -1389,7 +1451,29 @@ growls. \"Prepare to give us your brain in the name of science and revenge.\"" C
            <FSET ,HALLWAY1 ,RADPLUGBIT>)
           (ELSE
            <TELL "You are still in">)>
-    <TELL " a windy hallway, ">>
+    <TELL " a winding hallway, ">>
+
+<ROUTINE PASSAGES-LEAD ("OPT" (DES T))
+    <COND (.DES
+           <TELL !\P>)
+          (ELSE
+           <TELL !\p>)>
+    <TELL "assages lead">
+    <COND (<NOT .DES>
+           <TELL "ing">)>
+    <TELL !\ >
+    <COND (<IN? ,PLAYER ,HALLWAY1>
+           <TELL "off to the " ,O-2 !\, !\  ,O-3 ",
+and back into the \"Interview\" room to the north">)
+          (<IN? ,PLAYER ,HALLWAY2>
+           <TELL "up a set of stairs, " ,D-O/E ", and " ,D3>)
+          (<IN? ,PLAYER ,HALLWAY3>
+           <TELL "east, north and " ,TCOMP>)>
+    <TELL ,PAUSES>
+    <COND (.DES
+           <RFALSE>)
+          (ELSE
+           <RTRUE>)>>
 
 <GLOBAL MICE-CHASE 0>
 
@@ -1401,8 +1485,11 @@ growls. \"Prepare to give us your brain in the name of science and revenge.\"" C
     <DEQUEUE I-TENSE-SCENE>
     <DEQUEUE I-MOUSE-BLAB>
     <DEQUEUE MOUSE-BANG>
-    <COND (<G? ,MICE-CHASE <+ <RANDOM 5> 7>>
-           <TELL "Suddenly, the two mice burst into the room you ">
+    <SETG KILL-NOW? <>>
+    <COND (<AND <G? ,MICE-CHASE <+ <RANDOM 5> 10>>
+                <NOT <IN? ,PLAYER ,BEHIND-DEVICE>>>
+           <TELL CR
+"With a jolt of fear that freezes you to the spot, the two mice burst into the room you ">
            <COND (<VERB? WALK>
                   <TELL "have just entered">)
                  (ELSE
@@ -1412,7 +1499,8 @@ growls. \"Prepare to give us your brain in the name of science and revenge.\"" C
 you down with a stun gun. Oh, well. The mice have got their way.">
            <JIGS-UP "">)
           (ELSE
-           <TELL "Behind you, the sound of footsteps and people shouting echoes around the corridor." CR>
+           <TELL CR
+"Behind you, the sound of footsteps and people shouting echoes around the corridor." CR>
            <SETG MICE-CHASE <+ ,MICE-CHASE 1>>)>>
 
 <ROOM HALLWAY1
@@ -1424,35 +1512,36 @@ you down with a stun gun. Oh, well. The mice have got their way.">
 	(NE PER ONE-THREE-NE)
 	(EAST PER ONE-THREE-E)
 	(SW PER ONE-THREE-SW)
-	(DOWN PER CANNOT-GO)
-	(UP PER CANNOT-GO)
+	(DOWN PER PASSAGES-LEAD)
+	(UP PER PASSAGES-LEAD)
+    (SE PER PASSAGES-LEAD)
+    (NW PER PASSAGES-LEAD)
 	(NORTH SORRY "You can't go back in there! That's extremely dangerous!")
 	(ACTION HALLWAY1-F)
     (THINGS (WINDY COMPLICAT) (PASSAGE HALLWAY) GLOBAL-ROOM-F)
 	(FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE HALLWAY1-F (RARG)
-	<COND (<EQUAL? .RARG ,M-LOOK>
-		   <IN-A-HALLWAY>
-           <TELL
-"passages leading off to the " ,O-2 ", " ,O-3 ", and
-back into the \"Interview\" room to the north." CR>)
-          (<AND <EQUAL? .RARG ,M-END>
+	<COND (<AND <EQUAL? .RARG ,M-ENTER>
                 <NOT <FSET? ,HALLWAY1 ,RADPLUGBIT>>>
            <INCREMENT-SCORE 20>
-           <FSET ,HALLWAY1 ,RADPLUGBIT>)>>
+           <CRLF>
+           <FSET ,HALLWAY1 ,RADPLUGBIT>)
+          (<EQUAL? .RARG ,M-LOOK>
+		   <IN-A-HALLWAY>
+           <PASSAGES-LEAD <>>)>>
 
 ;"Buncha movement routines"
 <ROUTINE ONE-TWO-S ()
-	<COND (<EQUAL? ,O-2 "south"> ,HALLWAY2) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,O-2 "south"> ,HALLWAY2) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE ONE-TWO-W ()
-	<COND (<EQUAL? ,O-2 "west"> ,HALLWAY2) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,O-2 "west"> ,HALLWAY2) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE ONE-THREE-NE ()
-	<COND (<EQUAL? ,O-3 "northeast"> ,HALLWAY3) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,O-3 "northeast"> ,HALLWAY3) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE ONE-THREE-E ()
-	<COND (<EQUAL? ,O-3 "east"> ,HALLWAY3) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,O-3 "east"> ,HALLWAY3) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE ONE-THREE-SW ()
-	<COND (<EQUAL? ,O-3 "southwest"> ,HALLWAY3) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,O-3 "southwest"> ,HALLWAY3) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 
 <ROOM HALLWAY2
 	(IN ROOMS)
@@ -1463,34 +1552,38 @@ back into the \"Interview\" room to the north." CR>)
 	(EAST PER TWO-THREE-E)
 	(WEST PER TWO-THREE-W)
 	(NORTH PER O-E-N)
+    (SOUTH PER PASSAGES-LEAD)
 	(SW PER O-E-SW)
 	(SE PER O-E-SE)
-	;(DOWN PER CANNOT-GO)
+    (NW PER PASSAGES-LEAD)
+    (NE PER PASSAGES-LEAD)
+	(DOWN PER PASSAGES-LEAD)
 	(ACTION HALLWAY2-F)
     (THINGS (WINDY COMPLICAT) (PASSAGE HALLWAY) GLOBAL-ROOM-F)
 	(FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE HALLWAY2-F (RARG)
 	<COND (<EQUAL? .RARG ,M-LOOK>
-		   <IN-A-HALLWAY><TELL "passages leading up a set of stairs, " ,D-O/E ", and " ,D3 ,PAUSES>)>>
+		   <IN-A-HALLWAY>
+           <PASSAGES-LEAD <>>)>>
 
 ;"Buncha movement routines"
 <ROUTINE TWO-THREE-E ()
-	<COND (<EQUAL? ,D3 "east"> ,HALLWAY3) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,D3 "east"> ,HALLWAY3) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE TWO-THREE-W ()
-	<COND (<EQUAL? ,D3 "west"> ,HALLWAY3) (ELSE <CANNOT-GO> <RFALSE>)>>
+	<COND (<EQUAL? ,D3 "west"> ,HALLWAY3) (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE O-E-N ()
 	<COND (<EQUAL? ,D-O/E "north">
 		   <COND (<EQUAL? ,O/E "hall"> ,HALLWAY1) (ELSE ,END)>)
-		  (ELSE <CANNOT-GO> <RFALSE>)>>
+		  (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE O-E-SW ()
 	<COND (<EQUAL? ,D-O/E "southwest">
 		   <COND (<EQUAL? ,O/E "hall"> ,HALLWAY1) (ELSE ,END)>)
-		  (ELSE <CANNOT-GO> <RFALSE>)>>
+		  (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 <ROUTINE O-E-SE ()
 	<COND (<EQUAL? ,D-O/E "southeast">
 		   <COND (<EQUAL? ,O/E "hall"> ,HALLWAY1) (ELSE ,END)>)
-		  (ELSE <CANNOT-GO> <RFALSE>)>>
+		  (ELSE <PASSAGES-LEAD> <RFALSE>)>>
 
 <ROOM HALLWAY3
 	(IN ROOMS)
@@ -1502,7 +1595,12 @@ back into the \"Interview\" room to the north." CR>)
 	(SE PER THREE-COMP-SE)
 	(DOWN PER THREE-COMP-D)
 	(NORTH TO HALLWAY1)
-	;(UP PER CANNOT-GO)
+	(UP PER PASSAGES-LEAD)
+    (SOUTH PER PASSAGES-LEAD)
+    (WEST PER PASSAGES-LEAD)
+    (NE PER PASSAGES-LEAD)
+    (NW PER PASSAGES-LEAD)
+    (SW PER PASSAGES-LEAD)
 	(ACTION HALLWAY3-F)
     (GENERIC MAX-G)
     (THINGS (WINDY COMPLICAT) (PASSAGE HALLWAY) GLOBAL-ROOM-F)
@@ -1510,7 +1608,8 @@ back into the \"Interview\" room to the north." CR>)
 
 <ROUTINE HALLWAY3-F (RARG)
 	<COND (<EQUAL? .RARG ,M-LOOK>
-		   <IN-A-HALLWAY><TELL "passages leading east, north and " ,TCOMP ,PAUSES>)>>
+		   <IN-A-HALLWAY>
+           <PASSAGES-LEAD <>>)>>
 
 ;"Buncha movement routines"
 <ROUTINE THREE-COMP-SE ()
@@ -1518,14 +1617,14 @@ back into the \"Interview\" room to the north." CR>)
            <FCLEAR ,HALLWAY1 ,RADPLUGBIT>
            ,COMP-ROOM)
           (ELSE
-           <CANNOT-GO>
+           <PASSAGES-LEAD>
            <RFALSE>)>>
 <ROUTINE THREE-COMP-D ()
 	<COND (<EQUAL? ,TCOMP "down">
            <FCLEAR ,HALLWAY1 ,RADPLUGBIT>
            ,COMP-ROOM)
           (ELSE
-           <CANNOT-GO>
+           <PASSAGES-LEAD>
            <RFALSE>)>>
 
 <ROOM END
@@ -1533,8 +1632,17 @@ back into the \"Interview\" room to the north." CR>)
 	(DESC "Dead End")
 	(LDESC "This is a dead end. The only way out is down a set of stairs.")
 	(DOWN TO HALLWAY1)
+    (UP SORRY "You're at the top of the steps.")
+    (NORTH SORRY "Only down.")
+    (SOUTH SORRY "You can only go down.")
+    (EAST SORRY "East goes nowhere. Down only.")
+    (WEST SORRY "You can't go that way. You can go down.")
+    (SE SORRY "There is a set of steps going downwards. Nothing else.")
+    (SW SORRY "Down, please.")
+    (NE SORRY "I tell you, only downwards.")
+    (NW SORRY "I can see a staircase going down. You can as well.")
 	(FLAGS LIGHTBIT ONBIT)
-	(THINGS (SET ROW) (STAIRS STAIRCASE) STAIRS-F)>
+    (GLOBAL STAIRS)>
 
 <ROOM COMP-ROOM
 	(IN ROOMS)
@@ -1566,11 +1674,11 @@ being sung in English or a foreign language (which shouldn't mean much now; you 
 can't tell what is being said.||
 The computer is hot against your back, and the bullets ricochet off the walls, barely missing you. Can you escape?")
 	(LDESC
-"There are a lot of loud noises all around you, coming from bullets, alarms, and the big hot computer behind you.
-Not your idea of a perfect holiday, then again, who said this was a holiday?")
+"There are a lot of loud noises all around you, coming from bullets, alarms, and the big hot
+computer behind you. Not your idea of a perfect holiday, then again, who said this was a holiday?")
 	(NE SORRY "You can't go back! You'd die!")
 	(SE SORRY "You can't go back! You'd die!")
-	(EAST SORRY "There's a big computer there.")
+	(EAST SORRY "You can't since the big computer is in the way.")
 	;(DOWN PER CANNOT-GO)
 	;(UP PER CANNOT-GO)
 	(THINGS (BIG GREAT IMPORTANT HOT HYPERSPAT FIELD) (DEVICE COMPUTER CALCULATO GENERATOR) UNIMPORTANT-THING-F

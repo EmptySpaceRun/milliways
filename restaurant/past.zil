@@ -77,7 +77,7 @@ looking intently at you, is the captain, who plays with the rubber ducky in his 
     (DESC "rubber ducky")
     (SYNONYM DUCK DUCKY TOY)
     (ADJECTIVE RUBBER TOY)
-    (FLAGS NDESCBIT TAKEBIT)
+    (FLAGS NDESCBIT TAKEBIT TRYTAKEBIT)
     (ACTION DUCKY-F)>
 
 <ROUTINE DUCKY-F ()
@@ -98,7 +98,7 @@ looking intently at you, is the captain, who plays with the rubber ducky in his 
     <COND (<AND <VERB? TAKE>
                 <EQUAL? <GETP ,MEAT-DISH ,P?OWNER> ,ARK-CAPTAIN>>
            <TELL
-"\"Oh ... I don't really want it. I'm supposed to have it but I'm
+"\"Oh " ,ELLIPSIS " I don't really want it. I'm supposed to have it but I'm
 really not hungry. Here, you can have it.\" He drops it on the floor." CR>
            <PUTP ,MEAT-DISH ,P?OWNER ,PLAYER>
            <MOVE ,MEAT-DISH ,ARK>)
@@ -265,7 +265,7 @@ unlike any sort of burger you've ever seen." CR>)
     <RFALSE>>
 
 <ROUTINE TO-DRESSING-BAR ()
-    <TELL "Nobody notices you, even if you're not supposed to walk through. You find yourself in..." CR CR>
+    <TELL "Nobody notices you, even if you're not supposed to walk through. You find yourself in" ,ELLIPSIS "" CR CR>
     ,DRESSING-ROOM-BBBB>
 
 <ROOM DRESSING-ROOM-BBBB
@@ -342,7 +342,9 @@ before you can do any more damage to your mental health." CR>
     ;(LDESC "There is Max Quordlepleen's dressing room access register here.")
     (SYNONYM REGISTER ACCESS)
     (ADJECTIVE MAX QUORDLEPL MAX\'S DRESSING ROOM ACCESS ELECTRONI)
-    (FLAGS ;TAKEBIT READBIT ;CONTBIT ;SURFACEBIT NDESCBIT  ;SADRADIOBIT ;"LOOK-FOR-BEAST-NAME"  ;RADPLUGBIT ;"BEAST-NAME-SEEN")
+    (FLAGS TRYTAKEBIT READBIT ;CONTBIT ;SURFACEBIT NDESCBIT
+                      ;SADRADIOBIT ;"Looking for the beast's name"
+                      ;RADPLUGBIT ;"Beast name seen")
     (CAPACITY 0)
     (ACTION REGISTER-F)>
 
@@ -388,13 +390,19 @@ D ,DRESSING-ROOM-BBBB "s. On it are a bunch of names, which you read through">)
            <TELL " at random: " <PICK-ONE ,REGISTER-TITLES> !\, !\ >
            <COND (<FSET? ,REGISTER ,SADRADIOBIT>
                   <TELL
-"the " ,BEAST "..." CR CR "Looks like I was right. " ,YOU-SEE "its
-name near-ish the end. Poor ol' Max was probably scared for his
-life when he wrote that name in the register">
+"the " ,BEAST ,ELLIPSIS CR CR "Looks like I was right. " ,YOU-SEE
+"its name near-ish the end. Poor ol' Max was probably scared for
+his life when he wrote that name in the register">
                   <FSET ,REGISTER ,RADPLUGBIT>
                   <FCLEAR ,REGISTER ,SADRADIOBIT>)
                  (ELSE
-                  <TELL <PICK-ONE <PLTABLE "Joey \"Jess\" Cramsey" "Max Fog" "Manon" "Onno Brouwer" "Jinx" "Brian Rushton">> !\. !\.>)>
+                  <TELL <PICK-ONE <PLTABLE
+                                      "Joey \"Jess\" Cramsey"
+                                      "Max Fog"
+                                      "Manon"
+                                      "Onno Brouwer"
+                                      "Jinx"
+                                      "Brian Rushton">> !\. !\.>)>
            <TELL !\.>
            <COND (,MAX-FAIL
                   <TELL " Oh, and obviously your name.">)>
@@ -407,7 +415,7 @@ life when he wrote that name in the register">
     (LOC DRESSING-ROOM-BBBB)
     (SYNONYM PEN PENCIL)
     (ADJECTIVE ELECTRONI BROKEN)
-    (FLAGS TAKEBIT NDESCBIT)
+    (FLAGS TAKEBIT TRYTAKEBIT NDESCBIT)
     (GENERIC PEN-G)
     (SIZE 3)
     ;(ACTION PENCIL-F)>

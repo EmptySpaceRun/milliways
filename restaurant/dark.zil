@@ -21,6 +21,8 @@
 <GLOBAL ARK-PROB 15>
 
 
+<GLOBAL FAIL-FJORD <>>
+
 <GLOBAL DARK-COUNTER 0>
 
 <GLOBAL DREAMING <>>
@@ -74,6 +76,7 @@ as having a good, solid kick in the head.|
 				  <DEQUEUE I-ASK-DEATH>
 				  <DEQUEUE I-ASKED-NICELY>
 				  <DEQUEUE I-ASK-AGAIN>
+                  <DEQUEUE I-MICE-CHASE>
 				  <SETG KILL-NOW? <>>
 				  <FCLEAR ,EMERGENCY-EXIT ,OPENBIT>)
 				 (<IN? ,PLAYER ,ARK>
@@ -140,7 +143,6 @@ Everything becomes" ,ELLIPSIS>
                          <ROB ,PLAYER ,RECEPTION>
                          ;<SIXCR> <CHANGE-PART 2>
                          <RETURN ,DARK>)>)>
-           
 		   <TELL " Everything becomes" ,ELLIPSIS>
 		   <COND (<NOT <EQUAL? ,DARK-FLAG ,RECEPTION>>
 		   		  <SETG REST-PROB 100>)>
@@ -234,7 +236,7 @@ Everything becomes" ,ELLIPSIS>
 	(LDESC 0)
 	(SYNONYM BLUR)
 	(ADJECTIVE SMALL LARGE GREEN)
-	(FLAGS NDESCBIT ;PERSONBIT)>
+	(FLAGS NDESCBIT PERSONBIT)>
 
 <OBJECT WHITE-ROOM
 	(LOC LOCAL-GLOBALS)
@@ -351,11 +353,11 @@ remember what you were sent to do, and that you don't want to be here" ,ELLIPSIS
 		       <TELL "The clattering is all that can catch your attention." CR>)
               (<AND <SEE-VERB?>
                     <EQUAL? ,OTHER-THING ,PRSO ,PRSI>>
-		       <TELL "No, it's not the " D ,THING ", it's "><ITALICIZE "another"><TELL" thing." CR>)
+		       <TELL "No, it's not "><THE-J ,THING T><TELL ", it's "><ITALICIZE "another"><TELL" thing." CR>)
 		      (T
 		       <>)>)
 	       (<AND <EQUAL? ,DARK-FLAG ,INTERVIEW-ROOM ,RECEPTION>
-		     <VERB? EXAMINE ;LOOK>
+		     <VERB? EXAMINE LOOK>
 		     <EQUAL? ,PRSO ,DARK-OBJECT ,BLUR <>>
 		     <MISSING?>>
 		<TELL
@@ -440,48 +442,50 @@ identified as a chunk of ice), which is in the middle of a vast landscape" ,ELLI
 		<TELL". It trails off into what may be another room, further into the darkness." CR>
 		<MOVE ,DARKY-ROOM ,HERE>)
 	       (<AND <OR <EQUAL? ,PRSO ,BUBBLE ,BARBECUE ,DARKY-ROOM ,P?IN>
-			 <EQUAL? ,PRSI ,BUBBLE ,BARBECUE ,DARKY-ROOM>>>
-		<COND (<NOT <EQUAL? ,DARK-FLAG ,ARK ,BAR>>
-		       <CANT-SEE ,P-IT-OBJECT>)
-		      (<VERB? EXAMINE RUB>
-		       <TELL "You're trying to do that to "><THE-J ,P-IT-OBJECT <>><TELL "?">
-		       <IMPOSSIBLE>)
-		      (<VERB? SMELL>
-		       <TELL "The smell is ">
-				<COND (<EQUAL? ,DARK-FLAG ,ARK>
-					<THIS-IS-IT ,BUBBLE>
-					<MOVE ,BUBBLE ,HERE>
-					<TELL "sweet, like a bubble bath">)
-					(T
-					<THIS-IS-IT ,BARBECUE>
-					<MOVE ,BARBECUE ,HERE>
-					<TELL "strong, like a barbecue">)>
-				<TELL". It trails off into what may be another room, further into the darkness." CR>)
-		      (<AND <VERB? WALK-TO BOARD THROUGH LEAP WALK CLIMB-ON THROUGH>
-			  		<TELL "You walk forwards. ">
-					<COND (<EQUAL? ,DARK-FLAG ,ARK>
-						<TELL
+		    	     <EQUAL? ,PRSI ,BUBBLE ,BARBECUE ,DARKY-ROOM>>>
+		    <COND (<NOT <EQUAL? ,DARK-FLAG ,ARK ,BAR>>
+		           <CANT-SEE ,P-IT-OBJECT>)
+		          (<VERB? EXAMINE RUB>
+		           <TELL "You're trying to do that to "><THE-J ,P-IT-OBJECT <>><TELL !\? !\ >
+		           <IMPOSSIBLE>)
+		          (<VERB? SMELL>
+		           <TELL "The smell is ">
+		    	   <COND (<EQUAL? ,DARK-FLAG ,ARK>
+		    	   	      <THIS-IS-IT ,BUBBLE>
+		    	   	      <MOVE ,BUBBLE ,HERE>
+		    	   	      <TELL "sweet, like a bubble bath">)
+		    	   	     (T
+		    	   	      <THIS-IS-IT ,BARBECUE>
+		    	   	      <MOVE ,BARBECUE ,HERE>
+		    	   	      <TELL "strong, like a barbecue">)>
+		    	   <TELL ". It trails off into what may be another room, further into the darkness." CR>)
+		          (<OR <VERB? WALK-TO BOARD THROUGH LEAP WALK CLIMB-ON THROUGH>
+                       <AND <VERB? TAKE>
+                            <NOUN-USED? ,BUBBLE ,W?BATH>>>
+		    	  		<TELL "You walk forwards. ">
+		    			<COND (<EQUAL? ,DARK-FLAG ,ARK>
+		    				   <TELL
 "The darkness flashes brightly, and you find yourself staring into the eyes of a rubber ducky" ,ELLIPSIS>)
-						  (ELSE
-						<TELL
+						      (ELSE
+						       <TELL
 "The darkness plays backwards like a rewinding tape, and you
 are pulled back to your feet, just in time to see the universe
-unravel before your eyes in... " D ,BAR !\!>)>
-					<LEAVE-DARK>>)
+unravel before your eyes in" ,ELLIPSIS !\  D ,BAR !\!>)>
+					    <LEAVE-DARK>)
 			  (T
 		       <>)>)
 	       (T
-		<SETG DARK-COUNTER <+ ,DARK-COUNTER 1>>
-		<COND (<AND ,DARK-CONTROLLED>
-               <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
-		       <COND (<EQUAL? ,CURRENT-EXIT 8>
-			          <SETG CURRENT-EXIT 0>)>
-		       <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>
-               <COND (<OR <AND <EQUAL? ,DARK-FLAG ,GLACIER-1>
-                               <NOT <FSET? ,GLACIER-1 ,SADRADIOBIT>>>
-                          <EQUAL? ,DARK-FLAG ,PDW>>
-                      <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
-                      <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>)>)>
+		    <SETG DARK-COUNTER <+ ,DARK-COUNTER 1>>
+		    <COND (<AND ,DARK-CONTROLLED>
+                   <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
+		           <COND (<EQUAL? ,CURRENT-EXIT 8>
+		    	          <SETG CURRENT-EXIT 0>)>
+		           <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>
+                   <COND (<OR <AND <EQUAL? ,DARK-FLAG ,GLACIER-1>
+                                   <NOT <FSET? ,GLACIER-1 ,SADRADIOBIT>>>
+                              <EQUAL? ,DARK-FLAG ,PDW>>
+                          <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
+                          <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>)>)>
 		<COND (<VERB? LOOK>
 		       <BOLDEN "Dark">
 			   <CRLF>)>
@@ -640,7 +644,24 @@ or who you are or how you got there." CR>>
            <COND (<AND <NOT ,IMMOVABLE>
                        <NOT <FSET? ,GLACIER-1 ,SADRADIOBIT>>>
                   <V-FOO>)>
-		   <MOVE ,LUMP ,LOCAL-GLOBALS>
+		   <COND (,FAIL-FJORD
+                  <MOVE ,PLAYER ,FOO-ROOM>
+                  <SETG HERE ,FOO-ROOM>
+                  <TELL CR
+"But no! The landscape is not what you are standing on - in fact, there
+is nothing below you for another five miles or so. The chunk of ice which
+you had noticed was on the side of a zeppelin directly beside you, which
+you missed by approximately two metres." CR
+"Reaching terminal velocity within a few seocnds, you crash into part of
+the zeppelin and tumble. As you claw for a handhold, you find something
+- a bar! And secure yourself." CR
+"Now you just have to get out of this freezing cold" ,ELLIPSIS CR CR>
+                  <BOLDEN "Zeppelin, hanging from the underside">
+                  <CRLF>
+                  <CRLF>
+                  <FUCKING-CLEAR>
+                  <RTRUE>)>
+           <MOVE ,LUMP ,LOCAL-GLOBALS>
 		   <QUEUE I-FREEZE -1>
 		   <QUEUE I-GLACIER-CRACK -1>
            ;<QUEUE I-NORWAY-SET -1>
@@ -680,5 +701,5 @@ or who you are or how you got there." CR>>
 	<SETG DARK-FLAG <>>
 	<ROB ,DARK ,LOCAL-GLOBALS>
 	<MOVE ,DARK-OBJECT ,DARK>
-    ;<V-LOOK>
+    <FUCKING-CLEAR>
 	<RTRUE>>

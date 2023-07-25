@@ -8,37 +8,18 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 		a *		               <PRINTA .X>
 		the *		           <PRINT-THE .X>
 		The *		           <START-SENTENCE .X>
-		He+verb * *:STRING     <HE-SHE-IT .X 1 .Y>
-		He *		           <HE-SHE-IT .X 1>
-		he+verb * *:STRING     <HE-SHE-IT .X 0 .Y>
-		he *		           <HE-SHE-IT .X>
+		CHE+VERB * *:STRING    <HE-SHE-IT .X 1 .Y>
+		CHE *		           <HE-SHE-IT .X 1>
+		HE+VERB * *:STRING     <HE-SHE-IT .X 0 .Y>
+		HE *		           <HE-SHE-IT .X>
 		verb * *:STRING	       <HE-SHE-IT .X -1 .Y>
 		him *		           <HIM-HER-IT .X>
-		his *		           <HIM-HER-IT .X 0 T>
-		His *		           <HIM-HER-IT .X 1 T>
-        That *                 <THAT-THEY .X T>
-        that *                 <THAT-THEY .X>
-        That+verb * *:STRING   <THAT-THEY .X T .Y>
-        that+verb * *:STRING   <THAT-THEY .X <> .Y>>
-
-<ROUTINE THAT-THEY (OBJ "OPT" (CAP? <>) (VER:STRING <>))
-    <COND (<FSET? .OBJ ,PLURALBIT>
-           <COND (.CAP?
-                  <TELL !\T>)
-                 (ELSE
-                  <TELL !\t>)>
-           <TELL "hey">)
-          (<FSET? .OBJ ,PERSONBIT>
-           <HE-SHE-IT .OBJ .CAP?>)
-          (ELSE
-           <COND (.CAP?
-                  <TELL !\T>)
-                 (ELSE
-                  <TELL !\t>)>
-           <TELL "hat">)>
-    <COND (.VER
-           <TELL !\ >
-           <HE-SHE-IT .OBJ -1 .VER>)>>
+		HIS *		           <HIM-HER-IT .X 0 T>
+		CHIS *		           <HIM-HER-IT .X 1 T>
+        CTHAT *                <THAT-THEY .X 1>
+        THAT *                 <THAT-THEY .X>
+        CTHAT+VERB * *:STRING  <THAT-THEY .X 1 .Y>
+        THAT+VERB * *:STRING   <THAT-THEY .X 0 .Y>>
 
 <REPLACE-DEFINITION SEE-VERB?
 <ROUTINE SEE-VERB? ()
