@@ -255,7 +255,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
   <SETG PMEM-WORDS-USED <+ ,PMEM-WORDS-USED .LENGTH>>
   <SETG PMEM-STORE-WORDS <- .LEFT .LENGTH>>
   <IF-P-DEBUGGING-PARSER
-	<COND (<G? ,PMEM-STORE-WARN ,PMEM-STORE-WORDS>
+	<COND (<AND <T? ,P-DBUG>
+                <G? ,PMEM-STORE-WARN ,PMEM-STORE-WORDS>>
 	       <SETG PMEM-STORE-WARN ,PMEM-STORE-WORDS>
 	       <PRINTI "[Debugging info: ">
 	       <PRINTI "PMEM: ">

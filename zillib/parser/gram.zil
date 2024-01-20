@@ -26,6 +26,7 @@ stuff.  This resets everything else, so we can regenerate the grammar."
 
 <COMPILATION-FLAG-DEFAULT P-PS-COMMA T>
 <ADD-WORD AND	<IFFLAG (P-PS-COMMA COMMA) (T MISCWORD)>>
+<ADD-WORD "&"	<IFFLAG (P-PS-COMMA COMMA) (T MISCWORD)>>
 ;<ADD-WORD OR	<IFFLAG (P-PS-COMMA COMMA) (T MISCWORD)>>
 <ADD-WORD ","	<IFFLAG (P-PS-COMMA COMMA) (T MISCWORD)>>
 
@@ -41,15 +42,14 @@ stuff.  This resets everything else, so we can regenerate the grammar."
 <ADD-WORD FROM PREP>
 <ADD-WORD IN PREP>
 <ADD-WORD ON PREP>
+;<ADD-WORD WITH PREP>
 
 <IF-P-PS-ADV
 	<ADD-WORD ONCE ADV>
 	<ADD-WORD TWICE ADV>
 	<ADD-WORD THRICE ADV>
-	;<ADD-WORD "DON'T" ADV>
-	;<ADD-WORD DON\'T ADV>
-    <ADD-WORD CAREFULLY ADV>
-    <ADD-WORD SCREAMING ADV>>
+	<ADD-WORD "DON'T" ADV>
+    <ADD-WORD DONT ADV>>
 
 <IFFLAG (P-PS-ADV	<PRODUCTION RED-SP	SP 1	(?PERS S ?ADV)>)
 	(T		<PRODUCTION RED-SP	SP 1	(?PERS S)>)>
@@ -58,6 +58,7 @@ stuff.  This resets everything else, so we can regenerate the grammar."
 ;<PRODUCTION RED-SVPNN	S 2	(VP ?PARTICLE NPP NPP)>
 ;<PRODUCTION RED-SVNPN	S 2	(VP NPP ?PARTICLE NPP)>
 <PRODUCTION RED-SVPNPN	S 2	(VP ?PARTICLE NPP ?PARTICLE NPP)>
+<IF-P-THIRD-PART <PRODUCTION RED-SVPNPNPN	S 2	(VP ?PARTICLE NPP ?PARTICLE NPP ?PARTICLE NPP)>>
 ;<PRODUCTION RED-SVNP	S 2	(VP NPP PARTICLE)>
 <PRODUCTION RED-SVN	S 2	(VP ?PARTICLE NPP ?PARTICLE)>
 
@@ -77,9 +78,17 @@ stuff.  This resets everything else, so we can regenerate the grammar."
 						(?QW1 CANDO NOT NP)>)
 	(T
 	 <IFFLAG (P-PS-ADV
-	 	<PRODUCTION RED-VP	VP 3	(?ADV VERB ?ADV)>)
+	 	<IFFLAG (P-THREE-NOUNS
+            <PRODUCTION RED-VP	VP 3	(?ADV VERB ?ADV)
+                                        (?ADV VERB PARTICLE NPP ?ADV)>)
+                (T
+            <PRODUCTION RED-VP	VP 3	(?ADV VERB ?ADV)>)>)
 		 (T
-	 	<PRODUCTION RED-VP	VP 3	(VERB)>)>)>
+	 	<IFFLAG (P-THREE-NOUNS
+            <PRODUCTION RED-VP	VP 3	(VERB)
+                                        (VERB ?PARTICLE NPP)>)
+                (T
+            <PRODUCTION RED-VP	VP 3	(VERB)>)>)>)>
 
 <IFFLAG (P-PS-OFWORD
 	<PRODUCTION RED-PART	?PARTICLE 1	(PARTICLE OFWORD)

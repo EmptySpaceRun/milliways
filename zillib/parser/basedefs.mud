@@ -434,21 +434,31 @@ is the adjective ID, if present."
 etc)."
 <NEWTYPE VERB-POINTER ATOM>
 
-<DEFSTRUCT VERB-DATA
+<IFFLAG
+    (P-THIRD-PART
+      <DEFSTRUCT VERB-DATA
+	   (TABLE
+	    ('INIT-ARGS (TEMP-TABLE)))
+	   (VERB-ZERO ANY -1)
+	   (VERB-PREP <OR FALSE FIX VWORD>)
+	   (VERB-ONE <OR FALSE FIX TABLE>)
+	   (VERB-TWO <OR FALSE FIX TABLE>)
+       (VERB-THREE <OR FALSE FIX TABLE>)>)
+    (ELSE
+      <DEFSTRUCT VERB-DATA
 	   (TABLE
 	    ('INIT-ARGS (TEMP-TABLE)))
 	   ; "If GE 0, this verb is happy with no arguments.  The
 	      number identifies the action routine."
 	   (VERB-ZERO ANY -1)
-	   ; "VERB-ONE and VERB-TWO contain tables of VERB-SYNTAXES;
-	      the correct
-	      one is picked based on prepositions in the sentence, matched
-	      against stuff in the SYNTAX element.  This determines the
-	      allowable prepositions for the verb, and also the action routines
-	      to call."
+	   ; "VERB-ONE and VERB-TWO contain tables of VERB-SYNTAXES; the
+          correct one is picked based on prepositions in the sentence,
+          matched against stuff in the SYNTAX element.  This determines
+          the allowable prepositions for the verb, and also the action
+          routines to call."
 	   (VERB-PREP <OR FALSE FIX VWORD>)
 	   (VERB-ONE <OR FALSE FIX TABLE>)
-	   (VERB-TWO <OR FALSE FIX TABLE>)>
+	   (VERB-TWO <OR FALSE FIX TABLE>)>)>
 
 <NEWTYPE VERB-SYNTAX VECTOR>
 <COND (<GASSIGNED? TABLE-PRINT>
@@ -456,6 +466,7 @@ etc)."
 
 <MSETG VERB-ONE-SYNTAX-LEN 6>
 <MSETG VERB-TWO-SYNTAX-LEN 10>
+<MSETG VERB-THREE-SYNTAX-LEN 14>
 
 ; "All the syntaxes for a verb are stored in two tables, one for the one arg
    case, the other for the two arg case.  Each table contains a length
@@ -475,11 +486,11 @@ etc)."
 
 <MSETG SYN-PREP 0>
 <MSETG SP-LOCATION-TYPE -1>
-<MSETG SYN-FIND 2>		; "Byte offset"
+<MSETG SYN-FIND 2>		        ; "Byte offset"
 <MSETG SYN-FIND-NEGATE *200*>	; "If set, try something with this bit off"
-<MSETG SYN-SEARCH 3>		; "Byte offset"
-<MSETG SYN-FIRST-ENTRY 1>	; "Word offset"
-<MSETG SYN-ENTRY-SIZE 2>	; "Word length"
+<MSETG SYN-SEARCH 3>		    ; "Byte offset"
+<MSETG SYN-FIRST-ENTRY 1>	    ; "Word offset"
+<MSETG SYN-ENTRY-SIZE 2>	    ; "Word length"
 
 <DEFMAC SYNTAX-GET ('VS ELT 'WHICH)
   <COND (<TYPE? .ELT ATOM>

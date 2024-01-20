@@ -63,9 +63,8 @@ THINGS
  match.  If there's a big red book and a big ugly red book, BIG RED BOOK
  will get the former, since it's the only way to do so."
 
-<DEFINE FIND-DESCENDANTS FD
-	(PARENT:OBJECT FLAGS:FIX ;"INCLUDE, SEARCH, NEST, NOTOP"
-	 "AUX" (F ,FINDER) FOBJ:<OR FALSE OBJECT>)
+<DEFINE FIND-DESCENDANTS FD (PARENT:OBJECT FLAGS:FIX ;"INCLUDE, SEARCH, NEST, NOTOP"
+	                         "AUX" (F ,FINDER) FOBJ:<OR FALSE OBJECT>)
   <COND (<EQUAL? .PARENT ,GLOBAL-HERE>
 	 <SET PARENT ,HERE>)>
   <COND (<SET FOBJ <FIRST? .PARENT>>
@@ -80,13 +79,12 @@ THINGS
 					    ;<BTST .FLAGS 1>>>>
 		    <RETURN <> .FD>)>
 	     <COND (<AND <FD-FLAG FD-NEST? .FLAGS> ;<BTST .FLAGS 4>
-			 <FIRST? .FOBJ>
-			 <N==? .FOBJ ,WINNER>
-			 <OR ;,P-MOBY-FLAG
-			     <AND ;<FSET? .FOBJ ,SEARCHBIT>
-				  <OR <FSET? .FOBJ ,OPENBIT>
-				      <FSET? .FOBJ ,TRANSBIT>>>
-			     <FSET? .FOBJ ,SURFACEBIT>>>
+			         <FIRST? .FOBJ>
+			         <N==? .FOBJ ,WINNER>
+			         <OR <AND ;<FSET? .FOBJ ,SEARCHBIT>
+			        	  <OR <FSET? .FOBJ ,OPENBIT>
+			        	      <FSET? .FOBJ ,TRANSBIT>>>
+			             <FSET? .FOBJ ,SURFACEBIT>>>
 		    ;"Check its contents"
 		    <COND (<NOT <FIND-DESCENDANTS .FOBJ
 				 <FD-FLAG FD-INCLUDE? ,FD-NEST?
@@ -130,8 +128,8 @@ THINGS
 <DEFINE MATCH-OBJECT (FOBJ:OBJECT F:FINDER INCLUDE?:BOOLEAN
 		      "AUX" NOUN ADJS APP TB (RES <FIND-RES .F>) TMP)
   <COND (<AND <OR <NOT <FSET? .FOBJ ,INVISIBLE>>
-               <OR <ALL-OVER-VERB?> <EVERYWHERE-VERB?>>>
-          <OR <EQUAL? <SET NOUN <FIND-NOUN .F>> <> ,W?ONE>
+                <EVERYWHERE-VERB?>>
+	      <OR <EQUAL? <SET NOUN <FIND-NOUN .F>> <> ,W?ONE>
 		  <AND <SET TB <GETPT .FOBJ ,P?SYNONYM>>
 		       <ZMEMQ .NOUN .TB </ <PTSIZE .TB>:FIX 2>>>>
 	      <OR <NOT <SET ADJS <FIND-OF .F>>>
@@ -200,7 +198,7 @@ THINGS
 	       (T)>)
 	(T)>>
 
-<MSETG SYN-FIND-PROP *400*>	;"If set, look for this property"
+<CONSTANT SYN-FIND-PROP *400*>	;"If set, look for this property"
 
 <DEFINE TEST-OBJECT TO (FOBJ:OBJECT APP:<OR FIX TABLE> F:FINDER)
   <COND (<NOT <TABLE? .APP>>
@@ -291,8 +289,6 @@ THINGS
 <DEFINE EVERYWHERE-VERB? ("OPT" (WHICH <FIND-WHICH ,FINDER>)
 				(SYNTAX <PARSE-SYNTAX ,PARSE-RESULT>)
 			  "AUX" SYN)
-    <COND (<ALL-OVER-VERB?>
-           T)>
 	<COND (<==? .WHICH 1>
 	       <SET SYN <SYNTAX-SEARCH .SYNTAX 1>>)
 	      (T
@@ -305,48 +301,48 @@ THINGS
     <COND (<AND <VERB? ASK-CONTEXT-ABOUT LOOK-UP FIND WHERE WHAT WHAT-ABOUT
                        BOARD DISEMBARK CLIMB-UP CLIMB-DOWN STELL-ABOUT FOLLOW
                        LEAVE ASK-CONTEXT-FOR SAY WRITE WRITE-WHAT>
-                <OR <NOT <VISIBLE? ,PRSO>>
-                    ;<FSET? ,PRSO ,INVISIBLE>>>
+                <AND ,PRSO
+                     <NOT <VISIBLE? ,PRSO>>>>
            T)
           (<AND <VERB? ASK-ABOUT SEARCH-FOR ASK-FOR TALK-ABOUT TELL-ABOUT FOLLOW TAKE-TO SWRITE>
-                <OR <NOT <VISIBLE? ,PRSI>>
-                    ;<FSET? ,PRSI ,INVISIBLE>>>
+                <AND ,PRSI
+                     <NOT <VISIBLE? ,PRSI>>>>
            T)>>
 
 "MULTIPLE-EXCEPTION? -- return true if an object found by ALL should not
 be include when the crunch comes."
 
 <DEFINE MULTIPLE-EXCEPTION? (OBJ:OBJECT SYNTAX:VERB-SYNTAX WHICH:FIX F:FINDER
-			     "AUX" (L <LOC .OBJ>) (VB <SYNTAX-ID .SYNTAX>))
+			                 "AUX" (L <LOC .OBJ>) (VB <SYNTAX-ID .SYNTAX>))
  <COND (<EQUAL? .OBJ <> ,ROOMS ;,NOT-HERE-OBJECT>
-	<SETG P-NOT-HERE <+ 1 ,P-NOT-HERE>>
-	T)
+	    <SETG P-NOT-HERE <+ 1 ,P-NOT-HERE>>
+	    T)
        (<AND <0? <EVERYWHERE-VERB? .WHICH .SYNTAX>>
 	         <NOT <ACCESSIBLE? .OBJ>>>
-	T)
+	    T)
        (<AND <==? .VB ,V?TAKE>
-	     <ZERO? <FIND-NOUN .F>>
-	     <1? .WHICH>>
-	<COND (<AND <NOT <FSET? .OBJ ,TAKEBIT>>
-		    <NOT <FSET? .OBJ ,TRYTAKEBIT>>>
-	       T)
-	      (<EQUAL? .L ,WINNER>
-	       ;<AND <NOT <EQUAL? .L ,WINNER <LOC ,WINNER> ,HERE>>
-		    <NOT <FSET? .L ,SURFACEBIT>>
-		    <NOT <FSET? .L ,SEARCHBIT>>>
-	       T)>)
+	         <ZERO? <FIND-NOUN .F>>
+	         <1? .WHICH>>
+	    <COND (<AND <NOT <FSET? .OBJ ,TAKEBIT>>
+	    	    <NOT <FSET? .OBJ ,TRYTAKEBIT>>>
+	           T)
+	          (<EQUAL? .L ,WINNER>
+	           ;<AND <NOT <EQUAL? .L ,WINNER <LOC ,WINNER> ,HERE>>
+	    	    <NOT <FSET? .L ,SURFACEBIT>>
+	    	    <NOT <FSET? .L ,SEARCHBIT>>>
+	           T)>)
        (<==? .VB ,V?DROP>
-	<COND (<NOT <IN? .OBJ ,WINNER>>
-	       T)>)
+	    <COND (<NOT <IN? .OBJ ,WINNER>>
+	           T)>)
       ;(<AND ,PRSI
-	     <==? ,PRSO ,PRSI>>
-	;"VERB ALL and prso = prsi"
-	<RTRUE>)
+	         <==? ,PRSO ,PRSI>>
+	    ;"VERB ALL and prso = prsi"
+	    <RTRUE>)
       ;(<AND <==? .VB ,V?PUT>
-	     <NOT <IN? .OBJ ,WINNER>>
-	     <HELD? ,PRSO ,PRSI>>
-	;"PUT ALL IN X and object already in x"
-	<RTRUE>)>>
+	         <NOT <IN? .OBJ ,WINNER>>
+	         <HELD? ,PRSO ,PRSI>>
+	    ;"PUT ALL IN X and object already in x"
+	    <RTRUE>)>>
 
 <ADD-WORD OPEN ADJ>
 <ADD-WORD CLOSED ADJ>
@@ -354,12 +350,12 @@ be include when the crunch comes."
 
 <DEFINE CHECK-ADJS-THERE? (OWNER "AUX" TMP)
    <COND (<ZERO? <SET TMP <FIND-RES-COUNT ,OWNER-SR-THERE>>>
-	  <>)
-	 (<NOT <INTBL? .OWNER
-		       <REST-TO-SLOT ,OWNER-SR-THERE FIND-RES-OBJ1>
-		       .TMP>>
-	  <>)
-	 (T)>>
+	      <>)
+	     (<NOT <INTBL? .OWNER
+	    	       <REST-TO-SLOT ,OWNER-SR-THERE FIND-RES-OBJ1>
+	    	       .TMP>>
+	      <>)
+	     (T)>>
 
 <DEFINE CHECK-ADJS CA (OBJ:OBJECT F ADJS:PMEM
 		       "AUX" CNT (TMP <>) OWNER (ID <>) VEC)
@@ -405,15 +401,7 @@ be include when the crunch comes."
 			       <RETURN>)
 			      (T <SET VEC <ZREST .VEC 2>>)>>)>)
 	       (<OBJECT? .TMP>		;"possession"
-        <COND ;(<NOT <OR <AND <FSET? .OBJ ,BODYPARTBIT>
-                             <FIND-NUM-TBL ,BODY-PARTS-OWNERS .TMP>>
-                        <EQUAL? <GETP .OBJ ,P?OWNER> .TMP>
-                        <AND <EQUAL? .OBJ ,HEAD ,FEET>
-                             <EQUAL? .TMP ,MICE ,BENJY ,PERCY>>
-                        <HELD? .OBJ .TMP>>>
-               <THE-J .TMP T T><TELL !\ verb .TMP "n't have "><THE-J .OBJ <>><TELL !\! CR>
-               <FUCKING-CLEAR>)
-		      (ELSE
+		<COND (<NOT <HELD? .OBJ .TMP>>
 		       <RETURN <> .CA>)>)
 	       (T			;"possession"
 		<COND (<ZERO? <SET TMP <FIND-RES-COUNT ,OWNER-SR-HERE>>>
@@ -449,7 +437,7 @@ be include when the crunch comes."
 		  )
 		 ;(T <ZMEMQB .ID .OADJS <- <PTSIZE .OADJS>:FIX 1>>)>)
 	  (<AND <EQUAL? .ID ,W?CLOSED ,W?SHUT>
-		<NOT <FSET? .OBJ ,OPENBIT>>>)
+		    <NOT <FSET? .OBJ ,OPENBIT>>>)
 	  (<AND <EQUAL? .ID ,W?OPEN>
 		<FSET? .OBJ ,OPENBIT>>)
 	  ;(<VERSION? (ZIP <>)
@@ -792,9 +780,9 @@ be include when the crunch comes."
 	 <SET V <ZBACK <GETPT ,PSEUDO-OBJECT ,P?ACTION> 7>>
 	 <COPYT .NOUN .V 6>
 	 <COND (<BTST <WORD-FLAGS .NOUN> ,PLURAL-FLAG>
-		<FSET ,PSEUDO-OBJECT ,PLURAL>)
+		<FSET ,PSEUDO-OBJECT ,PLURALBIT>)
 	       (T
-		<FCLEAR ,PSEUDO-OBJECT ,PLURAL>)>
+		<FCLEAR ,PSEUDO-OBJECT ,PLURALBIT>)>
 	 <ADD-OBJECT ,PSEUDO-OBJECT .F>
 	 <RFALSE>)>
   <SET RMG <ZREST .RMG 4 ;6>>

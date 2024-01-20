@@ -17,23 +17,29 @@
 <MSETG SEARCH-ADJACENT <ORB ,SEARCH-MUST-HAVE ,SEARCH-MOBY>>
 
 <SETG NEW-SFLAGS
-      ["ALL"
+      [ALL ;"ALL"
        ,SEARCH-ALL
-       "ROOM"
+       ROOM ;"ROOM"
        ,SEARCH-IN-ROOM
-       "HELD"
+       HELD ;"HELD"
        ,SEARCH-HELD
-       "CARRIED"
+       HAVE ;"HAVE"
+       ,SEARCH-MUST-HAVE
+       TAKE ;"TAKE"
+       ,SEARCH-DO-TAKE
+       MANY ;"MANY"
+       ,SEARCH-MANY
+       CARRIED ;"CARRIED"
        ,SEARCH-CARRIED
-       "IN-ROOM"
+       IN-ROOM ;"IN-ROOM"
        ,SEARCH-IN-ROOM
-       "ON-GROUND"
+       ON-GROUND ;"ON-GROUND"
        ,SEARCH-ON-GROUND
-       "EVERYWHERE"
+       EVERYWHERE ;"EVERYWHERE"
        ,SEARCH-MOBY
-       "MOBY"
+       MOBY ;"MOBY"
        ,SEARCH-MOBY
-       "ADJACENT"
+       ADJACENT ;"ADJACENT"
        ,SEARCH-ADJACENT]>
 
 <GDECL (NEW-SFLAGS) <VECTOR [REST STRING FIX]>>

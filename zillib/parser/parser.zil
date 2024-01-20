@@ -11,7 +11,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <RENTRY	ACCESSIBLE?
 	BUZZER-WORD?
 	DIR-VERB?
-	FEMALE
+	FEMALEBIT
 	GLOBAL-OBJECTS
 	LIT
 	LIT?
@@ -25,14 +25,15 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	PERSONBIT
 	PLAYER
 	PRINT-VOCAB-WORD
-	;SEARCHBIT
+	SEARCHBIT
 	;SPECIAL-ADJ-CHECK
 	SPECIAL-CONTRACTION?
 	SURFACEBIT
+    MUNGBIT
 	TAKEBIT
 	TELL-CTHE
 	TELL-THE
-	;TITLE-ABBR?
+	TITLE-ABBR?
 	TRANSBIT
 	TRYTAKEBIT
 	;VEHBIT
@@ -48,8 +49,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <BEGIN-SEGMENT 0>
 
-<COMPILATION-FLAG-DEFAULT P-APOSTROPHE-BREAKS-WORDS T>
-<COMPILATION-FLAG-DEFAULT P-BE-VERB <>>
+<COMPILATION-FLAG-DEFAULT P-APOSTROPHE-BREAKS-WORDS <>>
 ;<COMPILATION-FLAG-DEFAULT P-DEBUGGING-PARSER T>
 
 <DEFAULTS-DEFINED
@@ -60,7 +60,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	COLLECTIVE-VERB?
 	CONTBIT
 	DIR-VERB?
-	FEMALE
+	FEMALEBIT
 	GAME-VERB?
 	INVISIBLE
 	LIT?
@@ -78,8 +78,9 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	READ-INPUT
 	ROOMSBIT
 	;SEARCH-IN-LG?
-	;SEARCHBIT
+	SEARCHBIT
 	SEENBIT
+    MUNGBIT
 	;SPECIAL-ADJ-CHECK
 	SPECIAL-CONTRACTION?
 	STATUS-LINE
@@ -144,7 +145,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <MSETG P-LEXWORDS 1>	"# of valid entries in LEXV (byte)"
 <MSETG P-LEXSTART 1>	"First LEXV entry (word)"
-<MSETG P-LEXELEN 2>	    "Words/LEXV entry"
+<MSETG P-LEXELEN 2>	"Words/LEXV entry"
 
 <CONSTANT OOPS-TABLE <TABLE <> <> <> <> <>>>
 <MSETG O-START 0>	"word pointer to sentence start in P-LEXV"
@@ -200,13 +201,15 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	 <HLIGHT ,H-INVERSE>
 	 <COND (<NOT <EQUAL? ,HERE ,OLD-HERE>>
 		<SETG OLD-HERE ,HERE>
-		<CURSET 1 1>		;"Erase old desc."
-		<ERASE 1>	;<PRINT-SPACES <LOWCORE SCRH>>
-		<CURSET 1 1>
-		<TELL "  "><D-J ,HERE>)>
+		;<CURSET 1 1>		;"Erase old desc."
+		;<ERASE 1>	;<PRINT-SPACES <LOWCORE SCRH>>)>
+     <CURSET 1 1>		;"Erase old desc."
+	 <ERASE 1>	;<PRINT-SPACES <LOWCORE SCRH>>
+     <CURSET 1 1>
+	 <TELL "  "><D-J ,HERE>
 	 <CURSET 1 <- <LOWCORE SCRH>
 	 		      <+ ,SCORE-TEXT
-		       		 <+ <COND (,SCOREMAD 6) (ELSE <DIGITS ,SCORE>)> <DIGITS ,MOVES>>>>>
+		       		 <+ <COND (<NOT <=? SCOREOUT 32 0>> 6) (ELSE <DIGITS ,SCORE>)> <DIGITS ,MOVES>>>>>
 	 <TELL "Score: ">
 	 <COND (<AND ,SCOREMAD
 	 			 <NOT <EQUAL? ,SCOREOUT 32>>>
@@ -254,6 +257,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	      (T
 	       <SET D <+ 1 .D>>)>>
    .D>>
+
 
 <DEFAULT-DEFINITION READ-INPUT
  <GLOBAL DEMO-VERSION? <>>
@@ -386,7 +390,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		      <TELL "'s ">)>)
 	      (<NOT <FSET? .OBJ ,NARTICLEBIT>>
 	       <TELL "the ">)>
-	<D-J .OBJ>)>>>
+	<;TELL D-J .OBJ>)>>>
 
 <DEFAULT-DEFINITION TELL-CTHE
 <DEFINE TELL-CTHE (OBJ "AUX" TMP)
@@ -397,8 +401,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <COND (<EQUAL? .TMP ,PLAYER>
 		      <TELL "Your ">)
 		     (<NOT <EQUAL? .TMP .OBJ>>
-		      ;<TELL-CTHE .TMP ;T>
-			  <THE-J .TMP T T>
+		      <TELL-CTHE .TMP ;T>
 		      <TELL "'s ">)>)
 	      (<NOT <FSET? .OBJ ,NARTICLEBIT>>
 	       <TELL "The ">)>
@@ -455,7 +458,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		     <WORD-TYPE? .WD .TYP2>>
 		<RETURN .WD>)>
 	 <COND (<AND <EQUAL? .TYP ,P-COMMA-CODE>
-		     <EQUAL? .WD ,W?COMMA ,W?AND>>
+		     <EQUAL? .WD ,W?COMMA ,W?AND ,W?&>>
 		<RETURN .WD .ACT>)>
 	 <COND (<SET GC <INTBL? .TYP <ZREST ,P-CODE-TABLE 2> <ZGET ,P-CODE-TABLE 0>>>
 		<SET GC <ZGET .GC 1>>)
@@ -500,14 +503,11 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	  <COND (<WORD-TYPE? <ZGET ,TLEXV ,P-LEXELEN> ,P-EOI-CODE ,P-COMMA-CODE>
 		 .LEN)>)
 	 (T
-	  <COND (<EQUAL? <SET WCNUM <ZGET ,TLEXV ,P-LEXELEN>> ,W?COMMA ,W?AND>
+	  <COND (<EQUAL? <SET WCNUM <ZGET ,TLEXV ,P-LEXELEN>> ,W?COMMA ,W?AND ,W?&>
 		 <RETURN .LEN .ACT>)>
 	  <SET WCNUM <WORD-CLASSIFICATION-NUMBER .WCNUM>>
 	  <COND (<COMPARE-WORD-TYPES .WCNUM <GET-CLASSIFICATION END-OF-INPUT>>
 		 .LEN)>)>>
-
-<GLOBAL SCREAMING-ACTION <>>
-<GLOBAL CAREFUL-ACTION <>>
 
 <DEFINE PARSER PARSER ("AUX" OWINNER LEN N)
 	<COND (T ;<F? ,P-OFLAG>
@@ -520,7 +520,6 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<SETG ERROR-PRIORITY 255>
 	<SETG ERROR-STRING <>>
 	<SET OWINNER ,WINNER>
-	<SETG DONT-FLAG <>>
 	;<SETG P-WON <>>
 	<COND ;(<NOT <F? ,M-PTR>>
 	       <PARSER-M>)
@@ -533,8 +532,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <SETG WINNER ,PLAYER>
 	       <COND (<AND <ZERO? ,P-OFLAG>
 			   <ZERO? <ZGET ,OOPS-TABLE ,O-PTR>>>
-		      <ZPUT ,OOPS-TABLE ,O-END <>>
-			  ;<SETG DONT-FLAG .DONT>)>
+		      <ZPUT ,OOPS-TABLE ,O-END <>>)>
 	       <COND (<IN? <LOC ,WINNER> ,ROOMS>
 		      ;<NOT <FSET? <LOC ,WINNER> ,VEHBIT>>
 		      <SETG HERE <LOC ,WINNER>>)>
@@ -550,9 +548,11 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <COND (<BTST <LOWCORE FLAGS> ,F-REFRESH ;4>
 		      <V-$REFRESH>)>
 	       <COND (<NOT <0? ,VERBOSITY>> <CRLF>)>
-	       <COND (T ;<OR <CHECK-EXTENDED? XZIP>
-			     <CHECK-EXTENDED? YZIP>>
-		      <UPDATE-STATUS-LINE>)>
+	       ;"<COND <IF-P-QUOTES
+                 (,DO-WINDOW
+              <CREATE-WINDOW ,DO-WINDOW>)>
+                 (ELSE"
+		      <UPDATE-STATUS-LINE>;")>"
 	       <READ-INPUT>
 	       <COND (<AND <SET LEN <GETB ,P-LEXV ,P-LEXWORDS>>
 			   <SET N <INTBL? ,W?QUOTE
@@ -574,8 +574,6 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <SETG TLEXV <ZREST ,TLEXV <* 2 ,P-LEXELEN>>>;"If so, ignore it."
 	       <SETG P-LEN <- ,P-LEN 1>>)>
 	<COND (<EQUAL? <ZGET ,TLEXV 0> ,W?YOU>
-	       <IGNORE-FIRST-WORD ;,W?YOU>)>
-    <COND (<EQUAL? <ZGET ,TLEXV 0> ,W?MY>
 	       <IGNORE-FIRST-WORD ;,W?YOU>)>
 	<COND (<EQUAL? <ZGET ,TLEXV 0> ,W?GO ,W?TO>
 	       <IGNORE-FIRST-WORD ;,W?GO ;,W?TO>)>
@@ -622,11 +620,6 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		 <L? ,P-CONT 1>>
 	    <ZPUT ,OOPS-TABLE ,O-END <>>)>
 	  <SETG P-CONT <>>
-	  <COND (<OR <EQUAL? .LEN ,W?DON\'T ,W?DONT>
-	  			 <EQUAL? <ZGET ,TLEXV 0> ,W?DON\'T ,W?DONT>>
-			 <SETG DONT-FLAG T>
-			 ;<DONT-F>
-			 ;<TELL "Dont = True."CR>)>
 	  <COND (<EQUAL? <ZGET ,TLEXV 0> ,W?AGAIN ,W?G>
 		 <COND (<NOT <DO-AGAIN .OWINNER>>
 			<RETURN <> .PARSER>)>)
@@ -658,13 +651,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	    <SETG PRSA <PARSE-ACTION .PV>> ;"SWG 30-Mar-89"
 	    <COND (<NOT <GAME-VERB?>>
 		   <SETG P-OFLAG 0>)>
-		<COND (,DONT-FLAG
-			   <DONT-F>
-			   ;<RETURN T .PARSER>
-			   <RETURN <> .PARSER>)>
 	    <IF-P-PS-ADV
-        <SETG CAREFUL-ACTION <>>
-        <SETG SCREAMING-ACTION <>>
 	    <COND (<AND <EQUAL? <SET LEN <PARSE-ADV .PV>> ,W?TWICE ,W?THRICE>
 			<SET N <INTBL? .LEN
 				       <ZGET ,OOPS-TABLE ,O-START>
@@ -673,38 +660,26 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		   <CHANGE-LEXV .N ,W?ONCE>	;"to avoid repeating"
 		   <DO-IT-AGAIN <COND (<EQUAL? .LEN ,W?THRICE> 2) (T 1)>>
 		   <SET PV <PARSE-IT <>>>
-		   <AGAIN>)
-              (<AND <EQUAL? <SET LEN <PARSE-ADV .PV>> ,W?CAREFULLY ,W?SCREAMING>
-			<SET N <INTBL? .LEN
-				       <ZGET ,OOPS-TABLE ,O-START>
-				       ,P-WORDS-AGAIN
-				       *204*>>>
-           <CHANGE-LEXV .N ,W?ONCE>	;"to avoid... I dunno, I didn't make this!"
-		   <COND (<EQUAL? .N ,W?CAREFULLY>
-                  <SETG CAREFUL-ACTION T>)
-                 (ELSE
-                  <SETG SCREAMING-ACTION T>)>
-		   <SET PV <PARSE-IT <>>>
-           <AGAIN>)>
-	    <IF-P-ZORK0
+		   <AGAIN>)>
 	    <COND (<EQUAL? .LEN ,W?DON\'T ,W?DONT>
-		   <COND (<EQUAL? ,WINNER ,EXECUTIONER>
-			  <PRINT
-"\"Tell me what you want me to do, not what you don't.\"">)
-			 (T
-			  <PRINT "[Not done.]">)>
+		   <COND <IF-P-ZORK0 
+                 (<EQUAL? ,WINNER ,EXECUTIONER>
+			     <PRINT
+"\"Tell me what you want me to do, not what you don't.\"">)>
+			    (T
+			     <DONT-F>)>
 		   <CRLF>
-		   <RETURN <> .PARSER>)>>>
+		   <RETURN <> .PARSER>)>>
 	    <COND (<T? <ZGET ,GWIM-MSG 1>>
 		   <TELL-GWIM-MSG>
 		   <ZPUT ,GWIM-MSG 1 0>)>
-	    <COND (<T? <ZGET ,GWIM-MSG 2>>
-		   <TELL "[\"">
-		   <NP-PRINT <ZGET ,GWIM-MSG 2>> ;"e.g. SOUTH DOOR"
-		   <TELL "\" meaning ">
-		   ;<TELL-THE <ZGET ,GWIM-MSG 3>>
-		   <THE-J <ZGET ,GWIM-MSG 1> T>
-		   <TELL "]|">
+        <COND (<T? <ZGET ,GWIM-MSG 2>>
+		   <IF-P-OBVIOUS
+               <TELL "[\"">
+		       <NP-PRINT <ZGET ,GWIM-MSG 2>> ;"e.g. SOUTH DOOR"
+		       <TELL "\" meaning ">
+		       <TELL-THE <ZGET ,GWIM-MSG 3>>
+		       <TELL "]|">>
 		   <ZPUT ,GWIM-MSG 2 0>)>
 	    <RETURN T .PARSER>)>>>
 
@@ -714,7 +689,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	  ;(L <GETB ,P-LEXV ,P-LEXWORDS>))
 	<COND (<DLESS? L 0>
 	       <RETURN>)
-	      ;(<AND <TITLE-ABBR? <ZGET .PTR 0>>
+	      (<AND <TITLE-ABBR? <ZGET .PTR 0>>
 		    <EQUAL? ,W?PERIOD <ZGET .PTR ,LEXV-ELEMENT-SIZE>>
 		    <CAPITAL-NOUN? <ZGET .PTR <* 2 ,LEXV-ELEMENT-SIZE>>>>
 	       <ZPUT .PTR ,LEXV-ELEMENT-SIZE ,W?NO.WORD>
@@ -726,14 +701,15 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <DEFAULT-DEFINITION GAME-VERB?
 <CONSTANT GAME-VERB-TABLE
- <LTABLE V?BRIEF V?QUIT V?RESTART V?RESTORE
-	 V?SAVE V?SCORE V?SCRIPT V?SUPER-BRIEF
-	 V?TELL V?UNSCRIPT V?VERBOSE V?VERSION V?$VERIFY>>
+ <LTABLE V?BRIEF V?QUIT V?RESTART V?RESTORE V?UNDO
+	     V?SAVE V?SCORE V?SCRIPT V?SUPER-BRIEF V?FOOTNOTE
+	     V?TELL V?UNSCRIPT V?VERBOSE V?VERSION V?$VERIFY
+         V?HELP V?HINTS-ON V?HINTS-NO>>
 
 <DEFINE GAME-VERB? ()
  <COND (<INTBL? ,PRSA <ZREST ,GAME-VERB-TABLE 2> <ZGET ,GAME-VERB-TABLE 0>>
 	<RTRUE>)>
- <COND (<VERB? ;$RANDOM $COMMAND $RECORD $UNRECORD>
+ ;<COND (<VERB? $RANDOM $COMMAND $RECORD $UNRECORD>
 	<RTRUE>)>>>
 
 <DEFINE RED-SD ("OPT" N:FIX TYP:FIX "AUX" V SYN)
@@ -1169,8 +1145,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 				 <PRINTC !\ >
 				 <P-P <PEEK-PSTACK ,DATA-STACK .N>>>)>>
 		<COND (<NOT <0? <SET RES <REDUCTION-SIZE .REDUCTION>>>>
-				;(Replace FSTACK with PSTACK defined FLUSH) 
-		       <FLUSH-PSTACK ,STATE-STACK .RES>
+		       ;<FSTACK .RES ,STATE-STACK>
+               <FLUSH-PSTACK ,STATE-STACK .RES>
 		       ;<REPEAT ((N .RES))
 			       <COND (<DLESS? N 0>
 				      <RETURN>)>
@@ -1265,12 +1241,12 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		    <T? ,P-RESPONDED>>
 	       <SETG P-RESPONDED 0>
 	       <BUFOUT T>
-	       <TELL "]" CR>)>)
+	       ;<TELL "]" CR>)>)
        (<ZERO? <MOD .NUM .LIM>>
 	<COND (<EQUAL? .NUM .LIM>
 	       <SETG P-RESPONDED .LIM>
 	       ;<BUFOUT <>>
-	       <TELL "[Please be patient...">)
+	       ;<TELL "[Please be patient...">)
 	      (<T? ,P-RESPONDED>
 	       <TELL ".">)>
 	<BUFOUT <>>		;"for Apple")>>>
@@ -1283,7 +1259,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <DEFAULT-DEFINITION DIR-VERB?
 	<DEFMAC DIR-VERB? () '<VERB? WALK>>>
 
-<DEFINE MAIN-LOOP-1 ACT ("AUX" ICNT OCNT NUM (OBJ <>) V OBJ1 (NP <>) NP1 XX)
+<DEFINE MAIN-LOOP-1 ACT ("AUX" NCNT ICNT OCNT NUM (OBJ <>) V OBJ1 OBJ3 (NP <>) NP1 NP3 XX)
    <COND (<SETG P-WON <PARSER>>
 	  <IFN-P-BE-VERB <COND (<L? <SETG P-ERRS <- ,P-ERRS 1>> 0>
 				<SETG P-ERRS 0>)>>
@@ -1294,6 +1270,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		       <IF-P-BE-VERB
 			<SETG PRSS <>>
 			<SETG PRSQ <>>>
+               <IF-P-THIRD-PART
+            <SETG PRSN <>>>
 		       <RETURN <PERFORM ,PRSA> .ACT>)
 		      (T
 		       <SETG P-CAN-UNDO <ISAVE>>
@@ -1307,6 +1285,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			      <RETURN <> .ACT>)>)>>
 	    <SETG P-PRSO <PARSE-OBJ1 ,PARSE-RESULT>>
 	    <SETG P-PRSI <PARSE-OBJ2 ,PARSE-RESULT>>
+        <IF-P-THIRD-PART <SETG P-PRSN <PARSE-OBJ3 ,PARSE-RESULT>>>
 	    <COND (<AND ,P-PRSO
 			<==? ,INTDIR <NOUN-PHRASE-OBJ1 ,P-PRSO>>>
 		   <SETG P-DIRECTION
@@ -1316,12 +1295,24 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			<==? ,INTDIR <NOUN-PHRASE-OBJ1 ,P-PRSI>>>
 		   <SETG P-DIRECTION
 			 <WORD-DIR-ID
-			  <NP-NAME <NOUN-PHRASE-NP1 ,P-PRSI>>>>)>
+			  <NP-NAME <NOUN-PHRASE-NP1 ,P-PRSI>>>>)
+         <IF-P-THIRD-PART
+          (<AND ,P-PRSN
+			<==? ,INTDIR <NOUN-PHRASE-OBJ1 ,P-PRSN>>>
+		   <SETG P-DIRECTION
+			 <WORD-DIR-ID
+			  <NP-NAME <NOUN-PHRASE-NP1 ,P-PRSN>>>>)>>
 	    <SETG P-PRSA-WORD <PARSE-VERB ,PARSE-RESULT>>
 	    <SETG CLOCK-WAIT <>>
-	    <SET ICNT 0>
+	    <IF-P-THIRD-PART <SET NCNT 0>>
+        <SET ICNT 0>
 	    <SET OCNT 0>
-	    <COND (,P-PRSI
+	    <IF-P-THIRD-PART
+         <COND (,P-PRSN
+		   <SET NCNT <NOUN-PHRASE-COUNT ,P-PRSN>>
+		   <COND (<NOT <0? .NCNT>>
+			  <SETG P-MULT .NCNT>)>)>>
+        <COND (,P-PRSI
 		   <SET ICNT <NOUN-PHRASE-COUNT ,P-PRSI>>
 		   <COND (<NOT <0? .ICNT>>
 			  <SETG P-MULT .ICNT>)>)>
@@ -1329,33 +1320,67 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		   <SET OCNT <NOUN-PHRASE-COUNT ,P-PRSO>>
 		   <COND (<NOT <0? .OCNT>> ;<NP-MULTI? ,P-PRSO>
 			  <SETG P-MULT .OCNT>)>)>
-	    <COND (<AND <ZERO? .OCNT> <ZERO? .ICNT>>
+	    <COND (<AND <ZERO? .OCNT> <ZERO? .ICNT> <ZERO? .NCNT>>
 		   T)
 		  (<AND <NOT <DIR-VERB?>>	;"? Is this necessary?"
 			<T? ,P-IT-OBJECT>>
-		   <COND (<T? .ICNT>
+		   <IF-P-THIRD-PART
+            <COND (<T? .NCNT>
+			  <MAIN-LOOP-IT .NCNT ,P-PRSN>)>>
+           <COND (<T? .ICNT>
 			  <MAIN-LOOP-IT .ICNT ,P-PRSI>)>
 		   <COND (<T? .OCNT>
 			  <MAIN-LOOP-IT .OCNT ,P-PRSO>)>)>
 	    <SET NUM
 		 <COND (<0? .OCNT> .OCNT)
 		       (<G? .OCNT 1>
-			<COND (<0? .ICNT> <SET OBJ <>>)
+			<COND (<0? .ICNT>
+                   <SET OBJ <>>
+                   <IF-P-THIRD-PART
+                    <COND (<0? .NCNT>
+                          <SET OBJ3 <>>)
+                          (T
+                          <IF-P-THIRD-PART
+                           <SET OBJ3 <OR <NOUN-PHRASE-OBJ1 ,P-PRSN>
+					               ;,NOT-HERE-OBJECT>>
+			               <SET NP3 <NOUN-PHRASE-NP1 ,P-PRSN>>>)>>)
 			      (T
 			       <SET OBJ <OR <NOUN-PHRASE-OBJ1 ,P-PRSI>
 					    ;,NOT-HERE-OBJECT>>
-			       <SET NP <NOUN-PHRASE-NP1 ,P-PRSI>>)>
+                   <SET NP <NOUN-PHRASE-NP1 ,P-PRSI>>
+                   <IF-P-THIRD-PART
+                    <SET OBJ3 <OR <NOUN-PHRASE-OBJ1 ,P-PRSN>
+					     ;,NOT-HERE-OBJECT>>
+			        <SET NP3 <NOUN-PHRASE-NP1 ,P-PRSN>>>)>
 			.OCNT)
 		       (<G? .ICNT 1>
 			<SET OBJ <OR <NOUN-PHRASE-OBJ1 ,P-PRSO>
 				     ;,NOT-HERE-OBJECT>>
 			<SET NP <NOUN-PHRASE-NP1 ,P-PRSI>>
-			.ICNT)
+			<IF-P-THIRD-PART
+             <COND (<0? .NCNT>
+                    <SET OBJ3 <>>)
+                   (T
+                    <SET OBJ3 <OR <NOUN-PHRASE-OBJ1 ,P-PRSN>
+			             ;,NOT-HERE-OBJECT>>
+			        <SET NP3 <NOUN-PHRASE-NP1 ,P-PRSN>>)>>
+            .ICNT)
+              <IF-P-THIRD-PART
+               (<G? .NCNT 1>
+			<SET OBJ3 <OR <NOUN-PHRASE-OBJ1 ,P-PRSN>
+				     ;,NOT-HERE-OBJECT>>
+			<SET NP3 <NOUN-PHRASE-NP1 ,P-PRSN>>
+            .NCNT)>
 		       (T 1)>>
 	    <COND (<AND <ZERO? .OBJ> <1? .ICNT>>
 		   <SET OBJ <OR <NOUN-PHRASE-OBJ1 ,P-PRSI>
 				;,NOT-HERE-OBJECT>>
 		   <SET NP <NOUN-PHRASE-NP1 ,P-PRSI>>)>
+        <IF-P-THIRD-PART
+         <COND (<AND <ZERO? .OBJ3> <1? .NCNT>>
+		   <SET OBJ3 <OR <NOUN-PHRASE-OBJ1 ,P-PRSN>
+				;,NOT-HERE-OBJECT>>
+		   <SET NP3 <NOUN-PHRASE-NP1 ,P-PRSN>>)>>
 	    <COND (<AND <SET V <PARSE-CHOMPER ,PARSE-RESULT>>
 			<L? 1 <NOUN-PHRASE-COUNT .V>>
 			<ZERO? <NOUN-PHRASE-FLAGS .V>>
@@ -1372,7 +1397,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			      (T
 			       <SETG PRSS <>>)>
 			;<SET V <PERFORM ,PRSA ,PRSO ,PRSI ;.PI ;.V ;.XX>>>
-	    <COND (<AND <ZERO? ,LIT>
+	    <COND ;(<AND <ZERO? ,LIT>
 			<SEE-VERB?>>
 		   <TELL-TOO-DARK>
 		   <SETG P-CONT -1>
@@ -1396,81 +1421,151 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 				  <MORE-SPECIFIC>)>
 			   <RETURN>)>
 		    <SET XX <+ ,NOUN-PHRASE-HEADER-LEN <* .CNT 2>>>
-		    <COND (<NOT <G? .ICNT 1>>
+		    
+
+            ;"If P-THIRD-PART: nums3 = always PRSN."
+            ;"nums1 = PRSO if PRSI is there; otherwise nums1 = PRSI."
+            ;"numsNull would then do vice versa."
+
+            <IF-P-THIRD-PART
+             <COND (<NOT <0? .NCNT>>
+                    <SET OBJ3 <ZGET ,P-PRSN .XX>>
+                    <SET NP3 <ZGET ,P-PRSN <+ .XX 1>>>)>>
+            <COND (<NOT <G? .ICNT 1>>
 			   <SET OBJ1 <ZGET ,P-PRSO .XX>>
 			   <SET NP1 <ZGET ,P-PRSO <+ 1 .XX>>>)
 			  (T
 			   <SET OBJ1 <ZGET ,P-PRSI .XX>>
 			   <SET NP1 <ZGET ,P-PRSI <+ 1 .XX>>>)>
-		    <COND (<OR <G? .NUM 1>
+		    
+            <COND (<OR <G? .NUM 1>
 			       <==? <NP-QUANT .NP1> ,NP-QUANT-ALL>>
-			   <COND (<NOT <PERF-MANY .OBJ1 .OBJ .NP1 ": ">> ;ABCDEFJHIJ...
-				  <AGAIN>)>)>
-		    <SET TMP T>
+			   <COND (<NOT <PERF-MANY .OBJ1 .OBJ .NP1 ": ">>
+				  <AGAIN>)>)> ;"No need to change this - just no MANY flags on third objects!"
+		    
+            <SET TMP T>
 		    <COND (<NOT <G? .ICNT 1>>
 			   <SETG PRSO .OBJ1>
 			   <SETG PRSO-NP .NP1>
 			   <SETG PRSI ;PI .OBJ>
-			   <SETG PRSI-NP .NP>)
+			   <SETG PRSI-NP .NP>
+               ;<IF-P-THIRD-PART
+                 ;<TELL "|CHECKPOINT 1|">
+                 <SETG PRSN .OBJ3>
+                 <SETG PRSN-NP .NP3>
+                 ;<TELL "|CHECKPOINT 2|">>)
 			  (T
 			   <SETG PRSO .OBJ>
 			   <SETG PRSO-NP .NP>
 			   <SETG PRSI ;PI .OBJ1>
-			   <SETG PRSI-NP .NP1>)>
-		    <COND (<AND <IFFLAG (P-BE-VERB
+			   <SETG PRSI-NP .NP1>
+               ;<IF-P-THIRD-PART
+                 ;<TELL "|CHECKPOINT 3|">
+                 <SETG PRSN .OBJ3>
+                 <SETG PRSN-NP .NP3>
+                 ;<TELL "|CHECKPOINT 4|">>)>
+            <IF-P-THIRD-PART
+             <COND (<NOT <0? .NCNT>>
+                    <SETG PRSN .OBJ3>
+                    <SETG PRSN-NP .NP3>)>>
+		    
+            <COND (<AND <IFFLAG (P-BE-VERB
 					 <EQUAL? ,IT ,PRSI ,PRSO ,PRSS>)
-					(T
+					(P-THIRD-PART
+					 <EQUAL? ,IT ,PRSI ,PRSO ,PRSN>)
+                    (T
 					 <EQUAL? ,IT ,PRSI ,PRSO>)>
-				<NOT <FIX-HIM-HER-IT ,IT ,P-IT-OBJECT>>>
-			   <AGAIN>)>
+				;<TELL "|CHECKPOINT 5|">
+                <NOT <FIX-HIM-HER-IT ,IT ,P-IT-OBJECT>>>
+			   ;<TELL "|CHECKPOINT 6|">
+               <AGAIN>)>
 		    <COND (<AND <IFFLAG (P-BE-VERB
 					 <EQUAL? ,HER ,PRSI ,PRSO ,PRSS>)
-					(T
+					(P-THIRD-PART
+					 <EQUAL? ,HER ,PRSI ,PRSO ,PRSN>)
+                    (T
 					 <EQUAL? ,HER ,PRSI ,PRSO>)>
 				<NOT <FIX-HIM-HER-IT ,HER ,P-HER-OBJECT>>>
 			   <AGAIN>)>
 		    <COND (<AND <IFFLAG (P-BE-VERB
 					 <EQUAL? ,HIM ,PRSI ,PRSO ,PRSS>)
-					(T
+					(P-THIRD-PART
+					 <EQUAL? ,HIM ,PRSI ,PRSO ,PRSN>)
+                    (T
 					 <EQUAL? ,HIM ,PRSI ,PRSO>)>
 				<NOT <FIX-HIM-HER-IT ,HIM ,P-HIM-OBJECT>>>
 			   <AGAIN>)>
 		    <COND (<AND <IFFLAG (P-BE-VERB
 					 <EQUAL? ,THEM ,PRSI ,PRSO ,PRSS>)
-					(T
+					(P-THIRD-PART
+					 <EQUAL? ,THEM ,PRSI ,PRSO ,PRSN>)
+                    (T
 					 <EQUAL? ,THEM ,PRSI ,PRSO>)>
 				<NOT <FIX-HIM-HER-IT ,THEM ,P-THEM-OBJECT>>>
 			   <AGAIN>)>
 		    <QCONTEXT-CHECK ,PRSO>
 		    <COND (<T? ,PRSO>
-			   <SET XX <SYNTAX-SEARCH <PARSE-SYNTAX ,PARSE-RESULT> 1>>
-			   <IFN-P-ZORK0
+			   ;<TELL "|CHECKPOINT 7|">
+               <SET XX <SYNTAX-SEARCH <PARSE-SYNTAX ,PARSE-RESULT> 1>>
+			   ;<TELL "|CHECKPOINT 8|">
+               ;<IFN-P-ZORK0
 			    <COND (<TEST-ADJACENT ,PRSO .XX> ;"Could be ADJACENT room."
 				   <NOT-HERE ,PRSO>
 				   <AGAIN>)>>
-			   <COND (<AND <BAND .XX<BOR ,SEARCH-MUST-HAVE ,SEARCH-DO-TAKE>>
+			   <COND (<AND <BAND .XX <BOR ,SEARCH-MUST-HAVE ,SEARCH-DO-TAKE>>
 				       <NOT <BAND ,SEARCH-MOBY .XX>>>
-				  <SET V <ITAKE-CHECK ,PRSO .XX>>
-				  <COND (<OR <EQUAL? ,M-FATAL .V>
+				  ;<TELL "|CHECKPOINT 9|">
+                  <SET V <ITAKE-CHECK ,PRSO .XX>>
+				  ;<TELL "|CHECKPOINT 10|">
+                  <COND (<OR <EQUAL? ,M-FATAL .V>
 					     ;<EQUAL? ,P-CONT -1>>
 					 <RETURN>)
 					(<T? .V>
 					 <AGAIN>)>)>)>
 		    <COND (<T? ,PRSI ;.PI>
-			   <SET XX <SYNTAX-SEARCH <PARSE-SYNTAX ,PARSE-RESULT> 2>>
-			   <IFN-P-ZORK0
+			   ;<TELL "|CHECKPOINT 11|">
+               <SET XX <SYNTAX-SEARCH <PARSE-SYNTAX ,PARSE-RESULT> 2>>
+			   ;<TELL "|CHECKPOINT 12|">
+               ;<IFN-P-ZORK0
 			    <COND (<TEST-ADJACENT ,PRSI .XX> ;"Could be ADJACENT room."
 				   <NOT-HERE ,PRSI>
 				   <AGAIN>)>>
-			   <COND (<AND <BAND .XX<BOR ,SEARCH-MUST-HAVE ,SEARCH-DO-TAKE>>
+			   <COND (<AND <BAND .XX <BOR ,SEARCH-MUST-HAVE ,SEARCH-DO-TAKE>>
 				       <NOT <BAND .XX ,SEARCH-MOBY>>>
-				  <SET V <ITAKE-CHECK ,PRSI ;.PI .XX>>
-				  <COND (<OR <EQUAL? ,M-FATAL .V>
+				  ;;<TELL "|CHECKPOINT 13|">
+                  <SET V <ITAKE-CHECK ,PRSI ;.PI .XX>>
+				  ;;<TELL "|CHECKPOINT 14|">
+                  <COND (<OR <EQUAL? ,M-FATAL .V>
 					     ;<EQUAL? ,P-CONT -1>>
 					 <RETURN>)
 					(<T? .V>
 					 <AGAIN>)>)>)>
-		    <SET V <PERFORM ,PRSA ,PRSO ,PRSI ;.PI>>
+            <IF-P-THIRD-PART
+             <COND (<AND <T? ,PRSN ;.PI>
+                     ;<NOT <L? ,PRSN 0>>
+                     ;<OBJECT? ,PRSN>>
+               <SET XX <SYNTAX-SEARCH <PARSE-SYNTAX ,PARSE-RESULT> 3>>
+			   ;<TELL "|CHECKPOINT 16|">
+               ;<IFN-P-ZORK0
+			    <COND (<TEST-ADJACENT ,PRSN .XX> ;"Could be ADJACENT room."
+				   <NOT-HERE ,PRSN>
+				   <AGAIN>)>>
+			   ;<TELL "|CHECKPOINT 16.5|">
+               <COND (<AND <BAND .XX <BOR ,SEARCH-MUST-HAVE ,SEARCH-DO-TAKE>>
+				       <NOT <BAND .XX ,SEARCH-MOBY>>>
+				  ;<TELL "|CHECKPOINT 17|">
+                  <SET V <ITAKE-CHECK ,PRSN ;.PI .XX>>
+				  ;<TELL "|CHECKPOINT 18|">
+                  <COND (<OR <EQUAL? ,M-FATAL .V>
+					     ;<EQUAL? ,P-CONT -1>>
+					 <RETURN>)
+					(<T? .V>
+					 <AGAIN>)>)>)>>
+		    <IFFLAG 
+             (P-THIRD-PART
+              <SET V <PERFORM ,PRSA ,PRSO ,PRSI ,PRSN ;.PI>>)
+             (ELSE
+              <SET V <PERFORM ,PRSA ,PRSO ,PRSI ;.PI>>)>
 		    <COND (<OR <EQUAL? ,M-FATAL .V>
 			       <EQUAL? ,P-CONT -1>>	;"per SEM 16-Feb-88"
 			   <RETURN>)>>)>
@@ -1527,10 +1622,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
    <SETG PRSI ;"PI" <>>>
 
 
-
-
 <GLOBAL FIRST-BUFFER <ITABLE BYTE 100>>
-
 ;<GLOBAL MRKUG-BUFFER <ITABLE BYTE 100>>
 
 <ROUTINE SAVE-INPUT (TBL "AUX" (OFFS 0) CNT TMP)
@@ -1558,9 +1650,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			<SET TBL <REST .TBL>>)>>>
 
 
-
-
-<DEFINE PERF-MANY (OBJ1 OBJ NP1 STR ;"AUX" ;OTH)
+<DEFINE PERF-MANY (OBJ1 OBJ NP1 STR)
    <COND (<EQUAL? .OBJ1 <> ,NOT-HERE-OBJECT>
 	  ;<SET X <+ .X 1>>
 	  <NP-PRINT .NP1>
@@ -1576,12 +1666,10 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	  <RFALSE>)
 	 (T
 	  <COND (<EQUAL? .OBJ1 ,IT>	;"? others?"
-		 ;<TELL D ,P-IT-OBJECT>
 		 <D-J ,P-IT-OBJECT>)
 		(<EQUAL? .OBJ1 ,PSEUDO-OBJECT>
 		 <NP-PRINT .NP1>)
-		(T ;<TELL D .OBJ1>
-		 <D-J .OBJ1>)>
+		(T <D-J .OBJ1>)>
 	  <TELL .STR>
 	  T)>>
 
@@ -1598,9 +1686,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <DEFAULT-DEFINITION QCONTEXT-CHECK
 <DEFINE QCONTEXT-CHECK (PER "AUX" (WHO <>))
-	 <COND (<OR ;<IFFLAG (P-BE-VERB <VERB? BE ;FIND ;HELP>) (T <>)>
-		    <AND <VERB? SHOW TELL-ABOUT>
-			 <EQUAL? .PER ,PLAYER>>> ;"? more?"
+	 <COND (<AND <VERB? SHOW TELL-ABOUT>
+			 <EQUAL? .PER ,PLAYER>> ;"? more?"
 		<COND (<SET WHO <FIND-A-WINNER ,HERE>>
 		       <SETG QCONTEXT .WHO>)>
 		<COND (<AND <QCONTEXT-GOOD?>
@@ -1671,26 +1758,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <SET QFLAG T>
 	       <SET X <+ ,LEXV-ELEMENT-SIZE </ <- .PTR ,P-LEXV> 2>>>
 	       <MAKE-ROOM-FOR-TOKENS 1 ,P-LEXV .X>
-	       <COND ;(<EQUAL? <GET ,P-LEXV .X> ,W?MRKUG ,W?MRIUG ,W?MRIVG>
-                  <COND (<EQUAL? <GET ,P-LEXV .X> ,W?MRKUG>
-                         <PUTP ,MRKUG-OBJECT ,P?SDESC "Mrkug">)
-                        (<EQUAL? <GET ,P-LEXV .X> ,W?MRIUG>
-                         <PUTP ,MRKUG-OBJECT ,P?SDESC "Mriug">)
-                        (<EQUAL? <GET ,P-LEXV .X> ,W?MRIVG>
-                         <PUTP ,MRKUG-OBJECT ,P?SDESC "Mrivg">)>
-                  <ZPUT ,P-LEXV .X ,W?NO.WORD>
-                  <COND (<DOBJ? INTQUOTE>
-                         <SETG PRSO ,MRKUG-OBJECT>)>
-                  ;<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: replace....]|">)>>
-                  <RTRUE>)
-                 ;(<EQUAL? <GET ,P-LEXV .X> ,W?HELLO ,W?HI ,W?HEY ,W?GREETINGS ,W?HOWDY>
-                  <ZPUT ,P-LEXV .X ,W?NO.WORD>
-                  <COND (<DOBJ? INTQUOTE>
-                         <SETG PRSO ,HELLO-OBJECT>)>
-                  ;<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: replace....]|">)>>
-                  <RTRUE>)
-                 (ELSE
-                  <ZPUT ,P-LEXV .X ,W?NO.WORD>)>)
+	       <ZPUT ,P-LEXV .X ,W?NO.WORD>)
 	      (T
 	       <SET QFLAG <>>)>
 	<SET PTR <+ .PTR ,LEXV-ELEMENT-SIZE-BYTES>>
@@ -1714,35 +1782,41 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <DEFAULT-DEFINITION P-NO-MEM-ROUTINE
 <DEFINE P-NO-MEM-ROUTINE ("OPT" (TYP 0))
-	<PRINTI "Sorry, but that">
+	<PRINTI "[Sorry, but that">
 	<COND (<EQUAL? .TYP 7 ;OBJLIST>
 	       <PRINTI "'s too many objects">)
 	      (T
 	       <PRINTI " sentence is too complicated">)>
-	<PRINTI ".|">
+	<PRINTI ".]|">
 	<THROW ,PARSER-RESULT-DEAD ,PARSE-SENTENCE-ACTIVATION>>>
 
 <DEFAULT-DEFINITION BEG-PARDON
-	<DEFINE BEG-PARDON () <TELL "I beg your pardon?" CR>>>
+	<DEFINE BEG-PARDON () <TELL "[I beg your pardon?]" CR>>>
 
 <CONSTANT DUNNO-GUYS
 	<PTABLE "I don't know the word" ""
 			"You may know what" " means, but I don't"
-			"I guess I'll have to learn what" " means. But for now, I don't"
 			"You don't need to use the word" " to complete the game"
 			"The word" " isn't in the vocabulary that you can use with me"
+            "I guess I'll have to learn what" " means. But for now, I don't"
 			"I'm just a stupid computer. Please enlighten me with what" " means. No, actually, don't">>
+
+<GLOBAL DUNNO-GUYS-COUNTER 0>
 
 <DEFAULT-DEFINITION UNKNOWN-WORD
 <DEFINE UNKNOWN-WORD (RLEXV "AUX" X CH)
   <COND (<SET X <NUMBER? .RLEXV>>
 	 .X)
 	(T
-	 <SET CH <- <* <RANDOM 6> 2> 2>>
-	 <TELL <GET ,DUNNO-GUYS .CH> " \"">
+	 <SET CH <* ,DUNNO-GUYS-COUNTER 2>>
+     <COND (<=? ,DUNNO-GUYS-COUNTER 5>
+            <SETG DUNNO-GUYS-COUNTER 0>)
+           (ELSE
+            <SETG DUNNO-GUYS-COUNTER <+ ,DUNNO-GUYS-COUNTER 1>>)>
+	 <TELL "[" <GET ,DUNNO-GUYS .CH> " \"">
 	 <ZPUT ,OOPS-TABLE ,O-PTR </ <- .RLEXV ,P-LEXV> 2>>
 	 <WORD-PRINT .RLEXV>
-	 <TELL "\"" <GET ,DUNNO-GUYS <+ .CH 1>> !\. CR>
+	 <TELL "\"" <GET ,DUNNO-GUYS <+ .CH 1>> ".]" CR>
 	 <IFN-P-BE-VERB <COUNT-ERRORS 1>>
 	 <THROW ,PARSER-RESULT-DEAD ,PARSE-SENTENCE-ACTIVATION>)>>>
 
@@ -1755,7 +1829,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	   <SET OFFS <+ .OFFS 1>>)>>>
 
 <IFFLAG (LONG-WORDS
-<DEFINE PRINT-VOCAB-WORD (WD ;"OPT" ;CAP "AUX" TMP)
+<DEFINE PRINT-VOCAB-WORD (WD "AUX" TMP)
 	<COND (<SET TMP <INTBL? .WD <ZREST ,LONG-WORD-TABLE 2>
 				    </ <ZGET ,LONG-WORD-TABLE 0> 2>
 				    *204*>>
@@ -1948,8 +2022,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<IFN-P-BE-VERB <VOC "COULDN">>
 		<IFN-P-BE-VERB <VOC "DIDN">>
 		<IFN-P-BE-VERB <VOC "DOESN">>
-		;<IFN-P-BE-VERB <VOC "DON">>
-		<VOC "DON">
+		<IFN-P-BE-VERB <VOC "DON">>
 		<VOC "HASN">
 		<VOC "HAVEN">
 		<IFN-P-BE-VERB <VOC "HE">>
@@ -1979,8 +2052,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<IFN-P-BE-VERB <VOC "T">>
 		<IFN-P-BE-VERB <VOC "T">>
 		<IFN-P-BE-VERB <VOC "T">>
-		;<IFN-P-BE-VERB <VOC "T">>
-		<VOC "T">
+		<IFN-P-BE-VERB <VOC "T">>
 		<VOC "T">
 		<VOC "T">
 		<IFN-P-BE-VERB <VOC "S">>
@@ -2010,7 +2082,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<IFN-P-BE-VERB <VOC "COULDN\'T">>
 		<IFN-P-BE-VERB <VOC "DIDN\'T">>
 		<IFN-P-BE-VERB <VOC "DOESN\'T">>
-		<IFN-P-BE-VERB <VOC "DON\'T">>
+		;<IFN-P-BE-VERB <VOC "DON\'T">>
 		<VOC "HASN\'T">
 		<VOC "HAVEN\'T">
 		<IFN-P-BE-VERB <VOC "HE\'S">>
@@ -2060,15 +2132,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <CONSTANT P-N-WORDS
 	<PLTABLE <VOC "ZERO">
-		<VOC "ONE">
-        <VOC "TWO">
-        <VOC "THREE">
-        <VOC "FOUR">
-        <VOC "FIVE">
-        <VOC "SIX">
-        <VOC "SEVEN">
-        <VOC "EIGHT">
-		<VOC "NINE">
+		;<VOC "EIGHT">
+		;<VOC "NINE">
 		<VOC "TEN">
 		<VOC "ELEVEN">
 		<VOC "TWELVE">
@@ -2098,7 +2163,6 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<VOC "ASSHOLE">
 		<VOC "BASTARD">
 		<VOC "BITCH">
-		<VOC "BUTTHEAD">
 		<VOC "COCK">
 		<VOC "COCKSUCKER">
 		<VOC "CRAP">
@@ -2119,21 +2183,19 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<VOC "SHIT">
 		<VOC "SHITHEAD">
 		;<VOC "SUCK">
-		;<VOC "SUCKS">>>
+		<VOC "SUCKS">>>
 
 <DEFINE BUZZER-WORD? (WD PTR "AUX" N)
  <IFN-P-BE-VERB
  <SETG P-ERRS <+ 3 ,P-ERRS>>
- <COND (<OR <EQUAL? ,P-PRSA-WORD ,W?FIND> ;"Because I don't make the parser library,"
-            <VERB? FIND>>                 ;"   I have no idea if PRSA is set yet.   "
-        <TELL "Don't just let me do all the work! ">)>
- <COND (<EQUAL? .WD ,W?\(SOMETHIN ,W?SOMETHING>
-	<TELL "Please type a real word instead of" ,P-SOMETHING>
+ <COND (<EQUAL? .WD ,W?\(SOMETHI ,W?SOMETHING>
+	<TELL "[Type a real word instead of" ,P-SOMETHING>
 	<RTRUE>)
        (<INTBL? .WD <ZREST ,P-W-WORDS 2> <ZGET ,P-W-WORDS 0>>
 	<W-WORD-REPLY .WD>
 	<RTRUE>)
-       (<OR <INTBL? .WD <ZREST ,P-Q-WORDS 2> <ZGET ,P-Q-WORDS 0>>
+       (<OR <AND <INTBL? .WD <ZREST ,P-Q-WORDS 2> <ZGET ,P-Q-WORDS 0>>
+                 ;<PRINTB .WD>>
 	    <IFFLAG (P-APOSTROPHE-BREAKS-WORDS
 		     <AND <SET N <INTBL? .WD <ZREST ,P-Q-WORDS1 2>
 					     <ZGET ,P-Q-WORDS1 0>>>
@@ -2142,13 +2204,19 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 				  <ZGET .PTR <* 2 ,P-LEXELEN>>>>)
 		    (T <INTBL? .WD <ZREST ,P-Q-WORDS1 2>
 				   <ZGET ,P-Q-WORDS1 0>>)>>
-	<TELL-PLEASE-USE-COMMANDS>
+    ;<PRINTB .WD>
+    ;<TELL "AHHHHHHH">
+    <COND (<AND <IF-P-THIRD-PART
+                 <NOT <=? <PARSE-ACTION ,PARSE-RESULT>
+                          ,V?PUT-IN ,V?POUR ,V?PUT>>>>
+           <RFALSE>)>
+    <TELL-PLEASE-USE-COMMANDS>
 	<RTRUE>)>>
  <COND (<INTBL? .WD <ZREST ,P-N-WORDS 2> <ZGET ,P-N-WORDS 0>>
-	<TELL "Use numerals for numbers, for example \"10.\"" CR>
+	<TELL "[Use numerals for numbers, for example \"10.\"]" CR>
 	<RTRUE>)
        (<INTBL? .WD <ZREST ,P-C-WORDS 2> <ZGET ,P-C-WORDS 0>>
-	<TELL <PICK-ONE ,OFFENDED> CR>
+	<TELL "[" <PICK-ONE ,OFFENDED> "]" CR>
 	<RTRUE>)
        (T <RFALSE>)>>
 
@@ -2172,12 +2240,12 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <TO-DO-X-USE-Y "ask about" "TELL ME ABOUT">
 	       <RTRUE>)>)
        (T
-	<TELL "Maybe you could ">
-	<COND (<VISIBLE? ,GUIDE>
-	       <TELL "look that up in">)
+	<TELL "[Maybe you could ">
+	<COND ;(<FSET? ,LIBRARY ,TOUCHBIT>
+	       <TELL "look that up in the">)
 	      (T
-	       <TELL "find a copy of">)>
-	<TELL !\ ,GUIDE-NAME ,PAUSES>)>>
+	       <TELL "find an">)>
+	<TELL " encyclopedia.]" CR>)>>
 
 <DEFINE TO-DO-X-USE-Y (STR1 STR2)
 	<TELL
@@ -2185,18 +2253,18 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<RTRUE>>
 
 <CONSTANT P-SOMETHING " (something).]|">
-<VOC "(SOMETHIN">
+<VOC "(SOMETHI">
 <VOC "SOMETHING">
 
 <DEFINE TELL-PLEASE-USE-COMMANDS
 		("AUX" (THRESH 4))
-	;<TELL "[">
+	<TELL "[">
 	;<SETG QUESTION-WORD-COUNT <+ 1 ,QUESTION-WORD-COUNT>>
 	<COND (<L? ,P-ERRS .THRESH>
 	       ;<NOT <ZERO? <MOD ,QUESTION-WORD-COUNT 4>>>
 	       <PRINT "Please use commands">
 	       <TELL ", not statements or questions">
-	       <PRINTR ".";"]">)
+	       <PRINTR ".]">)
 	      (T
 	       <TELL-SAMPLE-COMMANDS>)>>
 >>

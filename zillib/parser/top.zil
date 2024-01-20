@@ -37,13 +37,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <DEFAULT-DEFINITION SIBREAKS
 	<SETG20 SIBREAKS ".,\"!?" ;".,\"'!?">>
 <DEFAULT-DEFINITION OWNERS
-	<CONSTANT OWNERS 
-        <TABLE (PURE LENGTH)
-                PLAYER MARVIN FORD
-				ZAPHOD TRILLIAN
-				HEAD-COOK MORPHER-CAPTAIN
-				FIRST-CLASS-IDIOT ARK-CAPTAIN
-                SLARTY ;CH-DIRK>>>
+	<CONSTANT OWNERS <TABLE (PURE LENGTH) PLAYER>>>
 
 ;<DEFAULT-DEFINITION I-ASSUME-STRING
 	<CONSTANT I-ASSUME "[I assume you mean:">>
@@ -55,15 +49,15 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <FSET .PRON ,TOUCHBIT>
 	       <TELL ,I-ASSUME>
 	       <TELL !\ >
-	       ;<TELL-THE .OBJ> <THE-J .OBJ T>
+	       <TELL-THE .OBJ>
 	       <TELL ".]" CR>)>>>
 
 <DEFAULT-DEFINITION MORE-SPECIFIC
  <DEFINE MORE-SPECIFIC ()
 	<SETG CLOCK-WAIT T>
-	<TELL "Please be more specific." CR>>>
+	<TELL "[Please be more specific.]" CR>>>
 
-;"<IF-P-DEBUGGING-PARSER"
+<IF-P-DEBUGGING-PARSER
 <SYNTAX \#DBG = V-PDEBUG>
 
 <GLOBAL P-DBUG:FLAG <>>
@@ -76,14 +70,16 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<TELL !\{ N ,IDEBUG "}" CR>)
        (<SETG P-DBUG <NOT ,P-DBUG>>
 	<TELL "Find them bugs, boss!" CR>)
-       (T <TELL "No bugs left, eh?" CR>)>>;">"
+       (T <TELL "No bugs left, eh?" CR>)>>>
 
 <SETG P-PRSI <>>
 <SETG P-PRSO <>>
+<IF-P-THIRD-PART <GLOBAL P-PRSN <>>>
 <SETG PRSA 0 <OR VERB FALSE>>
 <IF-P-BE-VERB
 	<GLOBAL PRSQ 0>
 	<GLOBAL PRSS:OBJECT 0>>
+<IF-P-THIRD-PART <GLOBAL PRSN:OBJECT 0>>
 <GLOBAL PRSI:OBJECT 0>
 <GLOBAL PRSO:OBJECT 0>
 
@@ -111,7 +107,9 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <GLOBAL PRSO-NP <>>
 <GLOBAL PRSI-NP <>>
-<GLOBAL CLOCKER-RUNNING:NUMBER 2>
+<IF-P-THIRD-PART <GLOBAL PRSN-NP <>>>
+<IF-P-THIRD-PART <GLOBAL PRSN-NP <>>>
+;<GLOBAL CLOCKER-RUNNING:NUMBER 2>
 
 <IF-UNDO <GLOBAL P-CAN-UNDO:NUMBER 0>>
 
@@ -179,15 +177,18 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
  <COND (<AND <NOT <FSET? .PRON ,TOUCHBIT>> 
 	     <NOT <EQUAL? ,OPRSO .OBJ>>>
 	<IF-P-BE-VERB <COND (<EQUAL? ,PRSA ,V?DO?> <RFALSE>)>>
-	<TELL "[\"">
-	<TELL D ;PRINTB .PRON>
-	<TELL "\" meaning ">
-	;<TELL-THE .OBJ> <THE-J .OBJ T>
-	<TELL "]" CR>)>>>
+	<IF-P-OBVIOUS
+        <TELL "[\"">
+	    <TELL D ;PRINTB .PRON>
+	    <TELL "\" meaning ">
+	    <TELL-THE .OBJ>
+	    <TELL "]" CR>>)>>>
 
 <DEFAULT-DEFINITION NO-M-WINNER-VERB?
 <CONSTANT NO-M-WINNER-VERB-TABLE
- <PLTABLE V?TELL-ABOUT V?SGIVE V?SSHOW V?SRUB V?SPUT-ON>>
+ <PLTABLE V?STELL-ABOUT V?SGIVE V?SSHOW V?SRUB V?SPUT-ON
+          V?FWRITE V?SREAD V?SSHOOT V?SWRITE V?SAIM
+          V?SANALYZE V?SCALL V?SSEARCH-FOR>>
 
 <DEFINE NO-M-WINNER-VERB? ()
  <COND (<INTBL? ,PRSA <ZREST ,NO-M-WINNER-VERB-TABLE 2>
@@ -225,7 +226,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <DEFAULT-DEFINITION TELL-SAID-TO
  <DEFINE TELL-SAID-TO (PER)
-     <TELL "(to ">
+     <TELL "(said to ">
      <THE-J .PER T>
      <TELL !\) CR>>>
 
@@ -244,9 +245,15 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
                <TELL-SAID-TO .PER>
                <SETG QCONTEXT .PER>
                <RETURN ,QCONTEXT>)
-              (<SETG QCONTEXT <OR <FIND-FLAG-HERE-NOT ,PERSONBIT ,MUNGBIT ,PLAYER>
+              (<AND <IN? ,PLAYER ,DARK>
+                    <VISIBLE? ,BLUR>>
+               <SETG QCONTEXT ,BLUR>
+               <TELL-SAID-TO ,BLUR>
+               <RETURN ,BLUR>)
+              (<SETG QCONTEXT <OR <FIND-A-WINNER>
+                                  <FIND-FLAG-HERE-NOT ,PERSONBIT ,MUNGBIT ,PLAYER>
 							      <FIND-IN ,PLAYER ,PERSONBIT>>>
-			   <TELL-SAID-TO ,QCONTEXT>
+			   ;<TELL-SAID-TO ,QCONTEXT>
                <RETURN ,QCONTEXT>)
 			  (ELSE
 			   <RFALSE>)>)>>
@@ -303,11 +310,12 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       LOOK LOOK-BEHIND LOOK-DOWN LOOK-INSIDE LOOK-UNDER LOOK-UP
 	       READ SEARCH>>>
 
-<DEFINE PERFORM (PA "OPT" (PO <>) (PI <>) ;(PQ <>) ;(PS <>)
-		    "AUX" V OA OO OI OQ OS X)
+<DEFINE PERFORM (PA "OPT" (PO <>) (PI <>) (PN <>) ;(PQ <>) ;(PS <>)
+		    "AUX" V OA OO OI ON OQ OS X)
 	<SET OA ,PRSA>
 	<SET OO ,PRSO>
 	<SET OI ,PRSI>
+    <IF-P-THIRD-PART <SET ON ,PRSN>>
 	<COND (<AND <T? .OO> <==? .OO .PI>>
 	       <SETG OBJ-SWAP T>)
 	      (<AND <T? .OI> <==? .OI .PO>>
@@ -315,7 +323,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	      (T
 	       <SETG OBJ-SWAP <>>)>
 	<SETG PRSA .PA>
-	<SETG PRSI .PI>
+	<IF-P-THIRD-PART <SETG PRSN .PN>>
+    <SETG PRSI .PI>
 	<SETG PRSO .PO>
 	;<IF-P-BE-VERB
 	 <SET OS ,PRSS>
@@ -334,7 +343,11 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <COND (<T? .PI>
 		      <PRINTI "/I=">
 		      <TELL-D-LOC .PI>)>
-	       <IF-P-BE-VERB
+	       <IF-P-THIRD-PART
+           <COND (<T? .PN>
+              <PRINTI "/N=">
+              <TELL-D-LOC .PN>)>>
+           <IF-P-BE-VERB
 	       <COND (<T? ,PRSQ ;.PQ>
 		      <PRINTI "/Q=">
 		      <IFFLAG (IN-ZILCH <PRINTN ,PRSQ ;.PQ>)
@@ -347,7 +360,10 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<IF-P-BE-VERB
 	 <COND (<T? ,PRSS>
 		<THIS-IS-IT ,PRSS>)>>
-	<COND (<T? ,PRSI>
+	<IF-P-THIRD-PART
+     <COND (<T? ,PRSN>
+        <THIS-IS-IT ,PRSN>)>>
+    <COND (<T? ,PRSI>
 	       <THIS-IS-IT ,PRSI>)>
 	<COND (<AND <T? ,PRSO>
 		    <NOT <VERB? TELL>>	;"per PDL 14-Dec-88"
@@ -358,14 +374,14 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<SET PO ,PRSO>
 	<SET PI ,PRSI>
 	;<IF-P-BE-VERB <SET PS ,PRSS>>
-	<COND (<AND ;<ZERO? .V>
+    <COND (<AND ;<ZERO? .V>
 		    <NOT <NO-M-WINNER-VERB?>>>
 	       <IFFLAG (P-DEBUGGING-PARSER
 			<SET V <D-APPLY "Winner" <GETP ,WINNER ,P?ACTION>
 					,M-WINNER>>)
 		       (T
 			<SET V <ZAPPLY <GETP ,WINNER ,P?ACTION> ,M-WINNER>>)>)>
-<IFFLAG (P-BE-VERB
+    <IFFLAG (P-BE-VERB
 	<COND (<T? ,PRSS ;.PS>
 	       <COND (<ZERO? .V>
 		      <IFFLAG (P-DEBUGGING-PARSER
@@ -435,7 +451,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			<SET V <D-APPLY "Preaction" <ZGET ,PREACTIONS .PA>>>)
 		       (T
 			<SET V <ZAPPLY <ZGET ,PREACTIONS .PA>>>)>)>
-	<SETG NOW-PRSI 1>
+    <SETG NOW-PRSI 1>
 	<COND (<AND <ZERO? .V>
 		    <T? .PI>
 		    <NOT <DIR-VERB?>>
@@ -497,7 +513,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	.V>
 
 <DEFAULT-DEFINITION TELL-TOO-DARK
- <DEFINE TELL-TOO-DARK () <TELL "It's too dark to see!" CR> <RETURN ,M-FATAL>>>
+ <DEFINE TELL-TOO-DARK () <TELL ,TOO-DARK> <RETURN ,M-FATAL>>>
 
 <DEFAULT-DEFINITION ITAKE-CHECK
  <DEFINE ITAKE-CHECK (OBJ BITS "AUX" (TAKEN <>))
@@ -517,24 +533,25 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		<COND (<AND <NOT .TAKEN>
 			    <BTST .BITS ,SEARCH-MUST-HAVE>
 			    <NOT <BTST .BITS ,SEARCH-MOBY>>>
-		       ;<TELL !\[>
+		       <IF-P-OBVIOUS <TELL !\[>>
 		       <COND (<EQUAL? ,WINNER ,PLAYER>
 			      <TELL "You are">)
 			     (T
-			      ;<TELL-CTHE ,WINNER>
-				  <THE-J ,WINNER T T>
+			      <TELL-CTHE ,WINNER>
 			      <TELL " is">)>
 		       <TELL "n't holding ">
-		       <THE-J .OBJ T>
+		       <TELL-THE .OBJ>
 		       <THIS-IS-IT .OBJ>
-		       <TELL "!" CR>
+		       <TELL "!">
+               <IF-P-OBVIOUS <TELL "]">>
+               <CRLF>
 		       <RTRUE>)
 		      ;(<AND .TAKEN <==? ,WINNER ,PLAYER>>
-		       <FIRST-YOU "taking" .OBJ ,ITAKE-LOC>)>)>>>
+		       <FIRST-YOU "take" .OBJ ,ITAKE-LOC>)>)>>>
 
 <IF-P-DEBUGGING-PARSER
 <DEFINE TELL-D-LOC (OBJ)
-	<PRINTD .OBJ>
+	<D-J .OBJ>
 	<COND (<IN? .OBJ ,GLOBAL-OBJECTS>	<PRINTI "(gl)">)
 	      (<IN? .OBJ ,LOCAL-GLOBALS>	<PRINTI "(lg)">)
 	      (<IN? .OBJ ,ROOMS>		<PRINTI "(rm)">)>
@@ -555,7 +572,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		       <PRINT .STR>
 		       <COND (<=? .STR "Winner">
 			      <PRINTC !\=>
-			      <TELL D ,WINNER>)>
+			      <D-J ,WINNER>)>
 		       <PRINTI ": ">)>)>>
 	<COND (<T? .FOO> <SET RES <ZAPPLY .FCN .FOO>>)
 	      (T <SET RES <ZAPPLY .FCN>>)>
@@ -575,28 +592,24 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <DEFAULT-DEFINITION NOT-HERE
 <DEFINE NOT-HERE (OBJ "OPT" (CLOCK <>))
 	<COND (<ZERO? .CLOCK>
-	       <SETG CLOCK-WAIT T>
-	       <TELL "But ">)>
-	<THE-J .OBJ T>
+	       <SETG CLOCK-WAIT T>)>
+	<TELL "[But ">
+	<TELL-THE .OBJ>
 	<IFFLAG (P-BE-VERB
 		 <PRINT-IS/ARE .OBJ>)
 		(T <TELL " is">)>
 	<TELL "n't ">
-	<COND (<AND <VISIBLE? .OBJ>
-				<NOT <IN? .OBJ ,GLOBAL-OBJECTS>>>
+	<COND (<VISIBLE? .OBJ>
 	       <TELL "close enough">
 	       <COND (<SPEAKING-VERB?> <TELL " to hear you">)>
-	       <TELL !\.>)
+	       <TELL ".">)
 	      (T <TELL "here!">)>
 	 <THIS-IS-IT .OBJ>
-	 ;<COND (<ZERO? .CLOCK>
-		<TELL !\]>)>
-	 <CRLF>>>
+	 <TELL "]" CR>>>
 
 <DEFAULT-DEFINITION ASKING-VERB-WORD?
  <ADD-WORD ASK ASKWORD>
  <ADD-WORD ORDER ASKWORD>
- <ADD-WORD COMMAND ASKWORD>
  <ADD-WORD TELL ASKWORD>
  ;<DEFINE ASKING-VERB-WORD? (WD)
  <COND (<EQUAL? .WD ,W?ASK ,W?ORDER ,W?TELL>
@@ -604,8 +617,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <DEFAULT-DEFINITION SPEAKING-VERB?
  <DEFINE SPEAKING-VERB? ("OPT" (A ,PRSA) ;(PER 0))
- <COND (<EQUAL? .A ,V?ANSWER ,V?ASK-ABOUT ,V?ASK-CONTEXT-ABOUT ,V?ASK-FOR ,V?HELLO
-		   ,V?NO ,V?REPLY ,V?TELL ,V?TELL-ABOUT ,V?YES>
+ <COND (<EQUAL? .A ,V?ANSWER ,V?ASK-ABOUT ,V?ASK-FOR ,V?HELLO
+		        ,V?NO ,V?REPLY ,V?SAY ,V?TELL ,V?TELL-ABOUT ,V?YES>
 	<COND (T ;<EQUAL? .PER 0 ,PRSO>
 	       <RTRUE>)>)>>>
 

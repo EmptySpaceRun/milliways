@@ -13,7 +13,7 @@
 	(LOC GLOBAL-OBJECTS)
 	(DESC "what")
 	(SYNONYM WHAT WHO ;WHOM)
-	(FLAGS NOTHEBIT)
+	(FLAGS NARTICLEBIT)
 	(ACTION WHAT-F)>
 
 <DEFINE WHAT-F ("AUX" OBJ TMP NOT? LOC?)
@@ -84,7 +84,7 @@ yourself." CR>
 			 <AND <NOT <EQUAL? ,QCONTEXT ,PRSO>>
 			      <NOT <VERB? ASK-ABOUT>>
 			      <NOT <AND <VERB? TELL-ABOUT>
-					<EQUAL? ,PRSO ,PLAYER ;,ME>>>>>>
+					<EQUAL? ,PRSO ,ME>>>>>>
 		<SET W ,WINNER>
 		<SETG WINNER ,QCONTEXT>
 		<PERFORM ,PRSA ,PRSO ,PRSI>
@@ -111,7 +111,7 @@ yourself." CR>
 	<COND (<TRY-QCONTEXT?>
 	       <RTRUE>)>
 	<COND (<EQUAL? ,PRSI ,INTADJ>
-	       <COND (<EQUAL? ,PRSO ;,ME ,PLAYER>
+	       <COND (<EQUAL? ,PRSO ,ME ,PLAYER>
 		      <COND (<VERB? BE?>
 			     <TELL "You">)
 			    (T
@@ -123,12 +123,12 @@ yourself." CR>
 			    (ELSE <TELL " aren't ">)>)
 		     (ELSE
 		      <COND (<VERB? BE?>
-			     ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>)
+			     <TELL-CTHE ,PRSO>)
 			    (T
 			     <PRINT ,WHO-KNOWS-STRING>
 			     <TELL-Q-WORD>
 			     <TELL " ">
-			     ;<TELL-THE ,PRSO> <THE-J ,PRSO T>)>
+			     <TELL-THE ,PRSO>)>
 		      <PRINT-IS/ARE ,PRSO>
 		      <COND (<NOT <IS-PRSO-ADJ? .ADJ?>>
 			     <TELL "n't">)>
@@ -144,7 +144,7 @@ yourself." CR>
 			     <TELL " ">
 			     <PRINTB .PREP>
 			     <TELL " ">
-			     ;<TELL-THE .OBJ> <THE-J .OBJ T>
+			     <TELL-THE .OBJ>
 			     <TELL "." CR>)
 			    (ELSE
 			     <PRINT ,WHO-KNOWS-STRING>
@@ -153,7 +153,7 @@ yourself." CR>
 			     <TELL " ">
 			     <PRINTB .PREP>
 			     <TELL " ">
-			     ;<TELL-THE .OBJ> <THE-J .OBJ T>
+			     <TELL-THE .OBJ>
 			     <TELL "." CR>)>)
 		     (ELSE
 		      <PRINT ,WHO-KNOWS-STRING>
@@ -177,37 +177,37 @@ yourself." CR>
 		      <TELL " here." CR>)
 		     (<EQUAL? .LOC? ,GENERIC-OBJECTS>
 		      <TELL "You don't know where ">
-		      ;<TELL-THE ,PRSO> <THE-J ,PRSO T>
+		      <TELL-THE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL "." CR>)
 		     (<EQUAL? .LOC? ,GLOBAL-OBJECTS>
 		      <TELL "No doubt ">
-		      ;<TELL-THE ,PRSO> <THE-J ,PRSO T>
+		      <TELL-THE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL " around here somewhere." CR>)
 		     (<AND <EQUAL? .LOC? ,LOCAL-GLOBALS>
 			   <GLOBAL-IN? ,PRSO ,HERE>>
-		      ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>
+		      <TELL-CTHE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL " nearby." CR>)
 		     (<FSET? .LOC? ,PERSONBIT>
-		      ;<TELL-CTHE .LOC?> <THE-J .LOC? T T>
+		      <TELL-CTHE .LOC?>
 		      <TELL " has ">
-		      ;<TELL-THE ,PRSO> <THE-J ,PRSO T>
+		      <TELL-THE ,PRSO>
 		      <TELL "." CR>)
 		     (<EQUAL? <META-LOC ,PRSO> ,HERE>
-		      ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>
+		      <TELL-CTHE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL " in ">
-		      ;<TELL-THE .LOC?> <THE-J .LOC? T>
+		      <TELL-THE .LOC?>
 		      <TELL "." CR>)
 		     (<IN? .LOC? ,ROOMS>
-		      ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>
+		      <TELL-CTHE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL " probably ">
 		      <COND (<FSET? ,PRSO ,TOUCHBIT>
 			     <TELL
-"still in the place called \"" D .LOC? ".\"" CR>)
+"still in the place called \"" D .LOC? ,PIC>)
 			    (ELSE
 			     <COND (<NOT <FSET? ,PRSO ,PERSONBIT>>
 				    <TELL "lying ">)>
@@ -215,7 +215,7 @@ yourself." CR>
 		     (ELSE
 		      <PRINT ,WHO-KNOWS-STRING>
 		      <TELL "where ">
-		      ;<TELL-THE ,PRSO> <THE-J ,PRSO T>
+		      <TELL-THE ,PRSO>
 		      <PRINT-IS/ARE ,PRSO>
 		      <TELL "." CR>)>)
 	      (ELSE
@@ -248,18 +248,18 @@ yourself." CR>
 		      <PRINTB <PP-PREP .LOC?>>)>
 	       <TELL " ">
 	       <COND (<SET TMP <P-PP-OBJ>>
-		      ;<TELL-THE .TMP> <THE-J .TMP T>)
+		      <TELL-THE .TMP>)
 		     (ELSE <NP-PRINT <PP-NOUN .LOC?>>)>
 	       <TELL "." CR>)
 	      (<EQUAL? ,P-PRSA-WORD ,W?BE>
 	       <COND (<EQUAL? ,PRSO ,WINNER>
-		      ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>
-		      <TELL " is already " "that" "." CR>)
+		      <TELL-CTHE ,PRSO>
+		      <TELL " is already " HIM ,PRSO "." CR>)
 		     (T <TELL "That would take a bit of magic." CR>)>)
 	      (ELSE
 	       <TELL "So you think">
 	       <PRSO-IS .NOT?>
-	       <COND (,PRSI <TELL " " A ,PRSI>)>
+	       <COND (,PRSI <TELL !\  A ,PRSI>)>
 	       <TELL "." CR>)>)>>
 
 <DEFINE RIGHT-PREP? (PREP OBJ CONT)
@@ -303,7 +303,7 @@ yourself." CR>
 	      <MORE-SPECIFIC>)
 	     (<NOT ,PRSI>
 	      <TELL "You don't know anything special about ">
-	      ;<TELL-THE ,PRSO> <THE-J ,PRSO T>
+	      <TELL-THE ,PRSO>
 	      <TELL "." CR>)
 	     (ELSE <V-BE>)>>
 
@@ -365,22 +365,22 @@ yourself." CR>
 	 <NOT <FSET? ,HERE ,OUTSIDE>>>
 
 <DEFINE OPEN? (OBJ)
-	 <AND <OR <FSET? .OBJ ,OPENABLE>
+	 <AND <OR ;<FSET? .OBJ ,OPENABLEBIT>
 		  <FSET? .OBJ ,DOORBIT>>
 	      <FSET? .OBJ ,OPENBIT>>>
 
 <DEFINE Q-CLOSED? (OBJ)
-	 <AND <OR <FSET? .OBJ ,OPENABLE>
+	 <AND <OR ;<FSET? .OBJ ,OPENABLEBIT>
 		  <FSET? .OBJ ,DOORBIT>>
 	      <NOT <FSET? .OBJ ,OPENBIT>>>>
 
 <DEFINE LOCKED? (OBJ)
 	 <AND <FSET? .OBJ ,DOORBIT>
-	      <FSET? .OBJ ,LOCKED>>>
+	      <FSET? .OBJ ,LOCKEDBIT>>>
 
 <DEFINE UNLOCKED? (OBJ)
 	 <AND <FSET? .OBJ ,DOORBIT>
-	      <NOT <FSET? .OBJ ,LOCKED>>>>
+	      <NOT <FSET? .OBJ ,LOCKEDBIT>>>>
 
 <DEFINE DEAD? (OBJ)
 	 <OR <NOT <FSET? .OBJ ,PERSONBIT>>
@@ -391,21 +391,21 @@ yourself." CR>
 	      <NOT <FSET? .OBJ ,MUNGBIT>>>>
 
 <DEFINE PRSO-IS (NOT? "OPT" (CAP? <>))
-	 <COND (<EQUAL? ,PRSO ;,ME ,PLAYER>
+	 <COND (<EQUAL? ,PRSO ,ME ,PLAYER>
 		<COND (.CAP? <TELL "You">)
 		      (ELSE <TELL " you">)>
 		<TELL " are">
 		<COND (.NOT? <TELL "n't">)>)
 	       (ELSE
-		<COND (.CAP? ;<TELL-CTHE ,PRSO> <THE-J ,PRSO T T>)
-		      (T <TELL " "> ;<TELL-THE ,PRSO> <THE-J ,PRSO T>)>
+		<COND (.CAP? <TELL-CTHE ,PRSO>)
+		      (T <TELL " "> <TELL-THE ,PRSO>)>
 		<PRINT-IS/ARE ,PRSO>
 		<COND (.NOT? <TELL "n't">)>)>>
 
 <DEFAULT-DEFINITION PRINT-IS/ARE
 <DEFINE PRINT-IS/ARE (OBJ)
-	<COND (<OR <FSET? .OBJ ,PLURAL>
-		   <EQUAL? .OBJ ;,BLACKTHORNE ;,ME ,YOU>>
+	<COND (<OR <FSET? .OBJ ,PLURALBIT>
+		   <EQUAL? .OBJ ;,BLACKTHORNE ,ME ,YOU>>
 	       <TELL " are">)
 	      (ELSE <TELL " is">)>>>
 
@@ -461,10 +461,10 @@ yourself." CR>
 	<TELL "." CR>
 	<RTRUE>)>
  <TELL " ">
- <COND (<EQUAL? .SUBJ ;,ME ,PLAYER>
+ <COND (<EQUAL? .SUBJ ,ME ,PLAYER>
 	<TELL "you">)
        (ELSE
-	;<TELL-THE .SUBJ> <THE-J .SUBJ T>)>
+	<TELL-THE .SUBJ>)>
  <COND (<T? .WD>
 	<COND (<OR <NOT <EQUAL? .WD ,W?DO ,W?DOES ,W?DID>>
 		   <NOT <PARSE-SUBJ ,PARSE-RESULT>>>
@@ -491,21 +491,15 @@ yourself." CR>
 		     (T
 		      <PRINT-VOCAB-WORD ,P-PRSA-WORD>
 		      <COND (<AND <EQUAL? .WD ,W?DO ,W?DOES>
-				  <NOT <EQUAL? .SUBJ ;,ME ,PLAYER>>
-				  <NOT <FSET? .SUBJ ,PLURAL>>>
+				  <NOT <EQUAL? .SUBJ ,ME ,PLAYER>>
+				  <NOT <FSET? .SUBJ ,PLURALBIT>>>
 			     <TELL "s">)>)>
 	       <COND (<T? .OBJ>
 		      <TELL " ">
 		      <COND (<EQUAL? .OBJ .SUBJ>
-			     <COND (<NOT <FSET? .OBJ ,PERSONBIT>>
-				    <TELL "it">)
-				   (<FSET? .OBJ ,FEMALE>
-				    <TELL "her">)
-				   (T
-				    <TELL "him">)>
-			     <TELL "self">)
+			     <TELL HIM .OBJ "self">)
 			    (T
-			     ;<TELL-THE .OBJ> <THE-J .OBJ T>)>)
+			     <TELL-THE .OBJ>)>)
 		     (T
 		      <ECHO-NOUNS>)>)
 	      (T <PRINT-VOCAB-WORD ,P-PRSA-WORD>)>)>
@@ -517,13 +511,13 @@ yourself." CR>
 	       <TELL " ">
 	       <PRINTB .WD>)>
 	<TELL " ">
-	;<TELL-THE ,PRSO> <THE-J ,PRSO T>)>
+	<TELL-THE ,PRSO>)>
  <COND (<NOT <EQUAL? ,PRSI 0 ,WHAT ,NOT-HERE-OBJECT>>
 	<COND (<SET WD <PARSE-PARTICLE2 ,PARSE-RESULT>>
 	       <TELL " ">
 	       <PRINTB .WD>)>
 	<TELL " ">
-	;<TELL-THE ,PRSI> <THE-J ,PRSI T>)>>
+	<TELL-THE ,PRSI>)>>
 
 <DEFINE V-CAN? () <WHO-KNOWS ,W?CAN>>
 
@@ -544,7 +538,7 @@ yourself." CR>
 			     <TELL "don't ">)>)
 		     (T
 		      <COND ;(.CAP? <TELL-CTHE ,PRSS>)
-			    (T <TELL " "> ;<TELL-THE ,PRSS> <THE-J ,PRSS T> <TELL " ">)>
+			    (T <TELL " "> <TELL-THE ,PRSS> <TELL " ">)>
 		      <COND (<ANDB ,PARSE-NOT <PARSE-FLAGS ,PARSE-RESULT>>
 			     <TELL "doesn't ">)>)>
 	       <PRINT-VOCAB-WORD ,P-PRSA-WORD>
@@ -611,15 +605,15 @@ PERFORM also handles statements, for example:
 
 <CONSTANT QACTIONS <PLTABLE
 	V-BE V-BE? 0
-	V-DISEMBARK V-DISEMBARK? 0
+	V-EXIT V-EXIT? 0
 	V-DROP V-DROP? PRE-DROP?
 	V-TAKE V-TAKE? PRE-TAKE?
 	;"and so on">>
 
 <DEFINE PRE-DROP? ()
 	 <COND (<EQUAL? ,PRSO <LOC ,PRSS>>
-		;<SETG PRSQ ,V?DISEMBARK>
-		<PERFORM ,V?DISEMBARK ;,PRSA ,PRSO ,PRSI ;,V?DISEMBARK ;,PRSS>
+		;<SETG PRSQ ,V?EXIT>
+		<PERFORM ,V?EXIT ;,PRSA ,PRSO ,PRSI ;,V?EXIT ;,PRSS>
 		<RTRUE>)>>
 
 <DEFINE V-DROP? ()
@@ -627,7 +621,7 @@ PERFORM also handles statements, for example:
 		<PRINT "You aren't ">
 		<TELL "hanging from anything." CR>)>>
 
-<DEFINE V-DISEMBARK? ("AUX" AV)
+<DEFINE V-EXIT? ("AUX" AV)
 	 <SET AV <LOC ,PRSS>>
 	 <COND (<EQUAL? ,PRSO <> ,ROOMS>
 		<COND (<AND .AV <NOT <IN? .AV ,ROOMS>>>
@@ -637,15 +631,14 @@ PERFORM also handles statements, for example:
 		       <PRINT "You aren't ">
 		       <TELL "in anything." CR>)>)
 	       (<AND .AV <NOT <IN? .AV ,ROOMS>>>
-		;<COND (<AND <NOT <EQUAL? .AV ,PRSO>>
+		<COND (<AND <NOT <EQUAL? .AV ,PRSO>>
 			    <NOT <HELD? .AV ,PRSO>>>
 		       <PRINT "You already are">
 		       <COND (<FSET? .AV ,SURFACEBIT> <TELL " on ">)
 			     (ELSE <TELL " in ">)>
 		       <TELL-THE .AV>
 		       <TELL "!" CR>
-		       <RTRUE>)>
-		<TELL ,YOU-ARE>)
+		       <RTRUE>)>)
 	       (<LOC ,PRSO>
 		;<SETG PRSQ ,V?TAKE>
 		<PERFORM ,V?TAKE ;,PRSA ,PRSO ,PRSI ;,V?TAKE ;,PRSS>

@@ -8,6 +8,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	RED-PERS RED-VP RED-NP RED-OF RED-QT RED-QN RED-NPP RED-PP
 	RED-POSS RED-ADJ RED-ADJS RED-QUOTE>
 
+<IF-P-THIRD-PART <ENTRY RED-SVPNPNPN>>
+
 <ENTRY	RED-O-ADJ RED-O-PP RED-O-NP NUMERIC-ADJ? DIR-VERB-WORD?>
 
 <ENTRY ABS>
@@ -33,6 +35,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <DEFINE DIR-VERB-PRSI? (NP)
 	<AND <EQUAL? <PARSE-ACTION ,PARSE-RESULT>
 		     ,V?MOVE-DIR ,V?RIDE-DIR ,V?ROLL-DIR ,V?SET-DIR>
+         ;<TELL "|||[PARSED ACTION FOR DIR-VERB]|||">
 	     <NOT <EQUAL? <NOUN-PHRASE-OBJ1 .NP> ,INTDIR ,LEFT-RIGHT>>>>>
 
 <DEFAULT-DEFINITION DIR-VERB-WORD?
@@ -45,6 +48,16 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <DEFMAC ABS ('NUM)
 	<FORM COND (<FORM L? .NUM 0> <FORM - 0 .NUM>)
 	           (T .NUM)>>
+
+
+
+;"FOR MY OWN GOOD:
+   The first argument in the set, here N, counts the number of parts
+to the PRODUCTION. Use this to separate from one another.
+   <POP-PSTACK ,DATA-STACK> takes the top part of the command (the
+last one in the list) and removes it from the mix. This allows you
+to proceed to the next one in the list."
+
 
 "Generic reduction, which just returns a list of frobs"
 <DEFINE RED-FCN ("OPT" N:FIX TYP:FIX)
@@ -69,26 +82,40 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	      (T
 	       <POP-PSTACK ,DATA-STACK>)>>
 
-<DEFINE GET-SYNTAX GS (VA:TABLE NUM "OPT" (PREP 0) (GWIM <>) (SHUT-UP <>)"AUX" LEN)
+<DEFINE GET-SYNTAX GS (VA:TABLE NUM "OPT" (PREP 0) (GWIM <>) (SHUT-UP <>) "AUX" LEN)
   <COND (<==? .PREP 1>
 	 <SET PREP 0>)>
   <COND (<1? .NUM>
 	 <SET LEN ,VERB-ONE-SYNTAX-LEN ;6>)
-	(T
+    <IF-P-THIRD-PART
+        (<=? 3 .NUM>
+         <SET LEN ,VERB-THREE-SYNTAX-LEN>)>
+    (T
 	 <SET LEN ,VERB-TWO-SYNTAX-LEN ;10>)>
   <REPEAT ((CT:FIX <ZGET .VA 0>) S2 (P2 <PARSE-PARTICLE2 ,PARSE-RESULT>)
-	   (GWIM-NOW <>)
+	   S3 (P3 <IFFLAG (P-THIRD-PART <PARSE-PARTICLE3 ,PARSE-RESULT>) (T <>)>) ;"BY MAX FOG"
+       (GWIM-NOW <>)
 	   (SYN <IF-MUDDLE <CHTYPE <ZREST .VA 2> VERB-SYNTAX>
 			   <ZREST .VA 2>>))
     <COND (<AND <==? .PREP <SYNTAX-PREP ;1 .SYN 1>>
 		<OR <1? .NUM>
 		    <EQUAL? .P2
 			    <SET S2 <SYNTAX-GET .SYN ,SYN-PREP 2>>>
-		    <AND <0? .S2>
+		    <IF-P-THIRD-PART
+             <EQUAL? .P3
+			     <SET S3 <SYNTAX-GET .SYN ,SYN-PREP 3>>>>
+            <AND <0? .S2>
 			 <1? .P2>>
+            <IF-P-THIRD-PART
+             <AND <0? .S3>
+			  <1? .P3>>>
 		    <AND <T? .GWIM-NOW>
-			 <T? <SET S2 <COND (<1? .NUM> .PREP) (T .S2)>>>
-			 <ZPUT ,GWIM-MSG 0 .S2>>>>
+			 <T? <SET S2 <COND (<=? .NUM 1 3> .PREP) (T .S2)>>>
+			 <ZPUT ,GWIM-MSG 0 .S2>>
+            <IF-P-THIRD-PART
+             <AND <T? .GWIM-NOW>
+			  <T? <SET S3 <COND (<=? .NUM 1 2> .PREP) (T .S3)>>>
+			  <ZPUT ,GWIM-MSG 0 .S3>>>>>
 	   <PARSE-SYNTAX ;3 ,PARSE-RESULT .SYN>
 	   <PARSE-ACTION ;4 ,PARSE-RESULT <SYNTAX-ID .SYN>>
 	   <PARSE-PARTICLE1 ,PARSE-RESULT .PREP>
@@ -158,7 +185,19 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 				  <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ>>
 				  <COND (<SET OBJ <DETERMINE-OBJ <> 2>>
 					 <PARSE-OBJ2 ,PARSE-RESULT .OBJ>
-					 T)>)>)>)
+                     T)>)
+                     
+                    <IF-P-THIRD-PART
+                     (<AND <SET SYN <VERB-THREE .DATA>>
+				       <SET SYN <GET-SYNTAX .SYN 3 .PART T>>
+				       <SET OBJ <DETERMINE-OBJ <> 1>>>
+				  <PARSE-OBJ1 ,PARSE-RESULT .OBJ>
+				  <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ>>
+				  <COND (<SET OBJ <DETERMINE-OBJ <> 2>>
+					 <PARSE-OBJ2 ,PARSE-RESULT .OBJ>
+                     <COND (<SET OBJ <DETERMINE-OBJ <> 3>>
+					    <PARSE-OBJ3 ,PARSE-RESULT .OBJ>
+                        T)>)>)>>)>)
 		   (T
 		    <COND (<AND <1? .PART>
 				<L=? 0 <VERB-ZERO .DATA>:FIX>>
@@ -177,7 +216,18 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			   <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ>>
 			   <COND (<SET OBJ <DETERMINE-OBJ <> 2>>
 				  <PARSE-OBJ2 ,PARSE-RESULT .OBJ>
-				  T)>)>)>)>>
+				  T)>)
+              <IF-P-THIRD-PART
+               (<AND <SET SYN <VERB-THREE .DATA>>
+				 <SET SYN <GET-SYNTAX .SYN 3 .PART T>>
+				 <SET OBJ <DETERMINE-OBJ <> 1>>>
+			    <PARSE-OBJ1 ,PARSE-RESULT .OBJ>
+			    <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ>>
+			    <COND (<SET OBJ <DETERMINE-OBJ <> 2>>
+			       <PARSE-OBJ2 ,PARSE-RESULT .OBJ>
+			       <COND (<SET OBJ <DETERMINE-OBJ <> 3>>
+					    <PARSE-OBJ3 ,PARSE-RESULT .OBJ>
+                        T)>)>)>>)>)>>
 
 <DEFINE ROOT-VERB (VERB "AUX" DATA)
 	<COND (<AND <BAND ,PAST-TENSE <WORD-FLAGS .VERB>> ;"other tenses?"
@@ -198,7 +248,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		 <PARSE-PARTICLE2 ,PARSE-RESULT .PART2>)>
 	  <SVN .PART1 .DATA .OBJ>)>>
 
-<DEFINE SVN (PART DATA OBJ "AUX" SYN OBJ1 OBJ2)
+<DEFINE SVN (PART DATA OBJ "AUX" SYN OBJ1 OBJ2 OBJ3)
    <COND (<AND <ZERO? <PARSE-PARTICLE2 ,PARSE-RESULT>>
 	       <SET SYN <VERB-ONE .DATA>>
 	       <SET SYN <GET-SYNTAX .SYN 1 .PART>>>
@@ -222,10 +272,23 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		 <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ1>>
 		 <COND (<SET OBJ2 <DETERMINE-OBJ <> 2>>
 			<PARSE-OBJ2 ,PARSE-RESULT .OBJ2>
-			,PARSE-RESULT)>)>)>>
+			,PARSE-RESULT)>)>)
+     <IF-P-THIRD-PART
+     (<AND <SET SYN <VERB-THREE .DATA>>
+	       <SET SYN <GET-SYNTAX .SYN 3 .PART T>>>
+	  <COND (<NOT <SET OBJ1 <DETERMINE-OBJ .OBJ 1>>>
+		 <PARSER-ERROR 0 ,PARSER-ERROR-NOOBJ .OBJ
+			       .PART <SYNTAX-SEARCH .SYN 1>>)
+		(T
+		 <PARSE-OBJ1 ,PARSE-RESULT .OBJ1>
+		 <ZPUT ,ORPHAN-S ,O-OBJECT <NOUN-PHRASE-OBJ1 .OBJ1>>
+		 <COND (<SET OBJ3 <DETERMINE-OBJ <> 3>>
+			<PARSE-OBJ3 ,PARSE-RESULT .OBJ3>
+			,PARSE-RESULT)>)>)>>>
 
 <DEFINE RED-SVPNPN ("OPT" N:FIX TYP:FIX "AUX" N1 N2 (PART <>) P2 OBJ1 OBJ2 SYN)
-	<SET N2 <POP-PSTACK ,DATA-STACK>>
+	;<TELL "|||[RUNNING 2 NOUN]|||">
+    <SET N2 <POP-PSTACK ,DATA-STACK>>
 	<SET P2 <POP-PSTACK ,DATA-STACK>>
 	<COND (<EQUAL? .P2 T>
 	       <PARSE-PARTICLE2 ;8 ,PARSE-RESULT <OR <ZGET ,GWIM-MSG 0> 1>>)
@@ -235,12 +298,12 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	<COND (T ;<==? .N 4>
 	       <SET PART <POP-PSTACK ,DATA-STACK>>)>
 	;<COND (<AND <EQUAL? <PARSE-VERB ,PARSE-RESULT> ,W?SAY>
-		    ;<EQUAL? .P2 ,W?TO>
+		    <EQUAL? .P2 ,W?TO>
 		    <PMEM? .N1>
 		    <PMEM-TYPE? .N1 NOUN-PHRASE>
 		    <EQUAL? <NOUN-PHRASE-OBJ1 .N1> ,INTQUOTE>>
 	       ;"etc."
-	       <DEBUG-CODE <BOLDEN "|[DEBUG: I dunno]|">>)>
+	       )>
 	<COND (<NOT <SET SYN <ROOT-VERB <PARSE-VERB ,PARSE-RESULT>>>>
 	       <PARSER-ERROR 0 ;"No syntax" ,PARSER-ERROR-NOUND>)
 	      (<NOT <SET SYN <WORD-VERB-STUFF .SYN>>>
@@ -260,6 +323,64 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	       <PARSE-OBJ1 ,PARSE-RESULT .OBJ1>
 	       <PARSE-OBJ2 ,PARSE-RESULT .OBJ2>
 	       T)>>
+
+<IF-P-THIRD-PART
+<DEFINE RED-SVPNPNPN ("OPT" N:FIX TYP:FIX "AUX" N1 N2 N3 (PART <>) P2 P3 OBJ1 OBJ2 OBJ3 SYN SYNTHREE)
+    ;<TELL "|||[RUNNING 3 NOUN]|||">
+    <SET N3 <POP-PSTACK ,DATA-STACK>>
+	<SET P3 <POP-PSTACK ,DATA-STACK>>
+	<COND (<EQUAL? .P3 T>
+	       <PARSE-PARTICLE3 ;8 ,PARSE-RESULT <OR <ZGET ,GWIM-MSG 0> 1>>)
+	      (T
+	       <PARSE-PARTICLE3 ;8 ,PARSE-RESULT .P3>)>
+    
+    ;<TELL "||[FINISHED THE THIRD NOUNS]||">
+    <SET N2 <POP-PSTACK ,DATA-STACK>>
+	<SET P2 <POP-PSTACK ,DATA-STACK>>
+	<COND (<EQUAL? .P2 T>
+	       <PARSE-PARTICLE2 ;8 ,PARSE-RESULT <OR <ZGET ,GWIM-MSG 0> 1>>)
+	      (T
+	       <PARSE-PARTICLE2 ;8 ,PARSE-RESULT .P2>)>
+	
+    ;<TELL "||[FINISHED THE SECOND NOUN]||">
+    <SET N1 <POP-PSTACK ,DATA-STACK>>
+	<COND (T ;<==? .N 4>
+	       <SET PART <POP-PSTACK ,DATA-STACK>>)>
+	;<COND (<AND <EQUAL? <PARSE-VERB ,PARSE-RESULT> ,W?SAY>
+		    <EQUAL? .P2 ,W?TO>
+		    <PMEM? .N1>
+		    <PMEM-TYPE? .N1 NOUN-PHRASE>
+		    <EQUAL? <NOUN-PHRASE-OBJ1 .N1> ,INTQUOTE>>
+	       ;"etc."
+	       )>
+	<COND (<NOT <SET SYN <ROOT-VERB <PARSE-VERB ,PARSE-RESULT>>>>
+	       <PARSER-ERROR 0 ;"No syntax" ,PARSER-ERROR-NOUND>)
+	      (<NOT <SET SYN <WORD-VERB-STUFF .SYN>>>
+	       <>)
+	      (<AND ;<IF-P-DEBUGGING-PARSER <TELL "|||[WORD-VERB-STUFF DONE]|||">>
+                <NOT <SET SYNTHREE <VERB-THREE .SYN>>>>
+	       <PARSER-ERROR 0 ,PARSER-ERROR-TMNOUN>)
+	      (<AND ;<IF-P-DEBUGGING-PARSER <TELL "|||[VERB-THREE DONE]|||">>
+                <NOT <SET SYNTHREE <GET-SYNTAX .SYNTHREE 3 .PART>>>>
+	       <PARSER-ERROR 0 ;"No syntax" ,PARSER-ERROR-NOUND>)
+	      (<AND ;<IF-P-DEBUGGING-PARSER <TELL "|||[GET-SYNTAX 3 DONE]|||">>
+                <NOT <SET OBJ1 <DETERMINE-OBJ .N1 1>>>>
+	       <PARSER-ERROR 0 ,PARSER-ERROR-NOOBJ .N1 .PART <SYNTAX-SEARCH .SYN 1>>)
+	      (<NOT <SET OBJ2 <DETERMINE-OBJ .N2 2>>>
+	       <PARSER-ERROR 0 ,PARSER-ERROR-NOOBJ .N2 .PART <SYNTAX-SEARCH .SYN 2>>)
+          (<NOT <SET OBJ3 <DETERMINE-OBJ .N3 3>>>
+	       <PARSER-ERROR 0 ,PARSER-ERROR-NOOBJ .N3 .PART <SYNTAX-SEARCH .SYN 3>>)
+	      (<DIR-VERB-PRSI? .OBJ3>
+	       <PARSER-ERROR 0 ;"Not a direction" ,PARSER-ERROR-NOUND>)
+          (<DIR-VERB-PRSI? .OBJ2>
+	       <PARSER-ERROR 0 ;"Not a direction" ,PARSER-ERROR-NOUND>)
+	      (T
+	       ;<IF-P-DEBUGGING-PARSER <TELL "||[POPPING THE STACK]||">>
+           <POP-PSTACK ,DATA-STACK>
+	       <PARSE-OBJ1 ,PARSE-RESULT .OBJ1>
+	       <PARSE-OBJ2 ,PARSE-RESULT .OBJ2>
+           <PARSE-OBJ3 ,PARSE-RESULT .OBJ3>
+	       T)>>>
 
 <DEFINE RED-SVD ("OPT" N:FIX TYP:FIX "AUX" DIR)
 	<SET DIR <POP-PSTACK ,DATA-STACK>>
@@ -332,23 +453,24 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <CONSTANT PREP-BIT <ITABLE 3 0>>
 
-<DEFINE REDUCE-LOCATION RL
-	 (PP ;PP:PMEM
-	  "OPT" (SYN:<OR FALSE VERB-SYNTAX> <>)
-		(WHICH:<OR FIX FALSE> <>)
-	  "AUX" (SEARCH <COND (.SYN
-			       <COND (<==? .WHICH 1>
-				      <SYNTAX-SEARCH .SYN 1>)
-				     (T
-				      <SYNTAX-SEARCH .SYN 2>)>)>)
-		(TEST <COND (.SYN
-			     <COND (<==? .WHICH 1>
-				    <SYNTAX-FIND .SYN 1>)
-				   (T
-				    <SYNTAX-FIND .SYN 2>)>)>)
-		(PREP:VWORD <PP-PREP .PP>)
-		(NP:PMEM <PP-NOUN .PP>) (RLOC <>)
-		(BIT 0) (MSG <>) "VALUE" <OR TABLE FALSE>)
+<DEFINE REDUCE-LOCATION RL (PP ;PP:PMEM
+                            "OPT" (SYN:<OR FALSE VERB-SYNTAX> <>)
+                                  (WHICH:<OR FIX FALSE> <>)
+                            "AUX" (SEARCH
+                                   <COND (.SYN
+                            	          <COND (<==? .WHICH 1>
+                            		             <SYNTAX-SEARCH .SYN 1>)
+                            		            (T
+                            		             <SYNTAX-SEARCH .SYN 2>)>)>)
+                                  (TEST
+                                   <COND (.SYN
+                                          <COND (<==? .WHICH 1>
+                                                 <SYNTAX-FIND .SYN 1>)
+                                                (T
+                                                 <SYNTAX-FIND .SYN 2>)>)>)
+                                  (PREP:VWORD <PP-PREP .PP>)
+                                  (NP:PMEM <PP-NOUN .PP>) (RLOC <>)
+                                  (BIT 0) (MSG <>) "VALUE" <OR TABLE FALSE>)
   <COND (<NOT .SEARCH> <SET SEARCH <BOR ,SEARCH-HELD ,SEARCH-ON-GROUND> ;5>)>
   ;<COND (<NOT .TEST> <SET TEST ,TEST-PREP>)>
   <COPYT ,PREP-BIT 0 6>
@@ -359,10 +481,11 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	   <SET BIT ,F?HAS-UNDER>
 	   <SET MSG ,P-NO-UNDERSIDE>)
    ;(<EQUAL? .PREP ,W?ABOUT ,W?FOR ,W?TO>)
-   (<EQUAL? .PREP ,W?IN ,W?INSIDE>
+   (<AND <EQUAL? .PREP ,W?IN ,W?INSIDE>>
     <SET BIT ,CONTBIT>
     <SET MSG ,P-NO-INSIDE>)
-   (<EQUAL? .PREP ,W?ON ,W?OFF>
+   (<AND <EQUAL? .PREP ,W?ON ,W?OFF>
+         ;<NOT <EQUAL? ,P-PRSA-WORD ,W?PUT>>>
     <SET BIT ,SURFACEBIT>
     <SET MSG ,P-NO-SURFACE>)
    ;(<EQUAL? .PREP ,W?BEHIND>
@@ -644,23 +767,23 @@ last case, just return it, because it's already been reduced."
 		<COPYT ,SEARCH-RES ,OWNER-SR-THERE <* 2 ,FIND-RES-LENGTH>>)>)>
   <SET RES <>>
   <COND (<EQUAL? <NP-NAME .ROBJ> ,W?HIMSELF>	;"ASK TROLL ABOUT HIMSELF"
-	 <COND (<AND <EQUAL? 2 .WHICH>
-		     <SET COUNT <PARSE-OBJ1 ,PARSE-RESULT>>
-		     <SET COUNT <NOUN-PHRASE-OBJ1 .COUNT>>
-		     <FSET? .COUNT ,PERSONBIT>>
-		<SET RES .COUNT>
-		<IF-P-GENDERS
-			<COND (<FSET? .COUNT ,FEMALE ;,FEMALEBIT>
-			       <SET RES ,P-HIM-OBJECT>)>>)
-	       (T
-		<SET RES ,P-HIM-OBJECT>)>)>
+	     <COND (<AND <EQUAL? 2 .WHICH>
+	    	         <SET COUNT <PARSE-OBJ1 ,PARSE-RESULT>>
+	    	         <SET COUNT <NOUN-PHRASE-OBJ1 .COUNT>>
+	    	         <FSET? .COUNT ,PERSONBIT>>
+	    	    <SET RES .COUNT>
+	    	    <IF-P-GENDERS
+	    	     <COND (<FSET? .COUNT ,FEMALEBIT>
+	    	            <SET RES ,P-HIM-OBJECT>)>>)
+	           (T
+	    	    <SET RES ,P-HIM-OBJECT>)>)>
   <IF-P-GENDERS
   <COND (<EQUAL? <NP-NAME .ROBJ> ,W?HERSELF ;"<VOC 'HERSELF' NOUN>">
 	 <COND (<AND <EQUAL? 2 .WHICH>
-		     <SET COUNT <PARSE-OBJ1 ,PARSE-RESULT>>
-		     <SET COUNT <NOUN-PHRASE-OBJ1 .COUNT>>
-		     <FSET? .COUNT ,PERSONBIT>
-		     <FSET? .COUNT ,FEMALE ;,FEMALEBIT>>
+		         <SET COUNT <PARSE-OBJ1 ,PARSE-RESULT>>
+		         <SET COUNT <NOUN-PHRASE-OBJ1 .COUNT>>
+		         <FSET? .COUNT ,PERSONBIT>
+		         <FSET? .COUNT ,FEMALEBIT>>
 		<SET RES .COUNT>)
 	       (T
 		<SET RES ,P-HER-OBJECT>)>)>>
@@ -706,10 +829,9 @@ last case, just return it, because it's already been reduced."
 				     NP1 .ROBJ>>)>)
 	(<OR <1? .COUNT>
 	     <T? .QUANT>
-	     <SET RES <ZAPPLY <GETP <FIND-RES-OBJ1 ,SEARCH-RES> 
-                                ,P?GENERIC>
-			              ,SEARCH-RES
-                          ,FINDER>>
+	     <SET RES <ZAPPLY <GETP <FIND-RES-OBJ1 ,SEARCH-RES>
+				    ,P?GENERIC>
+			      ,SEARCH-RES ,FINDER>>
 	     ;"Protocol: returns .OBJ if that's the one to use,
 				 ,NOT-HERE-OBJECT if 'are none',
 				 ,ROOMS if case was handled and msg TELLed,
@@ -1085,7 +1207,7 @@ last case, just return it, because it's already been reduced."
 	      (<EQUAL? .X ,YOU-YOU>
 	       T)>
 	      (T
-	       <COND (<EQUAL? <ZGET ,TLEXV 0> ,W?YOU>
+	       ;<COND (<EQUAL? <ZGET ,TLEXV 0> ,W?YOU>
 		      <IGNORE-FIRST-WORD ;,W?YOU>)>
 	       <COND (<L? ,P-LEN 1>
 		      <SETG P-CONT <>>)
@@ -1124,15 +1246,53 @@ last case, just return it, because it's already been reduced."
 	<PARSE-ACTION ,PARSE-RESULT 0 ;"for DONT-UNDERSTAND">
 	.X>
 
-<DEFINE RED-VP ("OPT" N:FIX TYP:FIX "AUX" VERB (A1 T) (A2 T))
-	<COND (<G? .N 2>
+;"FOR MY OWN GOOD:
+   The first argument in the set, here N, counts the number of parts
+to the PRODUCTION. Use this to separate from one another.
+   <POP-PSTACK ,DATA-STACK> takes the top part of the command (the
+last one in the list) and removes it from the mix (before returning it).
+This allows you to proceed to the next one in the list."
+
+<DEFINE RED-VP ("OPT" N:FIX TYP:FIX "AUX" VERBED (A1 T) (A2 T) (PART3 T) (NOUN3 T) (X <>))
+	<IFFLAG (P-THREE-NOUNS
+        <COND (<G? .N 2> ;"Must either be an adverb or a third noun-etc"
+	           <SET A1 <POP-PSTACK ,DATA-STACK>>
+               <COND (<NOT <=? .A1 ,W?DONT ,W?DON\'T ,W?ONCE ,W?TWICE ,W?THRICE>>
+                      <COND (<OBJECT? .A1>
+                             <SET NOUN3 .A1>
+                             <SET A1 T>
+                             <COND (<NOT <COMPARE-WORD-TYPES <WCN <SET PART3 <POP-PSTACK ,DATA-STACK>>>
+                                                             <GET-CLASSIFICATION PARTICLE>>>
+                                    ;<NOT <PMEM-TYPE? <SET PART3 <POP-PSTACK ,DATA-STACK>> PARTICLE>>
+                                    <DONT-UNDERSTAND>
+                                    <SETG P-CONT <>>
+                                    <RFATAL>)>)
+                            (<NOT <COMPARE-WORD-TYPES .A1 <GET-CLASSIFICATION VERB>>>
+                             <SET VERBED .A1>
+                             <SET A1 T>
+                             <SET X T>)
+                            (ELSE ;"Might want to edit this if it is not just for nouns"
+                             <DONT-UNDERSTAND>
+                             <SETG P-CONT <>>
+                             <RFATAL>)>)>)>
+	    <COND (<NOT .X>
+               <SET VERBED <POP-PSTACK ,DATA-STACK>>)>)
+            (T
+        <COND (<G? .N 2>
 	       <SET A1 <POP-PSTACK ,DATA-STACK>>)>
-	<SET VERB <POP-PSTACK ,DATA-STACK>>
+	    <SET VERBED <POP-PSTACK ,DATA-STACK>>)>
+
 	<COND (<G? .N 2>
 	       <SET A2 <POP-PSTACK ,DATA-STACK>>
 	       <COND (<EQUAL? .N 4>
 		      <POP-PSTACK ,DATA-STACK>)>)>
-	<PARSE-VERB ,PARSE-RESULT .VERB>
+    
+	<IF-P-THREE-NOUNS
+        <COND (<N==? T .NOUN3 .PART3>
+               <SETG PRST <PARSE-OBJ1 ,PARSE-RESULT
+                              <OR <WORD-SEMANTIC-STUFF .NOUN3>
+                                                       .NOUN3>>>)>>
+    <PARSE-VERB ,PARSE-RESULT .VERBED>
 	<PARSE-VERB-LEXV ,PARSE-RESULT ,TLEXV>
 	<COND (<N==? .A1 T>
 	       <PARSE-ADV ,PARSE-RESULT <OR <WORD-SEMANTIC-STUFF .A1> .A1>>)
@@ -1152,7 +1312,7 @@ last case, just return it, because it's already been reduced."
   <COND (<IFFLAG (P-ZORK0
 		  <WORD-TYPE? .ADJ ,P-COMMA-CODE ,P-EOI-CODE>)
 		 (T
-		  <OR <EQUAL? .ADJ ,W?COMMA ,W?AND>
+		  <OR <EQUAL? .ADJ ,W?COMMA ,W?AND ,W?&>
 		      <COMPARE-WORD-TYPES <WCN .ADJ>
 					  <GET-CLASSIFICATION END-OF-INPUT>>>)>	 
 	 <SET LEXE <ZBACK .LEXE ,LEXV-ELEMENT-SIZE-BYTES>>)>
@@ -1255,7 +1415,10 @@ last case, just return it, because it's already been reduced."
 			 <RETURN <PARSER-ERROR 0 ,PARSER-ERROR-NOUND> .RED>)>)
 		 (<NOT <REDUCE-EXCEPTION .PP .ONPP>> ;"Try to make sense of it"
 		  <RETURN <> .RED>)>)
-	       (<NOT <SET RLOC <REDUCE-LOCATION .PP>>>
+	       (<AND <IF-P-THIRD-PART
+                  <NOT <=? <PARSE-ACTION ,PARSE-RESULT>
+                           ,V?PUT-IN ,V?POUR ,V?PUT>>>
+                 <NOT <SET RLOC <REDUCE-LOCATION .PP>>>>
 		;"Died, set up orphaning and severity"
 		<RETURN <> .RED>)>
 	 <COND (<NOT .RLOC> .ONPP)
@@ -1281,7 +1444,7 @@ last case, just return it, because it's already been reduced."
 	 ;"Case of NPP AND NP"
 	 <SET NP <POP-PSTACK ,DATA-STACK>>
 	 <COND (<EQUAL? <POP-PSTACK ,DATA-STACK>
-			,W?AND ;,W?OR ,W?COMMA>
+			,W?AND ;,W?OR ,W?COMMA ,W?&>
 		<COND (<AND <PMEM-TYPE? <SET NPP <POP-PSTACK ,DATA-STACK>> NP>
 			    <NP-EXCEPT .NPP>>
 		       ;"Prefer all (but foo and bar) over (all but foo) and bar..."
@@ -1317,7 +1480,6 @@ last case, just return it, because it's already been reduced."
   <COND (.PREP <PMEM-ALLOC PP PREP .PREP NOUN .NOUN>)>>
 
 <ADD-WORD MY ADJ>
-;<ADD-WORD OF ADJ>
 <ADD-WORD ME NOUN>
 <ADD-WORD YOUR ADJ>
 <ADD-WORD YOU NOUN>
@@ -1382,7 +1544,7 @@ last case, just return it, because it's already been reduced."
 			    <FSET? .AD ,PERSONBIT>>
 		       <ADJS-POSS .A1 .AD>
 		       <IF-P-GENDERS
-				<COND (<FSET? .AD ,FEMALE ;,FEMALEBIT>
+				<COND (<FSET? .AD ,FEMALEBIT>
 				       <ADJS-POSS .A1 ,P-HIM-OBJECT>)>>)
 		      (T
 		       <ADJS-POSS .A1 ,P-HIM-OBJECT>)>
@@ -1392,7 +1554,7 @@ last case, just return it, because it's already been reduced."
 		<COND (<AND <SET AD <PARSE-OBJ1 ,PARSE-RESULT>>
 			    <SET AD <NOUN-PHRASE-OBJ1 .AD>>
 			    <FSET? .AD ,PERSONBIT>
-			    <FSET? .AD ,FEMALE ;,FEMALEBIT>>
+			    <FSET? .AD ,FEMALEBIT>>
 		       <ADJS-POSS .A1 .AD>)
 		      (T
 		       <ADJS-POSS .A1 ,P-HER-OBJECT>)>
@@ -1400,7 +1562,7 @@ last case, just return it, because it's already been reduced."
 	 <COND (<EQUAL? .A2 ,W?THEIR>
 		<COND (<AND <SET AD <PARSE-OBJ1 ,PARSE-RESULT>>
 			    <SET AD <NOUN-PHRASE-OBJ1 .AD>>
-			    <FSET? .AD ,PLURAL>>
+			    <FSET? .AD ,PLURALBIT>>
 		       <ADJS-POSS .A1 .AD>)
 		      (T
 		       <ADJS-POSS .A1 ,P-THEM-OBJECT>)>)
@@ -1445,7 +1607,7 @@ last case, just return it, because it's already been reduced."
 
 <DEFINE RED-QUOTE ACT ("OPT" N:FIX TYP:FIX "AUX" NP)
  <COND (<EQUAL? ,W?QUOTE <POP-PSTACK ,DATA-STACK>>
-	<COND (<EQUAL? .N 3>
+	;<COND (<EQUAL? .N 3>
 	       <SET NP <POP-PSTACK ,DATA-STACK>>
 	       <COND (<EQUAL? ,W?QUOTE <POP-PSTACK ,DATA-STACK>>
 		      <RETURN .NP .ACT>)

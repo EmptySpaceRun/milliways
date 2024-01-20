@@ -63,7 +63,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	 <P-NO-MEM-ROUTINE>
 	 <RFALSE>)>
   <IF-P-DEBUGGING-PARSER
-	<COND (<L? ,PSTACK-WARN .TMP>
+	<COND (<AND <T? ,P-DBUG>
+                <L? ,PSTACK-WARN .TMP>>
 	       <SETG PSTACK-WARN .TMP>
 	       <PRINTI "[PSTACK: ">
 	       <PRINTN <- ,MAX-PSTACK-SIZE .TMP>>

@@ -33,23 +33,23 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	YES?>
 
 <DEFINE TOO-MANY-NEW (WHAT)
-	<TELL "[Warning: there are too many new " .WHAT "s.]" CR>>
+	<TELL "[There are too many new " .WHAT "s.]" CR>>
 
-<DEFINE NAKED-OOPS () <TELL "It's OK." CR>>
+<DEFINE NAKED-OOPS () <TELL "[Please type a word(s) after OOPS.]" CR>>
 
 <DEFINE CANT-OOPS ()
-	<TELL "There was nothing wrong with that sentence." CR>>
+	<TELL "[There was no word to replace in that sentence.]" CR>>
 
-<DEFINE CANT-AGAIN () <TELL "What do you want to do again?" CR>>
+<DEFINE CANT-AGAIN () <TELL "[What do you want to do again?]" CR>>
 
 <DEFAULT-DEFINITION CANT-USE-MULTIPLE
 <DEFINE CANT-USE-MULTIPLE (LOSS WD)
 	<SETG CLOCK-WAIT T>
 	;<COND (<==? .LOSS 2> <TELL "in">)>
 	;<TELL "direct ">
-	<TELL "You can't use more than one object at a time with \"">
+	<TELL "[You can't use more than one object at a time with \"">
 	<PRINT-VOCAB-WORD .WD>
-	<TELL "\"!" CR>>>
+	<TELL "\"!]" CR>>>
 
 <DEFINE MAKE-ROOM-FOR-TOKENS (CNT LEXV WHERE "OPT" (BEG ,P-LEXSTART)
 			      "AUX" LEN MAXLEN)
@@ -99,13 +99,20 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 ;<SYNTAX $REFRESH = V-$REFRESH>
 <DEFINE V-$REFRESH ()
 	 <LOWCORE FLAGS <BAND <LOWCORE FLAGS> <BCOM ,F-REFRESH>>>
-	 <CLEAR -1>
+	 <COLOR ,FOREGROUND-COLOR ,BACKGROUND-COLOR>
+     <CLEAR -1>
 	 <INIT-STATUS-LINE>
-	 <RTRUE>>>
+	 <COND (<EQUAL? ,P-CAN-UNDO 2>
+		    <SIXCR>
+            <HLIGHT ,H-BOLD>
+            <PRINT-PLAYER-LOC>
+            <HLIGHT ,H-NORMAL>
+            <TELL CR "[Undone.]" CR>)>
+     <RTRUE>>>
 
 <DEFAULT-DEFINITION PRINT-INTQUOTE
 <DEFINE PRINT-INTQUOTE ("AUX" (NP <GET-NP ,INTQUOTE>))
-	<PRINT-LEXV T -1
+	<PRINT-LEXV -1
 		    <ZREST <NP-LEXBEG .NP> ,LEXV-ELEMENT-SIZE-BYTES>
 		    <+ -1 </ <- <NP-LEXEND .NP> <NP-LEXBEG .NP>>
 			     ,LEXV-ELEMENT-SIZE-BYTES>>>
@@ -115,10 +122,10 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		      T>>>
 
 <DEFAULT-DEFINITION PRINT-LEXV
-<DEFINE PRINT-LEXV (SHHH "OPT" (QUIET 0)
+<DEFINE PRINT-LEXV ("OPT" (QUIET 0)
 			(X <ZREST ,TLEXV <* .QUIET ,LEXV-ELEMENT-SIZE-BYTES>>)
 			(LEN <- ,P-LEN .QUIET>))
-	<COND (<AND <ZERO? .QUIET> <G? 0 ,P-OFLAG> <NOT .SHHH>>
+	<COND (<OR <ZERO? .QUIET> <G? 0 ,P-OFLAG>>
 	       <COND (<T? ,P-RESPONDED>
 		      <BE-PATIENT <- 0 ,P-RESPONDED>>) ;"finish partial response"
 		     (T
@@ -139,25 +146,21 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 			    <T? .IN-QUOTE>>
 		       <SET IN-QUOTE <>>)
 		      (T
-			   <COND (<NOT .SHHH>
-			   		  <TELL !\ >)>)>
+		       <TELL !\ >)>
 		<COND (<EQUAL? .WD ,W?NO.WORD>
 		       T)
 		      (<CAPITAL-NOUN? .WD>
 		       <CAPITALIZE .X>)
-		      (<AND <EQUAL? .WD 0 ,W?INT.NUM ,W?INT.TIM>
-                    <ZERO? .QUIET>
-                    <NOT .SHHH>>
-               <BUFFER-PRINT .X <+ .X ,P-WORDLEN> <> T>)
+		      (<EQUAL? .WD 0 ,W?INT.NUM ,W?INT.TIM>
+		       <BUFFER-PRINT .X <+ .X ,P-WORDLEN> <> T>)
 		      (T
-			   <COND (<NOT .SHHH>
-			   		  <PRINT-VOCAB-WORD .WD>)>)>
+		       <PRINT-VOCAB-WORD .WD>)>
 		<COND (<DLESS? LEN 1>
 		       <RETURN>)>
 		<COND (<NOT <EQUAL? .WD ,W?NO.WORD>>
 		       <SET OWD .WD>)>
 		<SET X <ZREST .X ,LEXV-ELEMENT-SIZE-BYTES>>>
-	<COND (<AND <ZERO? .QUIET> <G? 0 ,P-OFLAG> <NOT .SHHH>>
+	<COND (<OR <ZERO? .QUIET> <G? 0 ,P-OFLAG>>
 	       <TELL "]" CR>)>
 	;<SETG P-OFLAG 0>>>
 
@@ -172,7 +175,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	      <+ <GETB ,TLEXV <SET LEN <- .LEN 1>>>
 		 <GETB ,TLEXV <SET LEN <- .LEN 1>>>>>
 	<COND (<NOT .QUIET>
-	       <PRINT-LEXV T .QUIET>)>
+	       <PRINT-LEXV .QUIET>)>
 	;<COND (<L? 0 ,P-OFLAG>
 	       <SETG P-OFLAG 0>)>>
 
@@ -212,7 +215,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 <ROUTINE V-$NUDGE ()
 	<SETG CLOCK-WAIT T>
 	<LEXV-WORD ,TLEXV ,W?SHOULD>	;"force sample command"
-	<TELL "[">
+    <TELL "[">
 	;<PRINT "Please use commands">
 	<TELL-SAMPLE-COMMANDS>
 	;<TELL ".]" CR>>
@@ -221,22 +224,23 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 ;<GLOBAL P-THRESH:NUMBER 10>
 
 <DEFINE COUNT-ERRORS ("OPT" (NUM 1)
-		      "AUX" (THRESH 5))
+		      "AUX" (THRESH ;<IF-P-ZORK0 <COND (<FSET? ,GREAT-HALL ,TOUCHBIT> 10)(T 2)>>
+                            4))
 	<SETG P-ERRS <+ .NUM ,P-ERRS>>
 	<COND (<G? ,P-ERRS .THRESH>
 	       <SETG P-ERRS 0>
 	       <TELL
-"|I'm having trouble understanding you. Maybe it's because you're not
+"[I'm having trouble understanding you. Maybe it's because you're not
 used to the rules for commands. ">
 	       <COND ;(<AND <NOT <FSET? ,GREAT-HALL ,TOUCHBIT>>
 			   <T? ,PROLOGUE-NOVICE-COUNTER>>
-		      <TELL "Here's a command you might be able to type now:|
-    "
+		      <TELL "Here's the command you should type now:|
+	"
 			    <ZGET ,NOVICE-MOVES ,PROLOGUE-NOVICE-COUNTER>
 			    "|
-Please try that." CR>)
+Please try that.]" CR>)
 		     (T
-		      <TELL-SAMPLE-COMMANDS>)>)>>
+              <TELL-SAMPLE-COMMANDS>)>)>>
 
 <DEFINE FIND-UEXIT-STR ACT ("AUX" (P 0))
  <REPEAT ()
@@ -246,13 +250,13 @@ Please try that." CR>)
 		<COND (<EQUAL? <PTSIZE <GETPT ,HERE .P>> ,UEXIT>
 		       <RETURN <DIR-TO-STRING .P> .ACT>)>)>>>
 
-<CONSTANT TELL-SAMPLE-COMMANDS-NUMBER 5>
+<CONSTANT TELL-SAMPLE-COMMANDS-NUMBER 3>
 
-<DEFINE TELL-SAMPLE-COMMANDS ("AUX" VERB SYN (OBJ <>) (NUM 0))
+<DEFINE TELL-SAMPLE-COMMANDS ("AUX" VERB PIN SYN (OBJ <>) (NUM 0))
 	<TELL
 "Commands tell the computer what you want to do in the
 story. Here are some commands that you can type right
-now, although they probably won't be useful:|">
+now, although they may or may not be useful:|">
 	;"0 objects:"
    <REPEAT ((CT <ZGET ,SAMPLE-COMMANDS-TABLE-0 0>)
 	    (N <COND (<T? ,PRSO> .CT) (T ,TELL-SAMPLE-COMMANDS-NUMBER)>))
@@ -284,9 +288,7 @@ now, although they probably won't be useful:|">
 	       <INC NUM>
 	       <TELL "  ">
 	       <PRINT-VOCAB-WORD .VERB>
-	       <TELL !\ >
-           <D-J .OBJ>
-           <CRLF>
+	       <TELL !\ ><D-J .OBJ><CRLF>
 	       <COND (<F? ,PRSO>
 		      <RETURN>)>)>>
 	;"2 objects:"
@@ -311,15 +313,63 @@ now, although they probably won't be useful:|">
 	       <INC NUM>
 	       <TELL "  ">
 	       <PRINT-VOCAB-WORD <ZGET ,SAMPLE-COMMANDS-TABLE-2 .VERB>>
-	       <TELL !\ >
-           <D-J .OBJ>
-           <TELL !\ >
+	       <TELL !\ ><D-J .OBJ><TELL !\ >
 	       <PRINT-VOCAB-WORD <ZGET ,SAMPLE-COMMANDS-TABLE-2 <+ 1 .VERB>>>
-	       <TELL !\ >
-           <D-J .SYN>
-           <CRLF>
+	       <TELL !\ ><D-J .SYN><CRLF>
 	       <COND (<F? ,PRSO>
 		      <RETURN>)>)>>
+    ;"3 objects:"
+   <REPEAT ((CT </ <ZGET ,SAMPLE-COMMANDS-TABLE-3 0> 3>)
+	    (N <COND (<T? ,PRSO> .CT) (T ,TELL-SAMPLE-COMMANDS-NUMBER)>))
+	<COND (<0? .N>
+	       <RETURN>)>
+    <SET VERB <- <* <COND (<T? ,PRSO> .N) (T <RANDOM .CT>)> 3> 2>>
+    <SET SYN <ZGET ,SAMPLE-COMMANDS-TABLE-3 .VERB>>
+    <COND (<0? <WORD-CLASSIFICATION-NUMBER .SYN>>	;"a synonym"
+	       <SET SYN <WORD-SEMANTIC-STUFF .SYN>>)>
+	<COND (<DLESS? N 0>
+	       <RETURN>)
+	      (<AND <SET SYN <VERB-THREE <WORD-VERB-STUFF .SYN>>>
+		    <PARSE-PARTICLE2 ,PARSE-RESULT
+				<ZGET ,SAMPLE-COMMANDS-TABLE-3 <+ 1 .VERB>>>
+            <PARSE-PARTICLE3 ,PARSE-RESULT
+				<ZGET ,SAMPLE-COMMANDS-TABLE-3 <+ 2 .VERB>>>
+		    <GET-SYNTAX .SYN 3 0 T>
+		    <SET OBJ <DETERMINE-OBJ <> 1 T>>
+		    <SET OBJ <NOUN-PHRASE-OBJ1 .OBJ>>
+		    <SET SYN <DETERMINE-OBJ <> 2 T>>
+		    <SET SYN <NOUN-PHRASE-OBJ1 .SYN>>
+            <SET PIN <DETERMINE-OBJ <> 3 T>>
+		    <SET PIN <NOUN-PHRASE-OBJ1 .PIN>>>
+	       <INC NUM>
+	       <TELL "  ">
+	       <PRINT-VOCAB-WORD <ZGET ,SAMPLE-COMMANDS-TABLE-3 .VERB>>
+	       <TELL !\ >
+           <COND (<EQUAL? .VERB 1>
+                  <TELL "\"">
+	              <SET PIN <ZREST ,VOCAB <+ 1 <GETB ,VOCAB 0>>>>
+	              <REPEAT (N (M <GETB .PIN 0>))
+	            	<SET N <ZREST .PIN <+ 3 <* .M	;"size of entry"
+	            				   <- <RANDOM <ZGET <ZREST .PIN 1> 0>
+	            				       ;"number of entries">
+	            				      1>>>>>
+	            	<COND (<AND <G=? .N ,W?A>
+	            		    <T? <WORD-CLASSIFICATION-NUMBER .N>>
+	            		    <NOT <EQUAL? .N ,W?END.OF.INPUT ,W?NO.WORD
+	            				    ,W?INT.NUM ,W?INT.TIM>>>
+	            	       <PRINT-VOCAB-WORD .N>
+	            	       <RETURN>)>>
+	              <TELL "\"">)
+                 (ELSE
+                  <D-J .PIN>)>
+           <TELL !\ >
+           <PRINT-VOCAB-WORD <ZGET ,SAMPLE-COMMANDS-TABLE-3 <+ 1 .VERB>>>
+	       <TELL !\ ><D-J .OBJ><TELL !\ >
+	       <PRINT-VOCAB-WORD <ZGET ,SAMPLE-COMMANDS-TABLE-3 <+ 2 .VERB>>>
+	       <TELL !\ ><D-J .SYN><CRLF>
+	       <COND (<F? ,PRSO>
+		      <RETURN>)>)>>
+    ;"SAY [something]"
    <COND (<OR <T? ,P-WON> <1? <RANDOM 2>>> ;<NOT <IGRTR? NUM 3>>
 	  <TELL "  say \"">
 	  <SET SYN <ZREST ,VOCAB <+ 1 <GETB ,VOCAB 0>>>>
@@ -335,9 +385,17 @@ now, although they probably won't be useful:|">
 		       <PRINT-VOCAB-WORD .N>
 		       <RETURN>)>>
 	  <TELL "\"|">)>
-   ;<COND (<IN? ,JESTER ,HERE> ;<NOT <IGRTR? NUM 3>>
-	  <TELL "   jester, give me the key|">)>
-   <TELL "Now you can try again." CR>>
+   <IFFLAG (P-ZORK0
+    <COND (<IN? ,JESTER ,HERE> ;<NOT <IGRTR? NUM 3>>
+    	  <TELL "  jester, give me the key|">)>)
+           (T
+    <COND (<AND <IN? ,SLARTY ,HERE>
+                <HELD? ,BLUE-TUBE ,SLARTY>>
+           <TELL "  slartibartfast, give me the blue test tube|">)
+          (<AND <IN? ,PLAYER ,CAR-PARK>
+                <NOT <FSET? ,MARVIN ,BADRADIOBIT>>>
+           <TELL "  marvin, unlock hotblack desiato's ship|">)>)>
+   <TELL "Now you can try again.]" CR>>
 
 <CONSTANT SAMPLE-COMMANDS-TABLE-0 <PLTABLE
 	<VOC "GO">	;"[a direction]"
@@ -363,6 +421,10 @@ now, although they probably won't be useful:|">
 	<VOC "ASK"> <VOC "ABOUT"> ;"[a character] ABOUT [one of several topics]
 	[a character], HELLO
 	[a character], GO [a direction]">>
+
+<CONSTANT SAMPLE-COMMANDS-TABLE-3 <PLTABLE
+	<VOC "WRITE"> <VOC "ON"> <VOC "WITH">	;"[a quotation] ON [a writable object] WITH [a held object]"
+	<VOC "POUR"> <VOC "IN"> <VOC "USING">	;"[a liquid] IN [a container] USING [a held object]">>
 
 <END-SEGMENT>
 >
@@ -391,6 +453,8 @@ now, although they probably won't be useful:|">
 	       (<EQUAL? .WRD ,W?ME>
 		<PRINTB ,W?YOU>
 		<SET PN T>)
+           (<EQUAL? .WRD ,W?MRIVG ,W?MRIUG ,W?MRKUG>
+		<TELL "that">)
 	       (<EQUAL? .WRD ,W?ONE>
 		<TELL "object">)
 	       (<AND ;<T? .ALL>
@@ -446,7 +510,7 @@ now, although they probably won't be useful:|">
 
 <DEFINE PRINT-PARSER-FAILURE ("AUX"
 	(CLASS <ZGET ,ERROR-ARGS 1>) (OTHER <ZGET ,ERROR-ARGS 2>)
-	(OTHER2<ZGET ,ERROR-ARGS 3>) (T??? <>))
+	(OTHER2<ZGET ,ERROR-ARGS 3>) (TEST <>) (PRTEST <>))
  ;<ZPUT ,ERROR-ARGS 1 0>
  <COND (<==? .CLASS ,PARSER-ERROR-ORPH-S>
 	<PROG (TMP PR N)
@@ -457,24 +521,7 @@ now, although they probably won't be useful:|">
 	      <ZPUT ,OOPS-TABLE ,O-AGAIN <ZGET ,OOPS-TABLE ,O-START>>
 	      <MAKE-ROOM-FOR-TOKENS 1 ,O-LEXV ,P-OFLAG>
 	      <ZPUT ,O-LEXV ,P-OFLAG ,W?NO.WORD ;0>
-		  <COND (<EQUAL? <ROOT-VERB <ZGET ,ORPHAN-S ,O-VERB>>
-		  							,V?WHERE ,V?WHAT ,V?WHAT-ABOUT ;WHAT-TIME>
-		  		 <PRINT-VOCAB-WORD <ROOT-VERB <ZGET ,ORPHAN-S ,O-VERB>>>
-				 <TELL "But ">
-				 <PRINT-VOCAB-WORD <ROOT-VERB <ZGET ,ORPHAN-S ,O-VERB>>>
-				 <COND (<VERB? WHERE>
-				 		<TELL " is">)>
-				 <TELL !\ "what?">)
-	      (ELSE
-		  ;<COND (<IN? ,PLAYER ,DARK>
-		  		 <SETG ,PRSO ,DARK-OBJECT>
-				 <TELL "(the dark)" CR>
-				 <DARK-FUNCTION>
-				 <SET T??? T>
-				 ;<PERFORM ,PRSA ,PRSO ,PRSI>
-				 ;<FUCKING-CLEAR>
-				 <RETURN>)>
-		  <TELL "Wh">
+	      <TELL "[Wh">
 	      <COND (<DIR-VERB-WORD? <ZGET ,ORPHAN-S ,O-VERB>>
 		     <TELL "ere">)
 		    (<==? ,PERSONBIT
@@ -488,19 +535,13 @@ now, although they probably won't be useful:|">
 	      <TELL !\ >
 	      <COND (<AND <SET PR <ZGET ,ORPHAN-S ,O-SUBJECT>>
 			  <BAND ,PAST-TENSE
-				<WORD-FLAGS<SET TMP<ZGET ,ORPHAN-S ,O-VERB>>>>>
+				<WORD-FLAGS <SET TMP <ZGET ,ORPHAN-S ,O-VERB>>>>>
 		     <TELL "did ">
-		     ;<TELL-THE .PR>
-			 <THE-J .PR T>
+		     <TELL-THE .PR>
 		     <THIS-IS-IT .PR>
-		     <TELL !\ >
-			 <COND (,DONT-FLAG
-			 		<TELL "not ">)>)
+		     <TELL !\ >)
 		    (T
-		     <TELL "do you ">
-			 <COND (,DONT-FLAG
-			 		<TELL "not ">)>
-			 <TELL "want ">
+		     <TELL "do you want ">
 		     <COND (<NOT <EQUAL? ,WINNER ,PLAYER>>
 			    <TELL D ,WINNER " ">)>
 		     <TELL "to ">)>
@@ -512,8 +553,7 @@ now, although they probably won't be useful:|">
 	      <COND (<SET TMP <ZGET ,ERROR-ARGS 2>>
 		     <TELL !\ >
 		     <COND (<SET PR <ZGET ,ORPHAN-S ,O-OBJECT>>
-			    ;<TELL-THE .PR>
-				<THE-J .PR T>
+			    <TELL-THE .PR>
 			    <THIS-IS-IT .PR>)
 			   (T
 			    <NP-PRINT .TMP>)>
@@ -540,8 +580,8 @@ now, although they probably won't be useful:|">
 						,O-LEXV <+ 1 <* ,P-WORDLEN .N>>>
 				   <TELL !\ >
 				   <PRINT-VOCAB-WORD .TMP>)>)>)>
-	      <TELL "?" CR>
-	      <RTRUE>)>>)
+	      <TELL "?]" CR>
+	      <RTRUE>>)
        (<==? .CLASS ,PARSER-ERROR-ORPH-NP>
 	<COND (<WHICH-PRINT .OTHER>
 	       <RTRUE>)>)>
@@ -552,8 +592,6 @@ now, although they probably won't be useful:|">
 	<CANT-USE-MULTIPLE .OTHER .OTHER2>
 	<RTRUE>)
        (<EQUAL? .CLASS ,PARSER-ERROR-NOOBJ>
-    ;<COND (<EVERYWHERE-VERB?>
-           <RETURN <PARSE-IT <>>>)>
 	<CANT-FIND-OBJECT .OTHER .OTHER2 ;.OTHER3>
 	<RTRUE>)
        (<EQUAL? .CLASS ,PARSER-ERROR-TMNOUN>
@@ -568,7 +606,7 @@ now, although they probably won't be useful:|">
 			<CHANGE-AND-TO-THEN? <SET OTHER2 ,OTLEXV>>>>
 	       <SETG P-LEN <ZGET ,OOPS-TABLE ,O-LENGTH>>
 	       <SETG TLEXV <ZGET ,OOPS-TABLE ,O-START>>
-	       <PRINT-LEXV T> ;"Remove 1 if error"
+	       <PRINT-LEXV>
 	       <RETURN <PARSE-IT <>>>)>
 	<SET OTHER2 ,OTLEXV>	;"Try to handle PUSH RED --"
 	<COND (<OR <AND <ZERO? ,P-LEN>
@@ -581,7 +619,7 @@ now, although they probably won't be useful:|">
 				 <WORD-TYPE? <ZGET ,OTLEXV 0>
 					     ,P-EOI-CODE ,P-COMMA-CODE>)
 				(T
-				 <OR <EQUAL? <ZGET ,OTLEXV 0> ,W?COMMA ,W?AND>
+				 <OR <EQUAL? <ZGET ,OTLEXV 0> ,W?COMMA ,W?AND ,W?&>
 				     <COMPARE-WORD-TYPES <WCN <ZGET ,OTLEXV 0>>
 					       <GET-CLASSIFICATION END-OF-INPUT>>>)>>>
 	       <SET CLASS <+ ,P-LEXELEN </ <- .OTHER2 ,P-LEXV> 2>>>
@@ -591,11 +629,10 @@ now, although they probably won't be useful:|">
 	       <SETG P-LEN <GETB ,P-LEXV ,P-LEXWORDS>
 			   ;<+ 1 <ZGET ,OOPS-TABLE ,O-LENGTH>>>
 	       <SETG TLEXV <ZGET ,OOPS-TABLE ,O-START>>
-	       ;<PRINT-LEXV T>
+	       ;<PRINT-LEXV>
 	       <RETURN <PARSE-IT <>>>)>
-	<COND (<NOT .T???>
-		   <DONT-UNDERSTAND>)>
-	<RTRUE>)>>
+    <DONT-UNDERSTAND>
+	;<RTRUE>)>>
 
 <IFFLAG (P-ZORK0
 	 <DEFINE NAKED-ADJECTIVE? (PTR "AUX" (WD <ZGET .PTR 0>))
@@ -650,7 +687,7 @@ now, although they probably won't be useful:|">
 					      <GET-CLASSIFICATION ADJ>>>)>>
 	<MISSING "verb">
 	<RETURN T>)>
- ;<IF-P-ZORK0
+ <IF-P-ZORK0
 	<COND (<COUNT-ERRORS 1>
 	       <RETURN T>)>>
  <TELL
@@ -658,7 +695,7 @@ now, although they probably won't be useful:|">
 something else.]" CR>>>
 
 <DEFINE MISSING (NV)
-	<TELL "There's a " .NV " missing in that sentence!" CR>>
+	<TELL "[I think there's a " .NV " missing in that sentence!]" CR>>
 
 <DEFAULT-DEFINITION CANT-FIND-OBJECT
 <DEFINE CANT-FIND-NPP (NPP PART)
@@ -684,7 +721,7 @@ something else.]" CR>>>
 	;<SET TMP <PARSE-ACTION ,PARSE-RESULT>>
 	;<COND (<==? .NUM 1>	<SET TMP <SYNTAX-FIND ;B4 .TMP 1>>)
 	      (T		<SET TMP <SYNTAX-FIND ;B8 .TMP 2>>)>
-	<TELL "There isn't any">
+	<TELL "[There isn't any">
 	<COND ;(<EQUAL? .TMP ,PERSONBIT>
 	       <TELL "one">)
 	      (T <TELL "thing">)>
@@ -695,13 +732,12 @@ something else.]" CR>>>
 		      <TELL !\ >
 		      <PRINT-VOCAB-WORD .PART>)>)
 	      (T <TELL "do that to">)>
-	<TELL "!" CR>)>>
+	<TELL "!]" CR>)>>
 
 <DEFINE NP-CANT-SEE ("OPT" (NP <GET-NP>) (SYN 0) "AUX" TMP (SHAVE <>))
 	<COND (<SET TMP <NP-NAME .NP>>
-	       ;<TELL "[">
-	       ;<TELL-CTHE ,WINNER>
-		   <THE-J ,WINNER T T>
+	       <TELL "[">
+	       <TELL-CTHE ,WINNER>
 	       <THIS-IS-IT ,WINNER>
 	       <TELL " ">
 	       <COND (<AND ;<T? .SYN>
@@ -709,8 +745,7 @@ something else.]" CR>>>
 			   <NOT <BTST .SYN ,SEARCH-MOBY>>>
 		      <SET SHAVE T>
 		      <TELL "do">
-		      <COND (<AND <NOT <EQUAL? ,WINNER ,PLAYER ;,ME>>
-                          <NOT <FSET? ,WINNER ,PLURALBIT>>>
+		      <COND (<NOT <EQUAL? ,WINNER ,PLAYER ;,ME>>
 			     <TELL "es">)>
 		      <TELL "n't have">)
 		     (T
@@ -734,15 +769,14 @@ something else.]" CR>>>
 					   <SET TMP <LOCATION-OBJECT .TMP>>
 					   <PRINT-VOCAB-WORD <LOCATION-PREP .TMP>>>>>
 			     <TELL " ">
-			     ;<TELL-THE <NOUN-PHRASE-OBJ1 .TMP>>
-				 <THE-J <NOUN-PHRASE-OBJ1 .TMP> T>
+			     <TELL-THE <NOUN-PHRASE-OBJ1 .TMP>>
 			     <THIS-IS-IT <NOUN-PHRASE-OBJ1 .TMP>>)
 			    (T
-			     <COND (<EVERYWHERE-VERB?>
+			     <COND ;(<MOBY-FIND? .SEARCH>
 				     <TELL "anyw">)
 				   (T <TELL "right ">)>
 			     <TELL "here">)>)>
-	       <TELL "." ;".]" CR>)
+	       <TELL ".]" CR>)
 	      (T <MORE-SPECIFIC>)>>>
 
 <DEFAULT-DEFINITION WINNER-SAYS-WHICH?
@@ -752,8 +786,6 @@ something else.]" CR>>>
 <DEFAULT-DEFINITION WHICH-LIST?
 <DEFINE WHICH-LIST? (NP SR "AUX" (CT <FIND-RES-COUNT .SR>))
  <COND (<AND <L=? .CT <FIND-RES-SIZE .SR>>
-         <NOT <OR <ALL-OVER-VERB?> <EVERYWHERE-VERB?>>>
-         ;<NOT <VERB? ASK-ABOUT ASK-FOR FIND SAY>>
 	     <OR <NOT <EQUAL? .CT 1>>
 		 <NOT <EQUAL? <ZGET <REST-TO-SLOT ,ORPHAN-SR FIND-RES-OBJ1> 0>
 			      ,PSEUDO-OBJECT>>>>
@@ -773,41 +805,7 @@ something else.]" CR>>>
 		       <RFALSE>)>>
     <PROG ((SR ,ORPHAN-SR) (TMP <>)
 	   (LEN <FIND-RES-COUNT .SR>) (SZ <FIND-RES-SIZE .SR>))
-	<COND (<AND <OR <EQUAL? <NP-NAME .NP> ,W?NAME>>>
-           <TELL "Which name?" CR>
-           <FUCKING-CLEAR>
-           <RTRUE>)
-          ;(<AND <OR <EQUAL? <NP-NAME .NP> ,W?CAPTAIN>>>
-           <COND (<AND <FSET? ,ARK ,SADRADIOBIT>
-                       <OR <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
-                           <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>>
-                  <TELL "You know of two captains: the Morpher one and the Golgafrincham Ark B one." CR>
-                  <FUCKING-CLEAR>
-                  <RTRUE>)
-                 (<FSET? ,ARK ,SADRADIOBIT>
-                  <TELL "(Try saying: ARK CAPTAIN instead. You see, I'm a little dumb.)" CR>
-                  <FUCKING-CLEAR>
-                  <RTRUE>)
-                 (<OR <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
-                      <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
-                  <TELL "(Try saying: MORPHER CAPTAIN instead. You see, I'm a little dumb.)" CR>
-                  <FUCKING-CLEAR>
-                  <RTRUE>)
-                 (ELSE
-                  <TELL "What captain?" CR>
-                  <FUCKING-CLEAR>
-                  <RTRUE>)>)
-          ;(<AND <OR <EQUAL? <NP-NAME .NP> ,W?I ,W?ME ,W?MYSELF ,W?SELF>>
-                ;<OR <EQUAL? .NP ,PLAIN-NAME>
-                    <EQUAL? .NP ,W?NAME>
-                    <FIND-NUM-TBL .NP ,W?NAME>
-                    <FIND-NUM-TBL .NP ,PLAIN-NAME>>>
-           ;<COND (<EQUAL? ,PLAYER ,CH-ARTHUR>
-                  <ZPUT ,OOPS-TABLE ,O-AGAIN ,W?ARTHUR>)
-                 (ELSE
-                  <ZPUT ,OOPS-TABLE ,O-AGAIN ,W?DIRK>)>
-           <RTRUE>)
-          (<AND <NOT <==? ,WINNER ,PLAYER>>
+	<COND (<AND <NOT <==? ,WINNER ,PLAYER>>
 		    <NOT <SET TMP <WINNER-SAYS-WHICH? .NP>>>>
 	       <TELL "\"I don't understand ">
 	       <COND (<WHICH-LIST? .NP .SR>
@@ -820,21 +818,18 @@ something else.]" CR>>>
 	      (<EQUAL? .TMP T>
 	       <RTRUE>)
 	      (T
-	       <TELL "Which">
-	       <COND (.NP ;<T? .NP>
+	       <TELL "[Which">
+	       <COND (<T? .NP>
 		      <TELL !\ >
 		      <NP-PRINT .NP>)>
 	       <TELL " do">)>
 	<TELL " you mean">
-	<COND (<AND <WHICH-LIST? .NP .SR>
-                <NOT <VERB? FIND>>
-                ;<0? <EVERYWHERE-VERB?>>>
+	<COND (<WHICH-LIST? .NP .SR>
 	       <COND (<OR .TMP <==? ,WINNER ,PLAYER>>
 		      <TELL !\,>)>
 	       <REPEAT ((REM .LEN) (VEC <REST-TO-SLOT .SR FIND-RES-OBJ1>))
 		<TELL !\ >
-		;<TELL-THE <ZGET .VEC 0>>
-		<THE-J <ZGET .VEC 0> T>
+		<TELL-THE <ZGET .VEC 0>>
 		<COND (<==? .REM 2>
 		       <COND (<NOT <==? .LEN 2>>
 			      <TELL !\,>)>
@@ -851,14 +846,13 @@ something else.]" CR>>>
 		      (T <SET VEC <ZREST .VEC 2>>)>>)>
 	<COND (<AND <NOT <==? ,WINNER ,PLAYER>>
 		    <NOT .TMP>>
-	       <TELL ".\"" CR>)
+	       <TELL ,PIC>)
 	      (T
-	       <TELL "?" CR>)>>>>
+	       <TELL "?]" CR>)>>>>
 
 <DEFINE NP-PRINT (NP:PMEM "OPT" (DO-QUANT <>) "AUX" LEN)
  <COND (<OBJECT? .NP>
-	;<TELL-THE .NP>
-	<THE-J .NP T>)
+	<TELL-THE .NP>)
        (<PMEM-TYPE? .NP NPP>	;3
 	<REPEAT ()
 		<COND (<SET LEN <NPP-NOUN .NP>>
@@ -876,8 +870,7 @@ something else.]" CR>>>
 	       <REPEAT (OBJ (CT 0))
 		<COND (<SET OBJ <ZGET .NP <+ ,NOUN-PHRASE-HEADER-LEN
 					     <* .CT 2>>>>
-		       ;<TELL-THE .OBJ>
-			   <THE-J .OBJ T>)>
+		       <TELL-THE .OBJ>)>
 		<COND (<G? <SET CT <+ .CT 1>> .LEN>
 		       <RETURN>)
 		      (T <TELL ", ">)>>)>)
@@ -1073,10 +1066,13 @@ something else.]" CR>>>
 	<DIROUT ,D-TABLE-ON ,O-INBUF>
 	<TELL .STR>
 	<COND (<T? .A>
-		   ;<TELL D .A>
-           <D-J .A>
+	       <COND (T ;<OBJECT? .A>
+		      <D-J .A>)
+		     ;(T <TELL .A>)>
 	       <COND (<T? .B>
-		          <TELL .B>)>)>
+		      <COND ;(<OBJECT? .B>
+			     <TELL D .B>)
+			    (T <TELL .B>)>)>)>
 	;<PRINTC 0>	;"Some ZIPs might need this."
 	<DIROUT ,D-TABLE-OFF>
 	<PUTB ,O-INBUF 0 ,INBUF-LENGTH>
