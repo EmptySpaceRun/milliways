@@ -18,7 +18,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
 <OBJECT LOCAL-GLOBALS
 	(LOC GLOBAL-OBJECTS)
-	(DESC "all")
+	(DESC "that")
 	(SYNONYM L.G ;XZZZP)
 	(FLAGS NARTICLEBIT)
 	(ACTION LOCAL-GLOBALS-F)>
@@ -27,8 +27,9 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
  <COND (<OR <REMOTE-VERB?>
  			<AND <VERB? EXAMINE>
 				 <EQUAL? ,PRSO ,INTNUM>>>
-	<RFALSE>)
-       (T <NOT-HERE ,LOCAL-GLOBALS>)>>
+	    <RFALSE>)
+       ;(T
+        <NOT-HERE ,LOCAL-GLOBALS>)>>
 
 
 
@@ -73,12 +74,17 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
   PDW - Default of interpreter
   Bar - Red (If I can find a brown that would be cool...)"
 
+<GLOBAL BACKGROUND-COLOR 12>
+<GLOBAL FOREGROUND-COLOR 9>
+
 <ROUTINE CHANGE-PART (COL "OPT" (Y 9) "AUX" X)
     <COND (<EQUAL? .COL 9>
            <SET Y 2>)
           (<EQUAL? .COL 1>
            <SET Y 1>)>
     <SIXCR>
+    <SETG BACKGROUND-COLOR .COL>
+    <SETG FOREGROUND-COLOR .Y>
     <SET X <INPUT 1>>
     <COLOR .Y .COL>
     <CLEAR -1>
@@ -153,7 +159,7 @@ of the " ,SCC ".\" ">>
 		<CRLF>>>
 
 <ROUTINE WANT-DEATH ()
-    <TELL "If you wanted to die, you would. But you don't, so let's not." CR>
+    <TELL "If you wanted to die, you would. But you don't, or at least I don't, so let's not." CR>
     <RFALSE>>
 
 
@@ -741,7 +747,7 @@ which included some postcards, a bottle of retsina, and a can of greek olive oil
       <COND (<=? ,P-NUMBER 42>
           <TELL ". Surprisingly, this is extremely important in the long run, and is why mice are out to get your brain." CR>)
       (<=? ,P-NUMBER 7>
-          <TELL "" CR>)
+          <CRLF>)
       (<=? ,P-NUMBER 12345>
           <NOTES 3 T>)
       (ELSE
@@ -831,7 +837,7 @@ the desired direction." CR>)
 		 <VERB? ASK-ABOUT ASK-FOR SEARCH-FOR TELL-ABOUT>>
 	    <AND <DOBJ? IT>
 		 <VERB? ASK-CONTEXT-ABOUT ASK-CONTEXT-FOR FIND ;WHAT>>>
-	<TELL "\"I'm not sure what you're talking about.\"" CR>)>
+	<TELL "\"I'm not sure what you're talking about" ,PIC>)>
  <>>
 
 <OBJECT HELLO-OBJECT
@@ -1090,16 +1096,12 @@ to continue?">
 	 <REPEAT ()
 		 <COND (<NOT .X> <RETURN>)>
 		 <SET N <NEXT? .X>>
-		 ;<COND (<NOT <FSET? .X ,TAKEBIT>>
-			<SET X .N>
-			<AGAIN>)>
 		 <COND (<AND <NOT .N> .TOLD? .TELL?>
 			<TELL " and ">)>
 		 <SET TOLD? T>
 		 <COND (.TELL?
-			;<TELL the .X>
 			<THE-J .X T>
-			<COND (.N <TELL !\,>)
+			<COND (.N <TELL ",">)
 			      (T <TELL ". ">)>)>
 		 <MOVE .X .THIEF>
 		 ;<FCLEAR .X ,TAKEBIT>
@@ -1136,7 +1138,7 @@ to continue?">
 		      <ALREADY ,LIGHT-GLOBAL "off">)
 		     (<SET P <FIND-FLAG-HERE-NOT ,PERSONBIT ,MUNGBIT ,PLAYER>>
 		      <TELL
-D .P " says, \"Please don't leave us in the dark.\"" CR>)
+D .P " says, \"Please don't leave us in the dark" ,PIC>)
 		     (T
 		      <FCLEAR ,HERE ,ONBIT>
 		      <OKAY ,LIGHT-GLOBAL "off">)>)>)>>
@@ -1402,7 +1404,7 @@ eh, not many people would care if you were inside the ship
 <OBJECT OBJECT-OF-GAME
 	(LOC GLOBAL-OBJECTS)
 	(DESC "point of the game")
-	(SYNONYM OBJECT GAME GOAL POINT MILLIWAYS)
+	(SYNONYM OBJECT GAME GOAL POINT ;MILLIWAYS)
 	(FLAGS VOWELBIT)
     (GENERIC RESTAURANT-G)
 	(ACTION OBJECT-OF-GAME-F)>
@@ -1412,19 +1414,25 @@ eh, not many people would care if you were inside the ship
 			<TELL ,DO-YOURSELF CR>)
 		   (<VERB? EXAMINE LAMP-ON PLAY READ THROUGH>
 	        <SETG CLOCK-WAIT T>
-	        <TELL "You're playing it now!" CR>)>>
+	        <TELL "You're playing Milliways now!" CR>)>>
 
 
 <OBJECT LIFE
 	(LOC GLOBAL-OBJECTS)
-	(DESC "life")
+	(DESC "Life, the Universe and Everything")
 	(SYNONYM LIFE EVERYTHING)
 	(ADJECTIVE ;POINT LIFE UNIVERSE EVERYTHING)
 	(FLAGS NARTICLEBIT)
 	(ACTION LIFE-F)>
 
 <ROUTINE LIFE-F ()
-	 <COND (<VERB? WHAT>
+	 <COND (<AND <NOUN-USED? ,LIFE ,W?EVERYTHING>
+                 <NOT <NOUN-USED? ,LIFE ,W?LIFE>>
+                 <ADJ-USED? ,LIFE <>>>
+            <SETG CLOCK-WAIT T>
+            <TELL "[Instead of EVERYTHING, try ALL.]" CR>
+            <RTRUE>)
+           (<VERB? WHAT EXAMINE>
 			<TELL "Ask Marvin." CR>)
 		   ;(<VERB? ASK-ABOUT>
 		   	<RFALSE>)>>
@@ -1440,7 +1448,7 @@ eh, not many people would care if you were inside the ship
 <ROUTINE WATER-F ()
 	<COND (<VERB? FIND>
 		<TELL "There isn't any water here, if that's what you want to ask." CR>)
-	(T
+	      (T
 		<TELL "There isn't any water here!" CR>)>>
 
 <ROUTINE CROWD-F ()
@@ -1465,7 +1473,7 @@ eh, not many people would care if you were inside the ship
 		   		  <PERFORM ,V?EXAMINE ,SKY>)
 				 (ELSE
 				  <PERFORM ,V?EXAMINE ,CEILING>)>)
-		  (<VERB? MOVE BOARD WALK>
+		  (<VERB? MOVE BOARD WALK SWIM>
 		   <DO-WALK ,P?UP>)
 		  (<VERB? TAKE>
 		   <DONT-UNDERSTAND>
@@ -1479,7 +1487,7 @@ eh, not many people would care if you were inside the ship
 	(ACTION DOWN-F)>
 
 <ROUTINE DOWN-F ()
-	<COND (<VERB? MOVE BOARD WALK>
+	<COND (<VERB? MOVE BOARD WALK SWIM>
 		   <DO-WALK ,P?DOWN>)
 		  (<VERB? EXAMINE>
            <TELL "That's the floor." CR>)>>
@@ -1517,7 +1525,8 @@ eh, not many people would care if you were inside the ship
 <OBJECT BEER
     (LOC LOCAL-GLOBALS)
     (SDESC "alcohol")
-    (SYNONYM BEER VODKA ALCOHOL WINE WHISKY DRINK TOOTHBRUS BRUSH RUBBER ERASER BAND DISASTER AREA)
+    (SYNONYM BEER VODKA ALCOHOL WINE WHISKY DRINK TOOTHBRUS BRUSH RUBBER ERASER AREA)
+    (ADJECTIVE DISASTER)
     (GENERIC BEER-G)
     ;(FLAGS TAKEBIT)
     (ACTION BEER-F)>
@@ -1531,7 +1540,8 @@ eh, not many people would care if you were inside the ship
            <PUTP ,BEER ,P?SDESC "toothbrush">)
           (<NOUN-USED? ,BEER ,W?RUBBER ,W?ERASER>
            <PUTP ,BEER ,P?SDESC "rubber">)
-          (<NOUN-USED? ,BEER ,W?BAND ,W?DISASTER ,W?AREA>
+          (<OR <NOUN-USED? ,BEER ,W?AREA>
+               <ADJ-USED? ,BEER ,W?DISASTER <>>>
            <PUTP ,BEER ,P?SDESC "Disaster Area">
            <FSET ,BEER ,PLURALBIT>)>
     <RFALSE>>
@@ -1696,7 +1706,7 @@ eh, not many people would care if you were inside the ship
 
 <OBJECT YOUR-NAME
 	(LOC GLOBAL-OBJECTS)
-	(DESC "name")
+	(DESC "your name")
     (OWNER PLAYER)
 	(SYNONYM NAME NAMES)
 	(ADJECTIVE ;YOUR MY)
@@ -1705,7 +1715,8 @@ eh, not many people would care if you were inside the ship
 	(ACTION YOUR-NAME-F)>
 
 <ROUTINE YOUR-NAME-F ()
-     <COND (<NOT <ADJ-USED? ,YOUR-NAME ,W?MY>>
+     <COND (<AND <NOT <ADJ-USED? ,YOUR-NAME ,W?MY ,W?ARTHUR ,W?DENT>>
+                 <NOT <NOUN-USED? ,YOUR-NAME ,W?ARTHUR ,W?DENT ,W?QUOTE>>>
             <COND (<VERB? READ EXAMINE>
                    <COND (<IN? ,PLAYER ,DRESSING-ROOM-BBBB>
                           <PERFORM ,PRSA ,REGISTER>)
@@ -1812,10 +1823,11 @@ You don't think you can, anyway.">> CR>
                   <COND (<NOT <IOBJ? REGISTER>>
                          <COND (<AND <NOT <VISIBLE? ,REGISTER>>>
                                 <COND (<NOT <NOUN-USED? ,GL-BEAST ,W?NAME>>
-                                       <TELL <PICK-ONE <PLTABLE
-"You can't see any beast here, which is pretty lucky."
+                                       <TELL ,NOPE "see "
+                                             <PICK-ONE <PLTABLE
+"any beast here, which is pretty lucky."
 "You should be glad you can't see any Beast here."
-"You can't see the Ravenous Bugblatter Beast of Traal here.
+"the Ravenous Bugblatter Beast of Traal here.
 You don't think you can, anyway.">> CR>)
                                       (ELSE
                                        <TELL "Where are you meant to find the beast's name?" CR>)>
@@ -1980,7 +1992,7 @@ brown stains. The south wall is more interesting." CR>)>)
     <COND (<AND <FSET? ,MOUSE-PAINTING ,NDESCBIT>
                 <IN? ,MOUSE-PAINTING ,INTERVIEW-ROOM>>
            <TELL
-", and next to is a strange and (not to mention) quite
+", and next to it is a strange and (not to mention) quite
 badly-made painting">)>
     <TELL !\.>>
 
@@ -2031,7 +2043,7 @@ The rest of the sky is either twinkling with stars or pitch dark." CR>)
 	(DESC "air")
 	(SYNONYM AIR VACUUM)
 	(FLAGS ;INVISIBLE SEENBIT)
-	(ACTION UNIMPORTANT-THING-F)>
+	(ACTION USELESS)>
 
 <OBJECT HEART-OF-GOLD
 	(LOC LOCAL-GLOBALS)
@@ -2049,7 +2061,7 @@ shaped like a sleek running shoe." CR>)
 		<COND (<EQUAL? ,HERE ,HATCHWAY ,RAMP>
 			<DO-WALK ,P?DOWN>)
 		(T
-			<TELL "You aren't inside " D ,HEART-OF-GOLD " at the moment, though." CR>)>)
+			<PRINT "You aren't "><TELL "inside " D ,HEART-OF-GOLD " at the moment, though." CR>)>)
 	(<VERB? CLIMB-ON WALK-TO BOARD THROUGH LEAP>
 		<COND (<EQUAL? ,HERE ,RAMP ,BLIGHTED-GROUND>
 		    <DO-WALK ,P?UP>)
@@ -2091,6 +2103,17 @@ shaped like a sleek running shoe." CR>)
 		<RFALSE>)
 	       (T
 		<TELL "That's not important; leave it alone." CR>)>>
+
+<ROUTINE USELESS ("OPT" THING STRING)
+	 <TELL "You don't need to refer to ">
+	 <COND (<ASSIGNED? STRING>
+		    <TELL "the " .THING>)
+	       (<ASSIGNED? THING>
+		    <THE-J .THING T>)
+	       (T
+		    <TELL "that">)>
+	 <TELL " to complete this story." CR>
+	 <RTRUE>>
 
 <OBJECT WINDOW
 	(LOC LOCAL-GLOBALS)
@@ -2162,9 +2185,20 @@ hurtled at. Please, nobody cares. Just DON'T LOOK OUT THE WINDOW." CR>)
  <COND (<VERB? EAT ENJOY>
  		<COND (<NOT <IN-REST? ,PLAYER>>
                <TELL
-"What! You were just recently in the perfect space to eat - Milliways,
-t" ,RATEOTU ". And you want to eat it "><ITALICIZE "here"><TELL !\? CR>
+"What! You were just recently in the perfect space
+to eat - " D ,RESTAURANT ". And you want to eat it ">
+               <ITALICIZE "here">
+               <TELL !\? CR>
                <RTRUE>)
+              (<NOT <IN? ,BLASTER ,LOCAL-GLOBALS>>
+               <TELL
+"Even with no utensils, this meal is very good! It's all you
+need to satisfy your hunger. But still, you felt something was
+missing." CR>
+               <REMOVE ,PLATE>
+               <INCREMENT-SCORE 25>
+               <SETG SCOREMAD T>  ;"Skip through the depression phase. In that way, you put yourself in a cheeky fail state."
+               <SETG SCOREOUT 32>)
               (<NOT <FSET? ,DINNER ,RADPLUGBIT>>
                <TELL
 "You stuff it in your mouth very quickly, and your hunger
@@ -2213,17 +2247,33 @@ destroyed.|But oh well. You didn't.">)>)
 
 "GENERICS"
 
+<ROUTINE ROCK-G ()
+    <RETURN ,STALACTITE>>
+
 <ROUTINE BLASTER-G ()
     <RETURN ,BLASTER>>
 
+<ROUTINE PAINTING-G ()
+    <COND (<OR <AND <VISIBLE? ,MOUSE-PAINTING>
+                    <VISIBLE? ,CAT-PAINTING>
+                    <NOT <VERB? SHOW>>>
+               <EVERYWHERE-VERB?>>
+           <ACTUALLY ,MOUSE-PAINTING>
+           <RETURN ,MOUSE-PAINTING>)
+          (ELSE
+           <RFALSE>)>>
+
+<ROUTINE RED-DYE-G ()
+    <RETURN ,RED-DYE>>
+
 <ROUTINE CAPTAIN-G ()
     <COND (<AND <FSET? ,ARK ,SADRADIOBIT>
-                <OR <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
+                <OR <FSET? ,MORPHER-CAPTAIN ,INVISIBLE>
                     <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>>
            <RFALSE>)
           (<FSET? ,ARK ,SADRADIOBIT>
            <RETURN ,ARK-CAPTAIN>)
-          (<OR <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
+          (<OR <FSET? ,MORPHER-CAPTAIN ,INVISIBLE>
                <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
            <RETURN ,MORPHER-CAPTAIN>)
           (ELSE
@@ -2284,7 +2334,7 @@ destroyed.|But oh well. You didn't.">)>)
     <COND (<AND <INTBL? ,W?BOWL ,P-INBUF ,INBUF-LENGTH>
                 <EVERYWHERE-VERB?>>
            <RETURN ,BOWL>)
-          (<INTBL? ,W?BOWL ,P-INBUF ,INBUF-LENGTH>
+          ;(<INTBL? ,W?BOWL ,P-INBUF ,INBUF-LENGTH>
            <RFALSE>)
           (ELSE
            <RETURN ,FRUIT>)>>
@@ -2292,7 +2342,7 @@ destroyed.|But oh well. You didn't.">)>)
 <ROUTINE PHONE-G ()
     <COND ;(<VERB? $CALL>
            <RETURN ,PHONE>)
-          (<VERB? WRITE WRITE-WHAT>
+          (<VERB? WRITE WRITE-WHAT WRITE-THIRD>
            <RETURN ,CELL-PHONE>)
           (ELSE
            <RETURN ,PHONE>)>>
@@ -2423,10 +2473,29 @@ destroyed.|But oh well. You didn't.">)>)
            <RFALSE>)>>
 
 <ROUTINE POLICE-G ()
-    <RETURN ,LIP1>>
+    <COND (<FSET? ,POLICEMAN ,SEENBIT>
+           <RETURN ,POLICEMAN>)
+          (ELSE
+           <RETURN ,LIP1>)>>
 
 <ROUTINE STAIRS-G ()
     <RETURN ,STAIRS>>
+
+<ROUTINE GLASS-G ()
+    <COND ;(<AND <FSET? ,WINE-GLASS ,SECRETBIT>
+                <FSET? ,RUM-GLASS ,SECRETBIT>>
+           <COND (<EVERYWHERE-VERB?>
+                  <TELL "There are many glasses in this game. I want to know which one." CR>
+                  <FUCKING-CLEAR>)
+                 (ELSE
+                  <CANT-SEE <> "glass">
+                  <>)>)
+          ;(<FSET? ,WINE-GLASS ,SECRETBIT>
+           <RETURN ,RUM-GLASS>)
+          ;(<FSET? ,RUM-GLASS ,SECRETBIT>
+           <RETURN ,WINE-GLASS>)
+          (ELSE
+           <RFALSE>)>>
 
 <ROUTINE DINNER-G ()
     <COND (<AND <VISIBLE? ,PLATE>
@@ -2532,11 +2601,11 @@ directions for that. You never read it and lost it ages ago." CR>)>>
 
 <OBJECT GOWN
 	(LOC HATCHWAY)
-	(DESC "gown")
+	(DESC "your gown")
     (OWNER PLAYER)
 	(DESCFCN GOWN-D)
 	(SYNONYM GOWN POCKET ROBE LOOP)
-	(ADJECTIVE MY ;YOUR DRESSING TATTY FADED BATTERED)
+	(ADJECTIVE MY ;YOUR DRESSING TATTY FADED BATTERED GOWN)
     (FLAGS WEARBIT TRYTAKEBIT TAKEBIT CONTBIT NARTICLEBIT ;SEARCHBIT OPENABLEBIT)
 	(SIZE 15)
 	(CAPACITY 20)
@@ -2545,7 +2614,7 @@ directions for that. You never read it and lost it ages ago." CR>)>>
 <ROUTINE GOWN-D ()
     <COND (<NOT ,LOOK-COUNTER-D>
            <SETG LOOK-COUNTER-D T>
-           <TELL
+           <TELL CR
 "Your gown appears to have been left where you dropped
 it in the last game (which seems like quite an unlikely
 occurrence, considering the ship you are currently in
@@ -2553,7 +2622,8 @@ is very likely to do unlikely things): in short, your
 gown is on the floor">)
           (ELSE <TELL "Your gown is here">)>
     <TELL ,PAUSES>
-    <COND (<FSET? ,GOWN ,OPENBIT>
+    <COND (<AND <FSET? ,GOWN ,OPENBIT>
+                <FIRST? ,GOWN>>
            <PRINT-CONT ,GOWN <> 0 <> T>)>>
 
 <ROUTINE GOWN-F ()
@@ -2622,29 +2692,11 @@ clearly a garment which has seen better decades. It has a pocket which is ">
 "The Guide is a Mark II model. Its only resemblance to the Mark IV pictured
 in the brochure in your game package is the large, friendly \"Don't Panic!\"
 on its cover.|
-|
-The Guide is a Sub-Etha Relay. You can use it to tap information from a huge
+|The Guide is a Sub-Etha Relay. You can use it to tap information from a huge
 and distant data bank by consulting the Guide about some item or subject.">
         <COND (<FSET? ,GUIDE ,BADRADIOBIT>
-               <TELL "|None of this matters anyway, because the Guide is broken.">)>
+               <TELL CR "None of this matters anyway, because the Guide is broken.">)>
         <CRLF>)
-	;(<VERB? TAKE>
-     <COND (<ITAKE>
-            <TELL "Taken." CR>)
-           (ELSE
-            <TELL "Some unseen force whispers in your ear: \"Don't do it. The Guide is too valuable.\"" CR>
-            <RTRUE>)>)
-    ;(<VERB? DROP>
-     <COND (<IDROP>
-            <TELL "Dropped." CR>)
-           (ELSE
-            <COND (<AND <VERB? PUT-IN>
-                        <IOBJ? THING GOWN>>
-                   <TELL "You squeeze it in." CR>
-                   <MOVE ,GUIDE ,PRSI>)
-                  (ELSE
-                   <TELL "Some unseen force whispers in your ear: \"Don't do it. The Guide is too valuable.\"" CR>
-                   <RTRUE>)>)>)
     (<VERB? ASK-ABOUT>
 	 <COND (<OR <EQUAL? ,PRSO ,GUIDE>
 	 			;<AND <EQUAL? ,PRSO ,IT>
@@ -2653,11 +2705,11 @@ and distant data bank by consulting the Guide about some item or subject.">
                <TELL "There is no response. It's broken." CR>
                <RTRUE>)>
 		<COND (<EQUAL? ,PRSI ,LIP1>
-			<TELL
+			   <TELL
 "Suddenly, agents of the " ,AGENCY " pop in using Sub-Etha belts, rough you up
 a bit, tell you there's no such thing as the " ,AGENCY " and never to consult "
 D ,GUIDE " about the " ,AGENCY " again; then they leave." CR>
-			<RTRUE>)
+			   <RTRUE>)
 		(ELSE
 		<TELL
 "The Guide checks through its Sub-Etha-Net database and eventually comes
@@ -2671,14 +2723,12 @@ D ,GUIDE " is a wholly remarkable product." ,ALREADY-KNOW-THAT CR>)
 "There is absolutely no such spaceship as " D ,HEART-OF-GOLD " and anything
 you've ever read in this spot to the contrary was just a prank.|
 -- " ,AGENCY CR>)
-			(<EQUAL? ,PRSI ,BLIGHTED-GROUND>
-			;<COND (<EQUAL? <RANDINT 1 2> 2>)>
-					<TELL
+			(<EQUAL? ,PRSI ,BLIGHTED-GROUND ,END>
+			<TELL
 "The " ,SCC " incompetently produces a wide range of inefficient and unreliable
 high-tech machinery. However, thanks to SCC's ruthless marketing division, this
-junk accounts for over 95% of the high-tech machinery sold in the Galaxy.
-(SCC's marketing division will be the first against the wall when the
-revolution comes.)" CR>)
+junk accounts for over 95% of the high-tech machinery sold in the Galaxy. (SCC's
+marketing division will be the first against the wall when the revolution comes.)" CR>)
 			(<EQUAL? ,PRSI ,MARVIN ,CLYDE>
 			<TELL
 ,GPP " are a misguided attempt by the " ,SCC " to make their machines behave
@@ -2725,18 +2775,18 @@ knife, a perfect sphere, a complex shape, or a wiggly line in multiple dimension
 in 3D without needing an alternate entity, if that makes sense, which it doesn't).
 |    Now, this may seem Like the premise of an epic hero film or something, but frobs are known all
 across the galaxy as things which you might use every day. Try looking for one! You can probably
-find a frob in in the bathroom, or maybe in the garden.|
+find a frob in the bathroom, or maybe in the garden.|
 |Possible uses of the word FROB:|
     - Old man, give me the frob|
     - \"She took the frob and threw it in the test tube.\"|">)
 			(<OR <EQUAL? ,PRSI ,ZAPHOD>>
-			<TELL D ,ZAPHOD " is the former" ,PRESIDENT ,PAUSES>)
+			<TELL D ,ZAPHOD " Beeblebrox is the former" ,PRESIDENT ,PAUSES>)
             (<OR <EQUAL? ,PRSI ,FORD>>
 			<TELL D ,FORD " Prefect is a researcher for " ,GUIDE-NAME ,PAUSES>)
             (<EQUAL? ,PRSI ,MAXXY>
             <TELL
 D ,MAXXY " is one of the most famous celebrities in all of the known
-Universe: he is the host of " D ,RESTAURANT ", t" ,RATEOTU ,PAUSES>)
+Universe: he is the host of " D ,RESTAURANT ,PAUSES>)
             (<EQUAL? ,PRSI ,BAR ,BURGERS>
             <TELL
 D ,BAR " is a place where you can sit and watch the Big Bang"
@@ -2797,7 +2847,7 @@ past the edge of extinction." CR>)
                       <=? 42 ,P-NUMBER>>
                  <EQUAL? ,PRSI ,LEDGE>>
 		    <TELL
-N ,P-NUMBER " is the Answer to the Question of Life, the Universe and Everything.
+"Forty-two is the Answer to the Question of Life, the Universe and Everything.
 Although " ,QUESTION-ANSWER " is unkown, and has been for millions of years, many
 scientists are determined to find it one day ">
             <NOTES 13>
@@ -2813,12 +2863,16 @@ which has yet to be found." CR CR
 "Mice are 6th-dimension beings who commonly take the form of a small furry rodent,
 so that they can pass inconspicuously by certain restrictions for high-tier races
 or threats. On the note of threat, mice are highly dangerous, and it is suggested
-you don't meet them unless you have a payload of money to give them or a death wish." CR>)
+you don't meet them unless you have a briefcase of money or a death wish." CR>)
             (<EQUAL? ,PRSI ,PEANUT-PACKET>
 		    <TELL
 "Sources of protein, such as the common peanut, are carried by all serious
 hitchhikers. Protein loss occurs in" ,BEAM "s and you will become groggy
-unless you replace it immediately." CR>)
+unless you replace it immediately. Nowadays some very rich corporations
+(eg. Milliways) have mainstream protein supplementers in their personalised
+doorway teleports, which reduces the need for the proteibn. However, many
+ships still don't have them as they are very expensive. It gets even worse
+when the ship decides to travel around through time AND space." CR>)
 			(<EQUAL? ,PRSI  ,BABEL-FISH>
 		    <TELL
 "A mind-bogglingly improbable creature. A " D ,BABEL-FISH ", when placed in
@@ -2829,16 +2883,15 @@ one's ear, allows one to understand any language." CR>)
 for learning from experience and is therefore surprised by virtually everything
 that happens to it. Here is an example of how stupid it is: it thinks that if
 you can't see it, it can't see you.|
-Its behaviour would be quite endearing if it wasn't spoilt by this one
-thing: it is the most violently carnivorous creature in the Galaxy. Avoid,
-avoid, avoid." CR>)
+Its behaviour would be quite endearing if it wasn't spoilt by this one thing:
+it is the most violently carnivorous creature in the Galaxy. Avoid, avoid, avoid." CR>)
 			(<EQUAL? ,PRSI ,BLASTER>
 			<TELL
 "The best drink in existence; somewhat like having your brains
 smashed out by a slice of lemon wrapped around a large gold brick.||">
 <HLIGHT ,H-NORMAL><TELL "It also says that drinking some of the "
 ,GALACT " and surviving the shock apparently makes you wiser, but
-you're npot sure how tyrue that can be - Zaphod Beeblebrox has a "
+you're not sure how true that can be - Zaphod Beeblebrox has a "
 ,GALACT " as a morning routine." CR>)
 			(<EQUAL? ,PRSI ,THIRD-PLANET>
 			<TELL "Mostly harmless." CR>)
@@ -2862,12 +2915,14 @@ night during a wild office party. The lost data will be restored as soon as
 we find someone who knows where the back-up tapes are kept, if indeed any
 are kept at all." CR>)
 			(<EQUAL? ,PRSI ,SPORFE>
-			<TELL "Generally, these are used as subtle murder devices, as you can
-hand it as a gift to someone who has no idea what it is actually used for, and
-the next time they use it, they would inadvertently die a very sad and messy death.
-It is said to have been the highest cause of death for the first few weeks after
-it was invented. In short, don't own one of these if you're happy with
-your life the way it is." CR>)
+			<TELL "A sporfe, in a sentence, is a spork (which is a spoon with
+prongs) and a serrated (but very sharp) knife blade on the end of the handle.
+Generally, these are used as subtle murder devices, as you can hand it as a
+gift to someone who has no idea what it is actually used for, and the next
+time they use it, they would inadvertently die a very sad and messy death. It
+is said to have been the highest cause of death for the first few weeks after
+it was invented. In short, don't own one of these if you're happy with your
+life the way it is." CR>)
 			(<EQUAL? ,PRSI ,RESTAURANT>
 			<TELL
 "Ahh. Milliways. " !\T ,RATEOTU !\.>
@@ -2894,7 +2949,8 @@ recipe for it is as follows:|
 |    - 1 steak of some sort of meat (but not black cow, which explodes if it is cooked)
 |    - A cup of non-deadly liquid, such as water
 |    - Breadcrumbs - or any crumbled food. If you're going really posh, you can
-use dried olives or crushed peanuts.
+use dried olives or some delicacy like that. They must be deep fried by the end for
+this to work, however.
 |    - A spoonful of " ,GALACT
 "||Okay, now this last part is a little more important. I cannot stress how important
 it is that you don't put any more than one spoonful. If you do, you may die, due to
@@ -2918,7 +2974,7 @@ consult the Guide." CR>)>)>
 
 <ROOM FOO-ROOM
     (LOC ROOMS)
-    (DESC "Foo Room (You have found a bug!)")
+    (DESC "Zeppelin, hanging from the underside")
     (LDESC
 "If you have reached here, you have found a BUG!
 Please report it to maxfouquetogarra@gmail.com .
@@ -2929,6 +2985,7 @@ restart to leave this damned place, or just QUIT.")
 
 <ROUTINE FOO-ROOM-F (RARG)
     <COND (<AND <EQUAL? .RARG ,M-BEG>
+                <NOT <VERB? UNDO QUIT RESTART RESTORE>>
                 ,FAIL-FJORD>
            <JIGS-UP
 "Before you can do anything, the zeppelin glides less than a meter

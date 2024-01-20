@@ -45,6 +45,7 @@ have already turned them off, so this would be a warning to you.]" CR>
 	       <RFATAL>)
 	      (<NOT ,HINT-WARNING>
 		   <SETG AWAITING-REPLY 6>
+           <QUEUE I-REPLY 1>
 	       <SETG HINT-WARNING T>
 	       <TELL
 "[Warning: It is recognized that the temptation for help may at times be
@@ -466,21 +467,24 @@ arrive at the Fjords of Norway."
 				"ASK BENJY ABOUT THE POINT OF THE GAME. Or Percy.">
 			<LTABLE 3
 				"How do I stop being killed?"
-				"At this point, you will need to distract the mice to get through. When the mice tell you to eat fruit,
-try eating the fruit, or saying YES/OK."
-				"Now, you can tell this doesn't work. So maybe refuse it, by saying NO."
-				"The mice at this point are very confused, which may be good, depending on how you look at it."
-				"Now you're being asked questions by either the mice or the computer."
-				"Reply with one of the answers, trying to not disagree with yourself (you may die)."
+				"At this point in the game, you will need to distract the mice to get through."
+                "If you have been asked twice already to eat fruit, or you insulted them too greatly
+(like insulting the painting), you'll have to undo until the beginning of this section."
+                "Now when the mice tell you to eat fruit, try eating the fruit, or SAY \"OK\"."
+				"Now, you can tell this doesn't work. So maybe UNDO and this time refuse it, by SAY \"NO\"."
+				"The mice at this point are very confused, which may be good or bad, depending on how you look at it."
+				"Now you are being asked questions by either of the mice."
+				"Reply with one of the answers (YES or NO), trying to not disagree with yourself (you may die)."
 				"There is one turn between each of the questions, where the mice are talking."
-				"In this turn, you can begin escaping. Try OUT."
+				"In this single turn, you can begin to try escaping. Try going OUT."
 				"As you can tell, that doesn't work. Too much action in one turn. Try splitting it up into shorter moves."
 				"OPEN DOOR."
 				"Nope, it's electronic. Though you will note that there's an emergency exit button by the door."
 				"PUSH BUTTON."
 				"Still too much. You have to be subtle!"
 				"Try GO TO THE EXIT. Then on the next free turn, PUSH THE BUTTON."
-				"Then, on the final free turn, OUT.">
+				"Then, on the final free turn, OUT."
+                "There is a much quicker and easier way to do this involving the painting, but I'll leave that up to you.">
 			<LTABLE 3
 				"Now I'm behind the big computer. Any help?"
 				"WAIT."
@@ -531,6 +535,12 @@ that he has a first-class access card. And when you try entering the Car Park, y
                 "Try it now."
                 "Then go to GETTING THE ACCESS CARD if you really don't understand.">
 			<LTABLE 3
+                "Getting the waiters' attention"
+                "There is only way to get a waiter's attention."
+                "Unfortunately, it hasn;t been coded into the game because that's a waste of time and is not important to the game."
+                "But you can get some useful hints from them."
+                "Namely, in the Kitchen.">
+            <LTABLE 3
 				"Is the Kitchen useful?"
 				"If you've looked at the cupboard in the Kitchen, you should be able to tell that there are many objects you can get.
 But if you try to take any of them, it won't let you."
@@ -540,6 +550,18 @@ But if you try to take any of them, it won't let you."
 				"But you should be more specific than that."
 				"So wait until there is something that you might need."
 				"[This space intentionally left blank]">
+            <LTABLE 3
+                "What items can I safely discard to pass the cupboard puzzle?"
+                "Before you've entered the car park and been able to collect many random objects from everywhere
+else in the game, you aren't likely to have been able to find many items that won't be needed later in the game."
+                "BUT there are enough."
+                "It's mainly trial-and-error, you know."
+                "All the items you can you from Magrathea, Below Magrathea & Milliways are:"
+                "  Interview Room - piece of fruit, painting of a mouse (good luck on getting THAT...)"
+                "  Reception - menu"
+                "  Dining Hall - Ford's satchel, Santriginean mineral water"
+                "  (You can also use the red dye for the cupboard once your have poured it into the wine glass.)"
+                "So there is enough to get all of the items, though the rum glass is not necessary and the tray can be gotten much later.">
             <LTABLE 3
                 "Getting the first-class access card"
                 "If you started off from the first-class idiot (continued), then you should be fine. Otherwise, try reading that first."
@@ -588,8 +610,8 @@ GARGLE BLASTER TO THE MEAL?)">
                 "How do I safely add the Pan Galactic Gargle Blaster to the meal?"
                 "You should know from the Hitchhiker's Guide that you need specifically a spoonful."
                 "During the game so far, have you noticed a utensil for that sort of thing?"
-                "You should pour the Blaster with the sporfe (yes, I'm sorry, but I'm
-not clever enough to be able to use three nouns), which is satisfying enough for me.">>
+                "You should POUR THE BLASTER ON THE TRAY WITH THE SPORFE, since the sporfe is technically a spoon."
+                "Apologies for the guess-the-verb.">>
         <PLTABLE
             "MORPHER SHIP"
             <LTABLE 3
@@ -696,26 +718,26 @@ not clever enough to be able to use three nouns), which is satisfying enough for
                 "Ask him for the code."
                 "Then you can start entring in the code."
                 "However, you won't be able to enter the whole thing in one go! The dial on the machine goes from 0 to 9."
-                "Try doing it."
+                "Try doing the code by setting the dial to each of the digits in the code at a time."
                 "Nothing happens. What happened?"
-                "Push the white button, perhaps?"
+                "Push the white button at the end, perhaps?"
                 "No, that isn't it either."
                 "Read over the last sentence when you ask Slartibartfast about the bug-testing device."
                 "You have to push the white button after EACH dial-change."
-                "Now try it again and see what happens.">
+                "Now try doing the code again with that information and see what happens.">
             <LTABLE 3
                 "What's up with this teleporter and what do I do?"
                 "This hint section (like most) won't actually help you."
-                "Just ask slartibartfast about it and it won't be useful except in context with other sections."
-                "ACTUALLY HELPFUL HINT: Don't enter it unless the old man tells you to, and save beforehand.">
+                "Just ask slartibartfast about it."
+                "ACTUALLY HELPFUL HINT: Don't enter it unless the Slartibartfast tells you to, and save beforehand.">
             <LTABLE 3
                 "What do I do with the peanuts?"
                 "Don't eat them."
                 "You won't be able to, anyway."
                 "If you examine them (after you open it), what does it remind you of?"
-                "Look at the Guide entry on dinner. What do the peanuts remind you of?"
+                "Look at the Guide entry on dinner. What do the peanuts remind you of NOW?"
                 "That's right! Breadcrumbs. Crushed, a little powdery."
-                "You probably would never have guessed that without me, eh?">
+                "You really would never have guessed that without me, eh?">
             <LTABLE 3
                 "Hey! I got a key."
                 "Does anything have a keyhole here?"
@@ -827,7 +849,7 @@ not clever enough to be able to use three nouns), which is satisfying enough for
                 "The light will turn on by itself.">
             <LTABLE 3
                 "I die as soon as the light goes on!"
-                "You've got to have put the peanuts on the dinner beofre you cook it or you won't have enough protein."
+                "You've got to have put the peanuts on the dinner before you cook it or you won't have enough protein."
                 "That means going quite far back."
                 "We apologise for the inconvenience.">
             <LTABLE 3
@@ -913,6 +935,9 @@ section will invariably give away the answers to puzzles in the game."
                 "throwing the fruit at the mice?"
                 "examining the painting?"
                 "destroying the painting?"
+                "showing the cat painting (Dorm, the Morpher Ship) to the mouse painting (Interview Room, Below Magrathea)?"
+                "and vice versa?"
+                "listening to the whirring device (in Behind the Great Device)?"
                 "drinking the Santriginean Mineral Water?"
                 "leaving the water out in the Dining Hall for too long, while you're there?"
                 "putting the Guide in the oven and then turning the oven on?"
@@ -925,9 +950,9 @@ section will invariably give away the answers to puzzles in the game."
                 "using the device multiple times while in the Fjords of Norway?"
                 "jumping off of the ledge in the Glacier and the dark chasm?"
                 "enjoying the sight at the Slippery Slope multiple times?"
-                "SAY MRKUG at various times, including (especially) before you've finished the Fjords course?"
+                "SAY MRKUG at various times, including (especially) while on BUT before you've finished the Fjords course?"
                 "playing with the chatterbox in Dirk Gently's Holistic Detective Agency (multiple times)?"
-                "to PHONE HOME, THE POLICE and?"
+                "to PHONE HOME and THE POLICE?"
                 "(while playing) reading through all the four failed attempts to jump over the couch?"
                 "to SIT ON THE COUCH?"
                 "TURN ON THE LIGHTS while in the Office?"
@@ -948,7 +973,7 @@ section will invariably give away the answers to puzzles in the game."
 				"typing WHY? Or WHAT?"
 				"ANNIHALATE something?"
                 "returning to various scenes after you've successfully completed them?
-Examples: returning to Damogran after stealing the Heart of Gold, or returning to Traal after getting the interface."
+Examples: returning to Below Magrathea after escaping, or returning to the Fjords of Norway after saying the magic word."
                 "answering the game's various rhetorical questions, such as \"Did you have a
 particular direction in mind?\" or \"Are you trying to make yourself feel miserable?\" by typing YES or NO?"
                 "APPRECIATE something?"
@@ -1010,13 +1035,14 @@ game. Once again, you shouldn't develop this section until you've finished."
 	            "  7   Examine the portal in the Car Park"
 	            "  8   After eating the dinner with Pan Galactic Gargle Blaster in it"
 	            "  9   Looking at Footnote 5"
-	            " 10   Cheating at the game by saying the Philosophical word in the
-Fjords without being able to know it during this lifetime (in fact, cheating TWICE in a way)"
+	            " 10   Cheating at the game by saying the Philosophical word in the Fjords
+without being able to know it during this lifetime (in fact, cheating TWICE in a way)"
 	            " 11   This footnote is not referenced"
 	            " 12   Also not referenced"
 	            " 13   ASK GUIDE ABOUT 42"
 	            " 14   Reading the last words book in the PDW a few times"
-	            " 15   ASK [something] ABOUT DIRK after you escape Dirk's building">>
+	            " 15   ASK [something] ABOUT DIRK after you escape Dirk's building"
+                " 16   Show the painting of a mutant cat to the painting of a mouse">>
 		<PLTABLE
 			"GENERAL COMMANDS"
 			<LTABLE 3
@@ -1042,6 +1068,26 @@ E( for EAST), and W( for WEST), Followed by the ENTER button. [Press ENTER to ge
 				"...And other commands. (Once you are done with typing out your command, press ENTER to get the response.)|
 To return to the previous menu, press Q, or to return to playing the game, press the escape key.">
 			<LTABLE 3
+                "TALKING TO PEOPLE"
+                "When communicating with people, you should use ASK [PERSON] ABOUT [something]."
+                "You can also ASK [person] FOR [something]."
+                "To tell them to do a specific action, you can communicate by typing
+their name followed by a comma, and then what you want them to do. Two examples:"
+                "JESTER, GIVE ME THE KEY."
+                "MIKE, NORTH. GET THE BRAN MUFFIN. THROW IT AT THE DWARF."
+                "Notice that in the last example, you are giving
+one person more than one command on the same input line. "
+                "You can also use quotes to answer a question or say something
+\"out loud\", especially in response to a YES or NO question, but also when
+you are meant to say something. For example:"
+                "SAY \"HELLO\" TO JEFF.">
+            <LTABLE 3
+                "FOR MORE EXPERIENCED PLAYERS"
+                "This game supports three objects in a verb, but only in two ways: WRITE and POUR. IE:"
+                "WRITE [something] ON [object] WITH [object]."
+                "POUR [liquid] IN [object] WITH [object]."
+                "This might be a giveaway that you'll need to use them, but it's important.">
+            <LTABLE 3
 				"EXAMPLE COMMANDS"
 				"GO TO THE NORTH."
 				"GO UP."
@@ -1050,14 +1096,13 @@ To return to the previous menu, press Q, or to return to playing the game, press
 				"TAKE MY GOWN."
 				"TAKE EVERYTHING."
 				"TAKE ALL BUT THE BLUE FROB."
-				"SEARCH THE THING FROM MY AUNT."
+				"SEARCH THE THING."
 				"HIT THE ALIEN WITH THE DOG BONE."
-				"JUMP."
 				"GO NORTH AND THEN EAST."
-				"MARVIN, GO DOWN TO THE LEDGE. (this commands the character Marvin to go down to the ledge)"
-				"YES."
+				"MARVIN, GO DOWN TO THE LEDGE."
+				"SAY \"YES\"."
 				"KILL ME."
-				"ASK ZAPHOD BEEBLEBROX FOR A PAN GALACTIC GARGLE BLASTER."
+				"ASK ZAPHOD BEEBLEBROX TO GIVE ME A PAN GALACTIC GARGLE BLASTER."
 				"SHOOT THE BUTTON WITH THE KILL-O-ZAP GUN."
 				"DONT WAIT."
 				"TAKE THE DINNER, THE TOWEL AND THE FRUIT. TIE THE TOWEL AROUND MY HEAD. DROP THE FRUIT."

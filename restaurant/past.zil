@@ -5,20 +5,33 @@
 
 <ROOM ARK
     (LOC ROOMS)
-    (DESC "Golgafrincham Ark B, on the bridge")
-    (THINGS (LITTERED SCATTERED STRANGE MULTIPLE MANY)
-                            (KNOBS SWITCH KNOB SWITCHES CONTROLS DATA CONTROL SCREENS) UNIMPORTANT-THING-F
+    (DESC "Golgafrincham Ark B")
+    (THINGS (LITTERED SCATTERED STRANGE MULTIPLE MANY CONTROL)
+                (KNOBS SWITCH KNOB SWITCHES CONTROLS
+                    DATA CONTROL SCREENS PANEL PANELS) UNIMPORTANT-THING-F
             (GOLGAFRIN ARK) (ARK B SHIP SPACESHIP STARSHIP) GLOBAL-ROOM-F)
-    (OUT SORRY "Although you're on the bridge, you don't seem to be able to leave.")
+    (OUT SORRY "Although you're on the bridge, you don't seem to be able to leave in any direction.")
     (ACTION ARK-F)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE ARK-F (RARG)
-    <COND (<EQUAL? .RARG ,M-LOOK>
-           <TELL "It looks just how you imagined the inside of a spaceship would look like.
-Controls litter the outer rim, with knobs and buttons all over, and confusing data on multiple screens." CR>)>
     <COND (<AND <EQUAL? .RARG ,M-END>
-                <FSET? ,ARK ,SADRADIOBIT>>
+                <NOT <FSET? ,ARK ,SADRADIOBIT>>>
+           <COND (<EQUAL? ,CRASH-LEVEL 7 9 13>
+                  <TELL CR "Alarms sing tuneless warnings, and red lights strobe on the control panels." CR>
+                  <MOVE ,RED-LIGHT ,ARK>
+                  <MOVE ,ALARM ,ARK>)
+                 (<EQUAL? ,CRASH-LEVEL 14>
+                  <TELL CR
+"Suddenly, you find yourself sailing through the air as the ship lands headfirst into its destination
+planet. You crash through the window and fall into a dark and ancient swamp into which the ship sinks.">
+                  <INCREMENT-SCORE 25 T>
+                  <GO-TO-DARK>)>
+           <SETG CRASH-LEVEL <+ ,CRASH-LEVEL 1>>)
+          (<EQUAL? .RARG ,M-LOOK>
+           <TELL "It looks just how you imagined the inside of a spaceship would look like.
+Controls litter the outer rim, with knobs and buttons all over, and confusing data on multiple screens." CR>)
+          (<EQUAL? .RARG ,M-END>
            <TELL CR "Just as you regain enough balance to stand up, the ship shudders violently
 and throws you across the room towards the pink bath. The last thing you see is a rubber ducky
 sailing through the air above you.">
@@ -29,7 +42,7 @@ sailing through the air above you.">
     (LOC ARK)
     (DESC "bath")
     (SYNONYM BATH TUB BATHTUB)
-    (ADJECTIVE PINK LARGE BIG ROUND)
+    (ADJECTIVE PINK BIG ROUND)
     (FDESC "A large, pink bath which contains frothy water sits in the centre of the room.
 |Inside the bath sits a man with a captain's hat on.")
     (LDESC "There is a big pink bath in the middle of the room, containing the captain of the ship.")
@@ -47,7 +60,7 @@ sailing through the air above you.">
            <TELL
 "The pink frothy water inside the bath swirls and steams. Swishing around inside,
 looking intently at you, is the captain, who plays with the rubber ducky in his hand." CR>)
-          (<VERB? CLIMB-ON BOARD>
+          (<VERB? CLIMB-ON BOARD THROUGH>
            <PERFORM ,V?BOARD ,PINK-WATER>
            <RTRUE>)
           (<VERB? OPEN CLOSE>
@@ -89,7 +102,7 @@ looking intently at you, is the captain, who plays with the rubber ducky in his 
     (SDESC "dish of meat")
     (OWNER ARK-CAPTAIN)
     (SYNONYM MEAT DISH PLATE MEAL ;DINNER STEAK FLESH FOOD LIZARD GECKO SALAMANDER DRAGON)
-    (ADJECTIVE MEAT SNOW CHILLY VEGAN COLD KOMODO)
+    (ADJECTIVE ;MEAT SNOW CHILLY VEGAN COLD KOMODO)
     (FLAGS TAKEBIT TRYTAKEBIT EATBIT ;SADRADIOBIT ;"Don't want to pick up" ;BADRADIOBIT ;"Cooked" ;RADPLUGBIT ;"Said it's raw")
     (GENERIC DINNER-G)
     (ACTION MEAT-DISH-F)>
@@ -111,8 +124,9 @@ really not hungry. Here, you can have it.\" He drops it on the floor." CR>
                   <RTRUE>)>
            <TELL "The plate holds a piece of ">
            <COND (<EQUAL? <GETP ,MEAT-DISH ,P?SDESC> "dish of meat">
-                  <TELL "meat. You don't know which type, but hey, so many things around here are unknown.
-Not even the Guide knows about most, so why would you?">)
+                  <TELL
+"meat. You don't know which type, but hey, so many things around here
+are unknown. Not even the Guide knows about most, so why would you?">)
                  (ELSE
                   <TELL "vegan snow lizard meat. ">
                   <NOTES 4>)>
@@ -150,26 +164,13 @@ captain, who fishes it out for you and tosses it on the floor." CR>
 
 <GLOBAL CRASH-LEVEL 0>
 
-<ROUTINE I-CRASH ()
-    <COND (<EQUAL? ,CRASH-LEVEL 7 9 13>
-           <TELL CR "Alarms sing tuneless warnings, and red lights strobe on the control panels." CR>
-           <MOVE ,RED-LIGHT ,ARK>
-           <MOVE ,ALARM ,ARK>)
-          (<EQUAL? ,CRASH-LEVEL 14>
-           <TELL CR
-"Suddenly, you find yourself sailing through the air as the ship lands headfirst into its destinated
-planet. You crash through the window and fall into a dark and ancient swamp into which the ship sinks.">
-           <INCREMENT-SCORE 25 T>
-           <GO-TO-DARK>)>
-    <SETG CRASH-LEVEL <+ ,CRASH-LEVEL 1>>>
-
 
 <OBJECT RED-LIGHT
     (LOC LOCAL-GLOBALS)
     (DESC "red lights")
     (SYNONYM LIGHTS LIGHT STROBE)
     (ADJECTIVE RED FLASHING STROBING)
-    (FLAGS NDESCBIT NARTICLEBIT PLURALBIT)
+    (FLAGS NDESCBIT PLURALBIT)
     (GENERIC LIGHT-G)>
 
 <OBJECT ALARM
@@ -177,12 +178,12 @@ planet. You crash through the window and fall into a dark and ancient swamp into
     (DESC "alarms")
     (SYNONYM ALARM ALARMS WARNINGS)
     (ADJECTIVE TUNELESS LOUD WARNING UNPLEASANT)
-    (FLAGS NDESCBIT NARTICLEBIT PLURALBIT)
+    (FLAGS NDESCBIT VOWELBIT PLURALBIT)
     (ACTION ALARM-F)>
 
 <ROUTINE ALARM-F ()
     <COND (<SEE-VERB?>
-           <TELL "You can't see an alarm. ">)>
+           <TELL ,NOPE "see an alarm. ">)>
     <COND (<VERB? LISTEN>
            <TELL "It isn't pleasant.">)
           (ELSE
@@ -257,7 +258,7 @@ warning signs - and everyone is eating either burgers or things that look
 unlike any sort of burger you've ever seen." CR>)
           (<AND <EQUAL? .RARG ,M-END>
                 <FSET? ,BAR ,SADRADIOBIT>>
-           <TELL
+           <TELL CR
 "You are stuck in the middle of a brawl. Someone throws a punch, and misses
 (obviously). You feel the impact as the pain spreads across your jaw." ;,CHEERS>
            <GO-TO-DARK>
@@ -265,7 +266,7 @@ unlike any sort of burger you've ever seen." CR>)
     <RFALSE>>
 
 <ROUTINE TO-DRESSING-BAR ()
-    <TELL "Nobody notices you, even if you're not supposed to walk through. You find yourself in" ,ELLIPSIS "" CR CR>
+    <TELL "Nobody notices you, even if you're not supposed to walk through. You find yourself in" ,ELLIPSIS "" CR ;CR>
     ,DRESSING-ROOM-BBBB>
 
 <ROOM DRESSING-ROOM-BBBB

@@ -1,6 +1,11 @@
 "MISC for MILLIWAYS
 Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 
+<GLOBAL SCORE:NUMBER 0>
+<GLOBAL MOVES:NUMBER 0>
+<GLOBAL HERE:OBJECT RAMP>
+<GLOBAL OHERE:OBJECT <>>
+
 <GLOBAL SCREENWIDTH:NUMBER 0>
 
 <ROUTINE START-QUEUES ()
@@ -14,13 +19,6 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 <ROUTINE INTRO ()
 	;<TELL "[LEN=" N <LOWCORE SCRV> " WID=" N ,SCREENWIDTH "]">
 	<CRLF><CRLF>
-	<ITALICIZE
-"Known bugs:|
-|- Odd printing of a word with WHAT-DO-YOU-WANT, eg:|
-   (\"What do you want to take?\"|
-    > MARVIN|
-    \"MarvinYou can't take Marvin!\")|
-|- Quotations not working, probably.||">
 	<V-LOOK>
 	<CRLF>>
 
@@ -35,7 +33,7 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	       <RTRUE>)
 	      (T
 	       <THE? .OBJ>
-	       <TELL D .OBJ>)>>
+	       <D-J .OBJ>)>>
 
 <ROUTINE THE? (OBJ)
 	<COND (<NOT <FSET? .OBJ ,NARTICLEBIT>>
@@ -51,7 +49,7 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	       <FSET .OBJ ,SEENBIT>)>>
 
 <ROUTINE START-SENTENCE (OBJ)	;"The"
-	<THIS-IS-IT .OBJ>
+	;<THIS-IS-IT .OBJ>
 	<COND (<EQUAL? .OBJ ,PLAYER> <TELL "You">		 <RTRUE>)
 	      (<EQUAL? .OBJ ,HANDS>	 <TELL "Your hand">	 <RTRUE>)
 	      (<EQUAL? .OBJ ,HEAD>	 <TELL "Your head">	 <RTRUE>)
@@ -109,29 +107,34 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 <ROUTINE NO-PRONOUN? (OBJ "OPTIONAL" (CAP <>))
 	<COND (<EQUAL? .OBJ ,PLAYER>
 	       <RFALSE>)
-          (<NOT <FSET? .OBJ ,PERSONBIT>>
+          ;(<NOT <FSET? .OBJ ,PERSONBIT>>
 	       <COND (<AND <EQUAL? .OBJ ,P-IT-OBJECT>
 			   <FSET? ,IT ,TOUCHBIT>>
 		      <RFALSE>)>)
 	      (<EQUAL? .OBJ ,FIRST-CLASS-IDIOT ,BLUR>)
-          (<FSET? .OBJ ,FEMALEBIT>
+          ;(<FSET? .OBJ ,FEMALEBIT>
 	       <COND (<AND <EQUAL? .OBJ ,P-HER-OBJECT>
 			   <FSET? ,HER ,TOUCHBIT>>
 		      <RFALSE>)>)
-	      (<FSET? .OBJ ,PLURALBIT>
+	      ;(<FSET? .OBJ ,PLURALBIT>
 	       <COND (<AND <EQUAL? .OBJ ,P-THEM-OBJECT>
 			   <FSET? ,THEM ,TOUCHBIT>>
 		      <RFALSE>)>)
 	      (T
-	       <COND (<AND <EQUAL? .OBJ ,P-HIM-OBJECT>
+	       ;<THIS-IS-IT .OBJ>
+           <RFALSE>
+           ;<COND (<AND <EQUAL? .OBJ ,P-HIM-OBJECT>
 			   <FSET? ,HIM ,TOUCHBIT>>
 		      <RFALSE>)>)>
-	<THE-J .OBJ T .CAP>
-	<THIS-IS-IT .OBJ>
+	<COND (<NOT .CAP>
+           <TELL !\ >)>
+    <THE-J .OBJ T .CAP>
+	;<THIS-IS-IT .OBJ>
 	<RTRUE>>
 
 <ROUTINE HE-SHE-IT (OBJ "OPTIONAL" (CAP 0) (VERB <>))	;"He/he/+verb"
-	<COND (<NO-PRONOUN? .OBJ .CAP>
+	<COND (<AND <NOT <EQUAL? .CAP -1>>
+                <NO-PRONOUN? .OBJ .CAP>>
 	       T)
 	      (<NOT <FSET? .OBJ ,PERSONBIT>>
 	       <COND (<ZERO? .CAP> <TELL "it">)
@@ -193,14 +196,18 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 		     (T <TELL "Him">)>)>)>
  <RTRUE>>
 
-<ROUTINE THAT-THEY (OBJ "OPT" (CAP? 0) (VER:STRING <>))
+<ROUTINE THAT-THEY (OBJ "OPT" (CAP? 0) (VER:STRING <>) (LOOK-DOWN <>))
     <COND (<NO-PRONOUN? .OBJ .CAP?>)
           (<FSET? .OBJ ,PLURALBIT>
            <COND (.CAP?
                   <TELL !\T>)
                  (ELSE
-                  <TELL !\t>)>
-           <TELL "hey">)
+                  <TELL !\  !\t>)>
+           <TELL "he">
+           <COND (.CAP?
+                  <TELL "y">)
+                 (T
+                  <TELL "m">)>)
           (<FSET? .OBJ ,PERSONBIT>
            <COND (<ONE? .CAP?> <HE-SHE-IT .OBJ .CAP?>)
                  (ELSE  <HIM-HER-IT .OBJ>)>)
@@ -208,7 +215,7 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
            <COND (.CAP?
                   <TELL !\T>)
                  (ELSE
-                  <TELL !\t>)>
+                  <TELL !\  !\t>)>
            <TELL "hat">)>
     <COND (.VER
            ;<TELL !\ >
@@ -236,50 +243,44 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 <GLOBAL P-PROMPT:NUMBER 4>
 
 <ROUTINE I-PROMPT ("OPTIONAL" (GARG <>))
- <COND (<EQUAL? .GARG ,G-DEBUG> <RFALSE>)>
- <SETG P-PROMPT <- ,P-PROMPT 1>>
- <RFALSE>>
+     %<DEBUG-CODE <COND (<EQUAL? .GARG ,G-DEBUG> <RFALSE>)>>
+     <SETG P-PROMPT <- ,P-PROMPT 1>>
+     <RFALSE>>
 
 <ROUTINE DONT-F ()
 	 <COND (<VERB? PANIC>
-		<COND (<1? <RANDOM 2>>
-		       <TELL 
+		    <COND (<1? <RANDOM 2>>
+		           <TELL 
 "Very clever. It looks as if there's a lot you should be panicking about." CR>)
-		      (T
-		       <TELL
+		          (T
+		           <TELL
 "Why not? Your position appears quite hopeless." CR>)>)
-	       ;(<VERB? LOOK>
-		<SETG DONT-FLAG <>>
-		<PERFORM ,V?CLOSE ,EYES>
-		<RTRUE>)
-           (<AND <IN? ,PLAYER ,STUNT-SHIP>
-            <VERB? LOOK-INSIDE LOOK-THROUGH LOOK-OUTSIDE EXAMINE>>
-        <TELL "All right! All right! It's right there! The sun is enormous! I get it! Don't panic!" CR>)
+	       (<AND <IN? ,PLAYER ,STUNT-SHIP>
+                 <VERB? LOOK-INSIDE LOOK-THROUGH LOOK-OUTSIDE EXAMINE>>
+            <TELL
+"All right! All right! It's right there! The sun is enormous! I get it! Don't panic!" CR>)
 	       (<VERB? ;WAIT WAIT-FOR WAIT-UNTIL>
-		<TELL "Time doesn't pass..." CR>)
+		    <TELL "Time doesn't pass..." CR>)
 	       (<VERB? TAKE>
-		<TELL "Not taken." CR>)
-	       ;(<AND <VERB? LISTEN>
-		     <VISIBLE? ,POETRY>>
-		<SETG DONT-FLAG <>>
-		<PERFORM ,V?LISTEN ,POETRY>
-		<RTRUE>)
+		    <TELL "Not taken." CR>)
 	       (T
-		<TELL "Not done." CR>)>>
+		    <TELL "Not done." CR>)>>
 
 <ROUTINE NOT-FOUND (OBJ "AUX" (WT <>))
 	<COND (<FSET? .OBJ ,CAPTAINBIT>
-		   <TELL "You can't see that here." CR>
-		   <RTRUE>)>
+		   <TELL ,NOPE "see that here." CR>
+		   <RTRUE>)
+          (ELSE
+           <RTRUE>)>
 	<COND (<VERB? WALK-TO>
 	       <SET WT T>)>
 	<COND (<ZERO? .WT>
 	       <SETG CLOCK-WAIT T>
-	       <TELL "(Y">)
+	       <TELL "[Y">)
 	      (T <TELL "But y">)>
 	<TELL "ou haven't found" him .OBJ " yet!">
 	<COND (<ZERO? .WT>
-	       <TELL !\)>)>
+	       <PRINT "]">)>
 	<CRLF>
 	<RTRUE>>
 
@@ -328,7 +329,8 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 	    <EQUAL? .WRD ,W?MARV ,W?MARVIN ,W?PREFECT>
         <EQUAL? .WRD ,W?SLART ,W?SLARTY ,W?SLARTIBAR>
         <EQUAL? .WRD ,W?EARTH ,W?KAKRAFOON ,W?CLYDE>
-        <EQUAL? .WRD ,W?FLOYD ,W?CLYDE\'S ,W?CLYDE>>>>
+        <EQUAL? .WRD ,W?FLOYD ,W?CLYDE\'S ,W?CLYDE>
+        <EQUAL? .WRD ,W?LIFE ,W?UNIVERSE ,W?EVERYTHING>>>>
 
 <ROUTINE TITLE-NOUN? (WRD)
     <OR ;<EQUAL? .WRD ,W?MR ,W?MS>
@@ -360,17 +362,8 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 		   <PUT .TBL .LEN .NEW>
 		   <RTRUE>)>>>
 
-
-"CLOCK for MILLIWAYS
-Copyright (C) 1988 Infocom, Inc.  All rights reserved."
-
-"List of queued routines:
-"
-
-<GLOBAL SCORE:NUMBER 0>
-<GLOBAL MOVES:NUMBER 0>
-<GLOBAL HERE:OBJECT RAMP>
-<GLOBAL OHERE:OBJECT <>>
+"CLOCK routines
+    by Max Fog (using the new parser)"
 
 <GLOBAL CLOCKER-RUNNING:NUMBER 0>
 
@@ -382,74 +375,125 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	0 0 I-REPLY
 	1 1 I-PROMPT	;"last to run">>
 
-<GLOBAL C-INTS:NUMBER <- 138 <* 1 6>>>
-<CONSTANT C-INTLEN 6>
-<CONSTANT C-ENABLED? 0>
-<CONSTANT C-TICK 1>
-<CONSTANT C-RTN 2>
+<GLOBAL CLOCK-WAIT <>>
 
-<ROUTINE QUEUE (RTN TICK "AUX" CINT)
-	 ;#DECL ((RTN) ATOM (TICK) FIX (CINT) <PRIMTYPE VECTOR>)
-	 <PUT <SET CINT <INT .RTN>> ,C-TICK .TICK>
-	 <PUT .CINT ,C-ENABLED? 1>
-	 .CINT>
+<GLOBAL C-INTS 60> ;"2x largest number of concurrent of interrupts"
 
-"DEQUEUE + {QUEUED/RUNNING}? taken from Shogun"
+<GLOBAL C-MAXINTS 60> ;"2x largest number of concurrent of interrupts"
 
-<ROUTINE DEQUEUE (RTN "AUX" TIM)
-	 <COND (<SET RTN <RUNNING? .RTN>>
-		<SET TIM <GET .RTN ,C-TICK>>
-		<PUT .RTN ,C-RTN 0>
-		.TIM)>>
+<GLOBAL CLOCK-HAND <>>
 
-<ROUTINE RUNNING? (RTN "AUX" C E)
+<CONSTANT C-TABLELEN 60>
+<CONSTANT C-INTLEN 4>	;"length of an interrupt entry"
+<CONSTANT C-RTN 0>	;"offset of routine name"
+<CONSTANT C-TICK 1>	;"offset of count"
+
+<ROUTINE CLOCKER ("AUX" E TICK RTN (FLG <>) (Q? <>) OWINNER)
+	 <COND (,CLOCK-WAIT
+		    <SETG CLOCK-WAIT <>>
+		    <RFALSE>)
+	       ;(,TIME-STOPPED           ;"If you have, say, a spell that does this."
+		    ;"don't run interrupts, but do increment moves"
+		    <SETG MOVES <+ ,MOVES 1>>
+		    <RFALSE>)>
+	 <SETG CLOCK-HAND <REST ,C-TABLE ,C-INTS>>
+	 <SET E <REST ,C-TABLE ,C-TABLELEN>>
+	 <SET OWINNER ,WINNER>
+	 <SETG WINNER ,PLAYER>
+	 <REPEAT ()
+	  <COND (<EQUAL? ,CLOCK-HAND .E>
+	         ;<SETG CLOCK-HAND .E>
+	         <SETG MOVES <+ ,MOVES 1>>
+	         <SETG WINNER .OWINNER>
+	         <RETURN .FLG>)
+	        (<NOT <ZERO? <GET ,CLOCK-HAND ,C-RTN>>>
+	         <SET TICK <GET ,CLOCK-HAND ,C-TICK>>
+	         <COND (<L? .TICK -1>
+	                <PUT ,CLOCK-HAND ,C-TICK <- -3 .TICK>>
+	                <SET Q? ,CLOCK-HAND>)
+	               (<NOT <ZERO? .TICK>>
+	                <COND (<G? .TICK 0>
+	                       <SET TICK <- .TICK 1>>
+	                       <PUT ,CLOCK-HAND ,C-TICK .TICK>)>
+	                <COND (<NOT <ZERO? .TICK>>
+	                       <SET Q? ,CLOCK-HAND>)>
+	                <COND (<NOT <G? .TICK 0>>
+	                       <SET RTN
+	                            <IFFLAG (IN-ZILCH
+	                                     <GET ,CLOCK-HAND ,C-RTN>)
+	                                    (T
+	                                     <NTH ,CLOCK-HAND
+	                                          <+ <* ,C-RTN 2> 1>>)>>
+	                       <COND (<ZERO? .TICK>
+	                              <PUT ,CLOCK-HAND ,C-RTN 0>)>
+	                       <COND (<APPLY .RTN>
+	                              <SET FLG T>)>
+	                       <COND (<NOT <OR .Q?
+	                                       <ZERO?
+                                            <GET ,CLOCK-HAND
+	                                             ,C-RTN>>>>
+	                              <SET Q? T>)>)>)>)>
+	  <SETG CLOCK-HAND <REST ,CLOCK-HAND ,C-INTLEN>>
+	  <COND (<NOT .Q?>
+	        <SETG C-INTS <+ ,C-INTS ,C-INTLEN>>)>>>
+
+<ROUTINE DEQUEUE (RTN)
+	 <COND (<SET RTN <QUEUED? .RTN>>
+		    <PUT .RTN ,C-RTN 0>)>>
+
+<ROUTINE QUEUED? (RTN "AUX" C E)
 	 <SET E <REST ,C-TABLE ,C-TABLELEN>>
 	 <SET C <REST ,C-TABLE ,C-INTS>>
 	 <REPEAT ()
-		 <COND (<EQUAL? .C .E> <RFALSE>)
-		       (<EQUAL? <GET .C ,C-RTN> .RTN>
-			<COND (<ZERO? <GET .C ,C-TICK>>
-			       <RFALSE>)
-			      (T <RETURN .C>)>)>
-		 <SET C <REST .C ,C-INTLEN>>>>
+	  <COND (<EQUAL? .C .E>
+	         <RFALSE>)
+	        (<EQUAL? <GET .C ,C-RTN> .RTN>
+	         <COND (<ZERO? <GET .C ,C-TICK>>
+	                <RFALSE>)
+	               (T
+	                <RETURN .C>)>)>
+	  <SET C <REST .C ,C-INTLEN>>>>
 
-<ROUTINE INT (RTN "OPTIONAL" (DEMON <>) E C INT)
-	 ;#DECL ((RTN) ATOM (DEMON) <OR ATOM FALSE> (E C INT) <PRIMTYPE
-							      VECTOR>)
+<ROUTINE RUNNING? (RTN "AUX" (TBL <REST ,C-TABLE ,C-INTS>) ;"SWG 10-Mar-89"
+			     (LEN </ <- ,C-TABLELEN ,C-INTS> ,C-INTLEN>))
+	 <COND (<AND <NOT <ZERO? .LEN>>
+		         <SET TBL <INTBL? .RTN .TBL .LEN <+ *200* ,C-INTLEN>>>>
+		    <COND (<OR <ZERO? <GET .TBL ,C-TICK>>
+		    	   <G? <GET .TBL ,C-TICK> 1>>
+		           <RFALSE>)
+		          (T
+		           <RTRUE>)>)>>
+
+<ROUTINE QUEUE (RTN TICK "AUX" C E (INT <>)) ;"automatically enables as well"
 	 <SET E <REST ,C-TABLE ,C-TABLELEN>>
 	 <SET C <REST ,C-TABLE ,C-INTS>>
 	 <REPEAT ()
-		 <COND (<==? .C .E>
-			<SETG C-INTS <- ,C-INTS ,C-INTLEN>>
-			;<AND .DEMON <SETG C-DEMONS <- ,C-DEMONS ,C-INTLEN>>>
-			<SET INT <REST ,C-TABLE ,C-INTS>>
-			<PUT .INT ,C-RTN .RTN>
-			<RETURN .INT>)
-		       (<EQUAL? <GET .C ,C-RTN> .RTN> <RETURN .C>)>
-		 <SET C <REST .C ,C-INTLEN>>>>
-
-
-<GLOBAL CLOCK-WAIT:FLAG <>>
-
-<ROUTINE CLOCKER ("AUX" C E TICK (FLG <>) VAL)
-	 ;#DECL ((C E) <PRIMTYPE VECTOR> (TICK) FIX ;(FLG) ;<OR FALSE ATOM>)
-	 <COND (,CLOCK-WAIT <SETG CLOCK-WAIT <>> <RFALSE>)>
-	 <SETG MOVES <+ ,MOVES 1>>
-	 <SET C <REST ,C-TABLE ,C-INTS>>
-	 <SET E <REST ,C-TABLE ,C-TABLELEN>>
-	 <REPEAT ()
-		 <COND (<==? .C .E>
-			<RETURN .FLG>)
-		       (<NOT <ZERO? <GET .C ,C-ENABLED?>>>
-			<SET TICK <GET .C ,C-TICK>>
-			<COND (<NOT <ZERO? .TICK>>
-			       <PUT .C ,C-TICK <- .TICK 1>>
-			       <COND (<AND <NOT <G? .TICK 1>>
-				           <SET VAL <APPLY <GET .C ,C-RTN>>>>
-				      <COND (<OR <ZERO? .FLG>
-						 <==? .VAL ,M-FATAL>>
-					     <SET FLG .VAL>)>)>)>)>
-		 <SET C <REST .C ,C-INTLEN>>>>
+	  <COND (<EQUAL? .C .E>
+	         <COND (.INT
+	                <SET C .INT>)
+	               (T
+	                <COND (<L? ,C-INTS ,C-INTLEN>
+	                       <TELL "** Too many ints! **" CR>)>
+	                <SETG C-INTS <- ,C-INTS ,C-INTLEN>>
+	                <COND (<L? ,C-INTS ,C-MAXINTS>
+	                       <SETG C-MAXINTS ,C-INTS>)>
+	                <SET INT <REST ,C-TABLE ,C-INTS>>)>
+	         <PUT .INT ,C-RTN .RTN>
+	         <RETURN>)
+	        (<EQUAL? <GET .C ,C-RTN> .RTN>
+	         <SET INT .C>
+	         <RETURN>)
+	        (<ZERO? <GET .C ,C-RTN>>
+	         <SET INT .C>)>
+	  <SET C <REST .C ,C-INTLEN>>>
+	 <COND (<AND ,CLOCK-HAND
+	             <IFFLAG (IN-ZILCH
+	                      <G? .INT ,CLOCK-HAND>)
+	                     (T
+	                      <L? <LENGTH .INT> <LENGTH ,CLOCK-HAND>>)>>
+	        <SET TICK <- <+ .TICK 3>>>)>
+	 <PUT .INT ,C-TICK .TICK>
+	 .INT>
 
 ;<ROUTINE DONT-ALL (OBJ1 "AUX" (L <LOC .OBJ1>))
 	 ;"RFALSE if OBJ1 should be included in the ALL, otherwise RTRUE"

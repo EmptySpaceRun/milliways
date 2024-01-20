@@ -1,7 +1,7 @@
 "COMPILE/LOAD FILE for MILLIWAYS
 Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 
-<SETG ZDEBUGGING? T>
+<SETG ZDEBUGGING? <>>
 <DEFINE DEBUG-CODE ('X "OPTIONAL" ('Y T))
 	<COND (,ZDEBUGGING? .X) (ELSE .Y)>>
 
@@ -24,6 +24,8 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 ;<NEVER-ZAP-TO-SOURCE-DIRECTORY?>
 <ZIP-OPTIONS MOUSE UNDO ;DISPLAY>
 <VERSION ;8 XZIP>
+<CONSTANT RELEASEID 301>
+<CONSTANT ZORKID 302>
 
 <IFFLAG (IN-ZILCH
 	 <PRINC "Compiling">)
@@ -70,6 +72,8 @@ DISABLE!-INITIAL
 <INSERT-FILE "PRESENT">     ;"Back to your time."														 
 <INSERT-FILE "EARTH">       ;"Going further back..."													 
 <INSERT-FILE "PAST">        ;"Until you reach 2 million years behind your own time, and then to the Big Bang!"
+
+;<INSERT-FILE "SOFT">
 
 <INSERT-FILE "PEOPLE">
 <INSERT-FILE "HINTS">

@@ -24,8 +24,8 @@
     (ACTION PDW-F)
     (THINGS (PLANETARY DESIGN SLARTY\'S SLARTIBAR) (WORKSHOP FACTORY) GLOBAL-ROOM-F
             <> (PASSAGE EXIT DOOR) NO-EXIT-F
-            <> (PEN PENCIL) UNIMPORTANT-THING-F
-            <> (MACHINES DEVICES) UNIMPORTANT-THING-F
+            <> (PEN PENCIL) USELESS
+            <> (MACHINES DEVICES) USELESS
             (NICE GOOD BEAUTIFUL COOL) (LIGHTS LIGHTING LIGHT LAMP) JUST-LIGHT-F)>
 
 <ROUTINE PDW-F (RARG)
@@ -107,31 +107,20 @@ not worry yourself just yet (if you have been doing so for some reason)
                        <FSET? ,GLACIER-1 ,SADRADIOBIT>>
                   <TELL CR
 "\"Welcome back!\" Slarty says. He guides you over to the computer
-and tells you to put the red frob on it, so that the computer can
+and tells you to put the red frob on it (\"just put it on the
+computer, and don't ask any questions\"), so that the computer can
 change the frob's form using the philosophical word that you spoke
-on returning here." CR CR>
+before returning to the Workshop." CR CR>
                   <FSET ,PDW ,RADPLUGBIT>)>)>>
 
 <ROUTINE OUT-PDW ()
-    <COND ;(<EQUAL? <LOC ,PLAYER> ,TELEPORTER>
-           ;<TELL "You step out of the teleporter." CR CR>
-           ;[<OWN-FEET><CRLF>
-           <V-LOOK>
-           <RFALSE>]
-           ,PDW)
-          (ELSE
-           <TELL "There are no exits." CR>
-           <RFALSE>)>>
+    <TELL "There are no exits." CR>
+    <RFALSE>>
 
 <ROUTINE IN-PDW ()
-    <COND ;(<IN? ,PLAYER ,TELEPORTER>
-           <TELL "There's nowhere to go into." CR>
-           <RFALSE>)
-          (ELSE
-           ;<TELL "You step into the chamber." CR>
-           <PERFORM ,V?BOARD ,TELEPORTER>
-           <FUCKING-CLEAR>
-           <RFALSE>)>>
+    <PERFORM ,V?BOARD ,TELEPORTER>
+    <FUCKING-CLEAR>
+    <RFALSE>>
 
 <OBJECT COMPUTER
     (LOC PDW)
@@ -153,7 +142,7 @@ on returning here." CR CR>
            <TELL "That's weird - there's no plug! At least that you can see." CR>)
           (<VERB? PLAY FIX CHANGE>
            <COND (<NOT <FSET? ,COMPUTER ,BADRADIOBIT>>
-                  <TELL "You can't seem to change it from the loading screen." CR>)
+                  <TELL ,NOPE "seem to change it from the loading screen." CR>)
                  (ELSE
                   <TELL
 "\"Just leave it.\" " D ,SLARTY " looks at you sternly, as if you were a bad child and he was
@@ -312,7 +301,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                          <TELL "Done." CR>
                          <MOVE ,PRSO ,TUBE-RACK>)
                         (ELSE
-                         <TELL "You aren't holding "><THE-J ,PRSO T><TELL !\! CR>)>)
+                         <PRINT "You aren't "><TELL "holding "><THE-J ,PRSO T><TELL !\! CR>)>)
                  (ELSE
                   <COND (<L? <GETP ,PRSO ,P?SIZE> 5>
                          <TELL CHE+VERB ,PRSO "fall" " right through, and " verb ,PRSO "land" " on the floor." CR>
@@ -330,7 +319,13 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
     (ACTION BLUE-TUBE-F)>
 
 <ROUTINE BLUE-TUBE-F ("AUX" BLU)
-    <COND (<AND <VERB? PUT-IN>
+    <COND (<AND <OR <TOUCHING?>
+                    <AND <VERB? THROW>
+                         <NOT <IOBJ? TV>>>>
+                <HELD? ,BLUE-TUBE ,SLARTY>>
+           <TELL ,NOPE "do that to the tube while " D ,SLARTY " is holding it!" CR>
+           <RTRUE>)
+          (<AND <VERB? PUT-IN>
                 <IOBJ? BLUE-TUBE>>
            <COND (<AND <DOBJ? BLUE-FROB>
                        <EQUAL? <GETP ,BLUE-FROB ,P?SDESC> "blue frob">>
@@ -407,7 +402,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
 <OBJECT GREEN-TUBE
     (LOC TUBE-RACK)
     (DESC "green test tube")
-    (SYNONYM TUBE LABEL CUBE FLASK)
+    (SYNONYM TUBE LABEL ;CUBE FLASK)
     (ADJECTIVE GREEN TEST CUBICAL)
     (FLAGS CONTBIT ;SEARCHBIT TRANSBIT TAKEBIT TRYTAKEBIT)
     (ACTION GREEN-TUBE-F)>
@@ -461,7 +456,7 @@ mark or the computer itself, and only a red rhombicosidodecahedron." CR>
                   <TELL CR
 "Suddenly, the teleporter lights up! \"Working!\" " D ,SLARTY
 " exclaims. \"Finally! Now you can leave!" CR "\"Come, enter
-the machine, and return to " D ,RESTAURANT ".\"" CR>
+the machine, and return to " D ,RESTAURANT ,PIC>
                   <FCLEAR ,TELEPORTER ,SADRADIOBIT>
                   <FCLEAR ,TELEPORTER ,BADRADIOBIT>
                   <FSET ,TELEPORTER ,RADPLUGBIT>)>)
@@ -628,6 +623,10 @@ to what people tell you, especially if they're old and make planets">
            <ASSUMING-DEVICE 1>
            <TELL ,SPEC-NUM>)
           (<VERB? AIM>
+           <COND (<NOT <HELD? ,DEVICE>>
+                  <PRINT "You aren't "><TELL "holding the device!" CR>
+                  <FUCKING-CLEAR>
+                  <RTRUE>)>
            <ASSUMING-DEVICE 1>
            <COND (<AND <IOBJ? INTNUM>
                        <G? ,P-NUMBER -1>
@@ -690,11 +689,12 @@ I think you can get it. You see, I am too old. You must go! It is your only way 
 of here. Oh, and mine too.|
 \"There are only just enough charges to reach Norway from here. Please, take my word
 for this one.\" He beckons for you to enter the teleportation chamber.|
-|He says, \"To make the frob reach its new form, you must seek the 'magic word' -
-merely a word of philosophy - and remember it. I carved it in the ice, but it may be
-bigger than you think. You might be standing on it without realising. Once you can see
-the big 'T' in the rock - which is not part of the word - you must say the word. You
-should know it by then, and if you do not, I cannot help you. Well, then. Off you go.\"" CR>
+|He says, \"To manually force a frob into its new form, you must seek the 'magic word'
+- merely a word of higher philosophy - and remember it. I carved it in the fjords when
+making the plans for them, but the carving is bigger than you think. You might be standing
+on it and never realise it until you are frozen in the ice and never to return. Once you
+can see the big 'T' in the rock - which is not part of the word - you must say the word. You
+should know it by then, and if you do not, I cannot help you. Well, then. Off you go" ,PIC>
            <FSET ,TELEPORTER ,RADPLUGBIT>
            <RTRUE>)>
     <REPEAT ()
@@ -708,8 +708,8 @@ should know it by then, and if you do not, I cannot help you. Well, then. Off yo
            <FCLEAR <SET OBJ <PICK-ONE <PLTABLE WEIRDBOX-KEY CLAW>>> ,INVISIBLE>
            <TELL "Suddenly, "><THE-J .OBJ <>><TELL " appears right in front of you!">
            <COND (<IN? ,SLARTY ,HERE>
-                  <TELL !\ D ,SLARTY " says with a smile on his face, \"And that's">
-                  <FACTOR "19,900"><TELL "..\"" CR>)>)
+                  <TELL " " D ,SLARTY " says with a smile on his face, \"And that's">
+                  <FACTOR "19,900"><TELL "." ,PIC>)>)
           (<EQUAL? .TIM ,SADRADIOBIT>
            <MOVE ,PEANUT-PACKET ,HERE>
            <THE-J ,PEANUT-PACKET <> T><TELL " falls on your head with a ">
@@ -752,7 +752,7 @@ it in the Fjords and never here? I can't remember..">)>
     <COND (<OR <AND <VERB? OPEN UNLOCK>
                     <DOBJ? WEIRDBOX>
                     <OR <IOBJ? WEIRDBOX-KEY>
-                        <AND <IN? ,PLAYER ,WEIRDBOX-KEY> ;"Directly holding it only"
+                        <AND <HELD? ,WEIRDBOX-KEY>
                              <TELL "(using "><THE-J ,WEIRDBOX T><TELL !\) CR>>>>
                <AND <VERB? PUT-IN>
                     <DOBJ? WEIRDBOX-KEY>
@@ -765,6 +765,11 @@ box, but it's not there. In its place" ,GREENY>
            <THIS-IS-IT ,GREEN-FROB>
            <FCLEAR ,GREEN-FROB ,INVISIBLE>
            <INCREMENT-SCORE 10>)
+          (<AND <VERB? UNLOCK>
+                <NOT ,PRSI>>
+           <TELL "You'll have to specify what you want to unlock the weirdbox with." CR>
+           <FUCKING-CLEAR>
+           <RTRUE>)
           (<AND <VERB? OPEN UNLOCK MUNG>
                 <DOBJ? WEIRDBOX>>
            <TELL ,TRY-HARD CR>)
@@ -823,7 +828,7 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
 <OBJECT GREEN-FROB
     (LOC PDW)
     (DESC "green frob of randomness")
-    (SYNONYM FROB FROBS GREEN RANDOMNES RANDOM)
+    (SYNONYM FROB FROBS GREEN RANDOMNES RANDOM CUBE)
     (ADJECTIVE GREEN RANDOM RANDOMNES)
     (LDESC "There is a green frob of randomness here.")
     (ACTION GREEN-FROB-F)
@@ -833,7 +838,7 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
 
 <ROUTINE GREEN-FROB-F ()
     <COND (<VERB? EXAMINE>
-           <TELL ,IT-LOOKS-LIKE "a " D ,GREEN-FROB !\. CR>)
+           <TELL ,IT-LOOKS-LIKE "a " D ,GREEN-FROB ". (It's a cube, if that's what you meant.)" CR>)
           (<VERB? MOVE PULL-APART OPEN>
            <TELL ,NOPE "do that to this frob." CR>)>>
 
@@ -955,7 +960,8 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
                   <TELL
 "No thanks. The point is, you're trying to get out of here. And you have the means currently." CR>)>)
           (<AND <VERB? PUT PUT-IN>
-                <IOBJ? TELEPORTER>>
+                <IOBJ? TELEPORTER>
+                <IDROP>>
            <COND (<FSET? ,TELEPORTER ,BADRADIOBIT>
                   <RFALSE>)
                  (ELSE
@@ -967,10 +973,27 @@ Well, you don't need to imagine; it's right in front of you." CR>)>>
                         (ELSE
                          <MOVE ,PRSO ,RECEPTION>)>)>)
           (<VERB? WALK-TO BOARD THROUGH LEAP CLIMB-ON CLIMB-UP>
-           ;"<PERFORM ,V?BOARD ,TELEPORTER>)
-          (<AND <EQUAL? .RARG ,M-ENTER>
-                <FSET? ,TELEPORTER ,RADPLUGBIT>>"
-           <TELL CHE+VERB ,WINNER "step" " inside the chamber. ">
+           <COND (<OR <HELD? ,BLUE-TUBE>
+                      <HELD? ,RED-TUBE>
+                      <HELD? ,GREEN-TUBE>>
+                  <TELL "You still have ">
+                  <COND (<HELD? ,BLUE-TUBE>
+                         <THE-J ,BLUE-TUBE T>
+                         <COND (<AND <HELD? ,GREEN-TUBE>
+                                     <HELD? ,RED-TUBE>>
+                                <TELL ", ">)
+                               (<OR <HELD? ,GREEN-TUBE>
+                                    <HELD? ,RED-TUBE>>
+                                <TELL " and ">)>)>
+                  <COND (<HELD? ,GREEN-TUBE>
+                         <THE-J ,GREEN-TUBE T>
+                         <COND (<HELD? ,RED-TUBE>
+                                <TELL " and ">)>)>
+                  <COND (<HELD? ,RED-TUBE>
+                         <THE-J ,RED-TUBE T>)>
+                  <TELL ". Stuff like this belongs in the " D ,PDW ,PAUSES>
+                  <RTRUE>)>
+           <TELL CHE+VERB ,WINNER "step"" inside the chamber. ">
            <COND (<FSET? ,TELEPORTER ,BADRADIOBIT>
                   <TELL "Nothing interesting happens, so you step out again." CR>
                   <RTRUE>)
@@ -1100,11 +1123,11 @@ so this is less of an entrance and more of a dead end of some sort">)>
                   <TELL ". On the wall is a television." CR>)>)>
     <COND (<AND <EQUAL? .RARG ,M-END>
                 <FSET? ,ENTRY-HALL ,SADRADIOBIT>>
-           <TELL
+           <TELL CR
 "Just as it occurs to you that you've been here before, you are shot by
 a beam from the gun which the morpher captain right in front of you is holding.|
 |The next things that you register from the paralysed position you are in are as follows:
-|   - You are carried to a hidden alcove in annother part of the ship.
+|   - You are carried to a hidden alcove in another part of the ship.
 |   - The captain lays you down and pushes a button on the wall.
 |   - He runs out of the room just before you are shot out of the airlock.
 |   -">
@@ -1165,7 +1188,7 @@ way you entered), there isn't any entrance now. Surely there's a hatch or exit f
                  (ELSE
                   <RFALSE>)>)
           (<TOUCHING?>
-           <TELL "You can't reach it. It's fixed in place in the corner of the ceiling." CR>
+           <TELL ,NOPE "reach it. It's fixed in place in the corner of the ceiling." CR>
            <SET ANNOYED-TV T>)
           (<VERB? EXAMINE>
            <TELL "What did you expect? It's a TV.">
@@ -1184,7 +1207,7 @@ way you entered), there isn't any entrance now. Surely there's a hatch or exit f
     (FDESC "The junction you stand in is mostly empty. Corridors lead north, south, east
 and west to different parts of the ship.")
     (LDESC "The junction leads off randomly in different directions. If you want to exit,
-you can go in one of in the four cardinal directions.")
+you can go in one of the four cardinal directions.")
     (NORTH TO PRES-BRIDGE)
     (SOUTH TO ENTRY-HALL)
     (WEST TO GALLEY)
@@ -1248,12 +1271,13 @@ this one couldn't ever do so much damage." CR>>
                     <FSET? ,PRSO ,CAPTAINBIT>>>
            <TELL "As you zap "><THE-J ,PRSO T><TELL ", you see it change into the form of the captain.
 He slumps to the floor, stunned." CR>
-           <COND (<NOT <FSET? ,PRSO ,RADPLUGBIT>>
+           <COND (<AND <NOT <FSET? ,PRSO ,RADPLUGBIT>>
+                       <NOT <=? ,PRSO ,CAP-CHAIR>>>
                   <TELL CR "[It's funny - you never even looked around to be able to notice ">
                   <THE-J ,PRSO T>
                   <TELL ". So how did you know?]" CR>)>
            <FSET ,MORPHER-CAPTAIN ,MUNGBIT>
-           <FCLEAR ,MORPHER-CAPTAIN ,SECRETBIT>
+           <FCLEAR ,MORPHER-CAPTAIN ,INVISIBLE>
            <FCLEAR ,MORPHER-CAPTAIN ,NDESCBIT>
            <MOVE ,MORPHER-CAPTAIN ,HERE>
            <FSET ,PRSO ,INVISIBLE>
@@ -1458,10 +1482,33 @@ can find in dorms (oddly enough, they are circular instead of rectangular)">)
 <OBJECT CAT-PAINTING
     (LOC DORM)
     (DESC "bad painting of some sort of mutant cat")
-    (ADJECTIVE BAD SORT MUTANT)
+    (ADJECTIVE BAD SORT MUTANT CAT)
     (SYNONYM BAD SOME CAT PAINTING)
     (FLAGS TRYTAKEBIT TAKEBIT NDESCBIT)
-    (ACTION JUNK-F)>
+    (GENERIC PAINTING-G)
+    (ACTION CAT-PAINTING-F)>
+
+<ROUTINE CAT-PAINTING-F ()
+    <COND (<NOT <FSET? ,BATHROOM-SHIP ,BADRADIOBIT>>
+           <TELL "Move on for a bit. You can come back later." CR>)
+          (<VERB? EXAMINE>
+           <TELL "It's worthless art. Why would you need it?" CR>)
+          (<NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
+           <TELL
+"This is a crime scene. [No, not really, just in my head because
+it's more fun.] All junk is treated as guilty until found innocent.
+You can come back for it later. Not that you'll need it." CR>)
+          (<AND <VERB? SHOW>
+                <IOBJ? CAT-PAINTING>
+                <DOBJ? MOUSE-PAINTING>>
+           <REMOVE ,MOUSE-PAINTING>
+           <REMOVE ,CAT-PAINTING>
+           <TELL
+"The cat eyes the mouse well, and leaps through the glass at the mouse, but
+the mouse drops the monocle, fluidly draws one eerily familiar Kill-O-Zap
+gun, and fires a range of Star Wars-kind laser bullets, vaporising the glass,
+the two paintings and the cat, and the mouse falls to the floor before running
+off out of sight." CR>)>>
 
 <OBJECT PILLOW
     (LOC DORM)
@@ -1507,7 +1554,8 @@ The junk in the room includes ">)
 ", as well as a strange man with a captain-style uniform - wait, what?"
 CR CR "The strange man shoves you aside, and dashes out of the room">
                   <FSET ,MORPHER-CAPTAIN ,BADRADIOBIT> ;"He must move."
-                  <FSET ,BATHROOM-SHIP ,BADRADIOBIT>)>
+                  <FSET ,BATHROOM-SHIP ,BADRADIOBIT>
+		          <QUEUE I-MORPHER-CAPTAIN -1>)>
            <TELL ,PAUSES>)>>
 
 <OBJECT PLUG-JUNK
@@ -1541,7 +1589,10 @@ CR CR "The strange man shoves you aside, and dashes out of the room">
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE PRES-BRIDGE-F (RARG)
-    <COND (<EQUAL? .RARG ,M-LOOK>
+    <COND (<AND <EQUAL? .RARG ,M-ENTER>
+                <FSET? ,BATHROOM-SHIP ,BADRADIOBIT>>
+           <QUEUE I-MORPHER-CAPTAIN -1>)
+          (<EQUAL? .RARG ,M-LOOK>
            <COND (<EQUAL? ,VERBOSITY 2>
                   <TELL
 "The bridge is much cleaner than any other part of the ship

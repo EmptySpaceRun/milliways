@@ -31,7 +31,7 @@
 
 <GLOBAL CURRENT-EXIT 0>
 
-<GLOBAL DARK-CONTROLLED <>> ;"Controlled by the signing of the reciept"
+<GLOBAL DARK-CONTROLLED <>> ;"Controlled by the signing of the receipt"
 
 <GLOBAL IMMOVABLE <>>
 
@@ -50,7 +50,10 @@ as having a good, solid kick in the head.|
 |Although the after effects of darkness make you wish you had chosen the kick...">>
 
 <ROUTINE GO-TO-DARK ()
-	<COND (<IN? ,PLAYER ,CAR-PARK>
+	<COND (,SCOREMAD
+           <DEQUEUE I-LOSE-IT-EVERY-TURN>
+           <SETG SCOREOUT 32>)>
+    <COND (<IN? ,PLAYER ,CAR-PARK>
 		   <TELL "You step through the matter transference portal." CR CR <PICK-ONE ,DARK-ENTRANCES>>
            ;<SIXCR> <CHANGE-PART 2>
 		   ,DARK)
@@ -64,7 +67,7 @@ as having a good, solid kick in the head.|
 				  <MOVE ,MARVIN ,CAR-PARK>
 				  <DEQUEUE I-RADIO>
 				  <DEQUEUE I-MARVIN>
-				  <SETG DARK-FLAG ,INTERVIEW-ROOM>
+				  ;<SETG DARK-FLAG ,INTERVIEW-ROOM>
 				  <SETG CURRENT-EXIT 0>
                   <FSET ,DARK ,SEENBIT>
                   <COND (,P-WALK-DIR
@@ -75,6 +78,7 @@ as having a good, solid kick in the head.|
 		   		  <FSET ,INTERVIEW-ROOM ,SADRADIOBIT>
 				  <DEQUEUE I-ASK-DEATH>
 				  <DEQUEUE I-ASKED-NICELY>
+                  <DEQUEUE I-WHATEVER-DEAD>
 				  <DEQUEUE I-ASK-AGAIN>
                   <DEQUEUE I-MICE-CHASE>
 				  <SETG KILL-NOW? <>>
@@ -83,7 +87,7 @@ as having a good, solid kick in the head.|
 				  <FSET ,ARK ,SADRADIOBIT>
 				  <MOVE ,ALARM ,LOCAL-GLOBALS>
 				  <MOVE ,RED-LIGHT ,LOCAL-GLOBALS>
-				  <DEQUEUE I-CRASH>)
+				  ;<DEQUEUE I-CRASH>)
 				 (<EQUAL? <LOC ,PLAYER> ,ENTRY-HALL ,JUNCTION ;,GALLEY ;,PRES-BRIDGE ;,DORM ;,BATHROOM-SHIP>
 				  <SETG S-ENTRY-HALL <>>
 				  <FSET ,ENTRY-HALL ,SADRADIOBIT>
@@ -93,7 +97,7 @@ as having a good, solid kick in the head.|
 				  <COND (<AND ,S-ENTRY-HALL
 				  			  ,P-WALK-DIR
 							  <IN? ,PLAYER ,ENTRY-HALL>>
-						 <SETG REST-PROB 100>
+						 ;<SETG REST-PROB 100>
 						 <TELL " Everything becomes" ,ELLIPSIS>
 						 ;<SIXCR> <CHANGE-PART 2>
 				  		 <RETURN ,DARK>
@@ -133,19 +137,8 @@ as having a good, solid kick in the head.|
                   <TELL
 "You swing open the wooden door, and a bright light hits
 you so fast that you don't have time to close your eyes.">
-                  <ROB ,PLAYER ,DINING-HALL>
-                  ;<COND (<EQUAL? ,HERE ,BOTTOM-OF-STAIRS>
-                         <TELL
-"You swing open the wooden door, and a bright light hits
-you so fast that you don't have time to close your eyes.
-Everything becomes" ,ELLIPSIS>
-                         <INCREMENT-SCORE 25 T>
-                         <ROB ,PLAYER ,RECEPTION>
-                         ;<SIXCR> <CHANGE-PART 2>
-                         <RETURN ,DARK>)>)>
+                  <ROB ,PLAYER ,DINING-HALL>)>
 		   <TELL " Everything becomes" ,ELLIPSIS>
-		   <COND (<NOT <EQUAL? ,DARK-FLAG ,RECEPTION>>
-		   		  <SETG REST-PROB 100>)>
 		   ;<SIXCR> ;"Extra CRLFs?"
            ;<SIXCR> <CHANGE-PART 2>
 		   <GOTO ,DARK>
@@ -161,59 +154,67 @@ Everything becomes" ,ELLIPSIS>
 
 <ROUTINE DARK-F (RARG)
 	 <COND (<EQUAL? .RARG ,M-ENTER>
-		<PUTP ,PLAYER ,P?ACTION ,DARK-FUNCTION>
-        <COND ;(<1? ,MY-NAME>
-               <ROB ,PLAYER ,RECEPTION>)
-              (ELSE
-               <ROB ,PLAYER ,DARK-OBJECT>)>
-		;<FSET ,CONVERSATION ,INVISIBLE>
-		<SETG DREAMING <>>
-		<SETG LYING-DOWN <>>
-		<REPEAT ()
-			<COND (,DARK-FLAG
-			       <RETURN>)>
-			<COND (<PROB ,REST-PROB>
-			       <SETG REST-PROB 0>
-			       <SETG DARK-FLAG ,RECEPTION>
-			       <SETG CURRENT-EXIT 3>)
-			      (<PROB ,MOUSE-PROB>
-				   ;<V-FOO>
-			       <SETG MOUSE-PROB 10>
-			       <SETG REST-PROB 100>
-			       <SETG DARK-FLAG ,INTERVIEW-ROOM>
-			       <SETG CURRENT-EXIT 0>)
-			      (<PROB ,MORPH-PROB>
-			       <COND (<NOT <EQUAL? ,MORPH-PROB 10>>
-				      <SETG MORPH-PROB 10>
-				      <SETG DIRK-PROB 33>
-				      <SETG ARK-PROB 33>
-				      <SETG PDW-PROB 33>)>
-			       <SETG DARK-FLAG ,ENTRY-HALL>
-			       <SETG CURRENT-EXIT 4>)
-			      (<PROB ,DIRK-PROB>
-			       <SETG DIRK-PROB 10>
-			       <SETG DARK-FLAG ,OFFICE>
-			       <SETG CURRENT-EXIT 2>)
-			      (<PROB ,FJORD-PROB>
-                   ;<V-FOO>
-			       <SETG FJORD-PROB 10>
-			       <SETG DARK-FLAG ,GLACIER-1>
-			       <SETG CURRENT-EXIT 1>)
-			      (<PROB ,PDW-PROB>
-			       <SETG PDW-PROB 10>
-			       <SETG DARK-FLAG ,PDW>
-			       <SETG CURRENT-EXIT 5>)
-			      (<PROB ,ARK-PROB>
-			       <SETG ARK-PROB 10>
-			       <SETG DARK-FLAG ,ARK>
-			       <SETG CURRENT-EXIT 7>)
-			      (<PROB ,BBBB-PROB> ;"this should always be 0"
-			       <V-FOO>
-			       <SETG DARK-FLAG ,BAR>
-			       <SETG CURRENT-EXIT 6>)>>
-		<RFALSE>)
+		    <PUTP ,PLAYER ,P?ACTION ,DARK-FUNCTION>
+            <COND ;(<1? ,MY-NAME>
+                   <ROB ,PLAYER ,RECEPTION>)
+                  (ELSE
+                   <ROB ,PLAYER ,DARK-OBJECT>)>
+		    ;<FSET ,CONVERSATION ,INVISIBLE>
+		    <SETG DREAMING <>>
+		    <SETG LYING-DOWN <>>
+		    <REPEAT ()
+		     <COND (,DARK-FLAG
+		            <RETURN>)>
+		     <COND (<PROB ,REST-PROB>
+		            <SETG REST-PROB 0>
+		            <SETG DARK-FLAG ,RECEPTION>
+		            <SETG CURRENT-EXIT 3>)
+		           (<PROB ,MOUSE-PROB>
+		            ;<V-FOO>
+		            <SETG MOUSE-PROB 7>
+		            <SETG REST-PROB 100>
+		            <SETG DARK-FLAG ,INTERVIEW-ROOM>
+		            <SETG CURRENT-EXIT 0>)
+		           (<PROB ,BBBB-PROB>
+		            ;<V-FOO>
+		            <SETG DARK-FLAG ,BAR>
+		            <SETG CURRENT-EXIT 6>)
+                   (<PROB ,MORPH-PROB>
+		            <COND (<NOT <EQUAL? ,MORPH-PROB 7>>
+		     	           <SETG MORPH-PROB 7>
+		     	           <SETG DIRK-PROB 33>
+		     	           <SETG ARK-PROB 33>
+		     	           <SETG PDW-PROB 33>)>
+		            <SETG DARK-FLAG ,ENTRY-HALL>
+		            <SETG CURRENT-EXIT 4>)
+		           (<PROB ,DIRK-PROB>
+		            <SETG DIRK-PROB 7>
+		            <SETG DARK-FLAG ,OFFICE>
+		            <SETG CURRENT-EXIT 2>)
+		           (<PROB ,FJORD-PROB>
+                    ;<V-FOO>
+		            <SETG FJORD-PROB 7>
+		            <SETG DARK-FLAG ,GLACIER-1>
+		            <SETG CURRENT-EXIT 1>)
+		           (<PROB ,PDW-PROB>
+		            <SETG PDW-PROB 7>
+		            <SETG DARK-FLAG ,PDW>
+		            <SETG CURRENT-EXIT 5>)
+		           (<PROB ,ARK-PROB>
+		            <SETG ARK-PROB 7>
+		            <SETG DARK-FLAG ,ARK>
+		            <SETG CURRENT-EXIT 7>)>>
+		    <IF-P-DEBUGGING-PARSER
+             <COND (<T? ,P-DBUG>
+                    <HLIGHT ,H-BOLD>
+                    <TELL "(Set current exit to ">
+                    <D-J ,DARK-FLAG>
+                    <BOLDEN ".)|">)>>
+            <COND (<NOT <EQUAL? ,DARK-FLAG ,RECEPTION>>
+		   		   <SETG REST-PROB 100>)>
+            <RFALSE>)
 	       (<EQUAL? .RARG ,M-LOOK>
-		<RTRUE>)>>
+		    <RTRUE>)>>
 
 <OBJECT DARK-OBJECT
 	(LOC DARK)
@@ -235,7 +236,7 @@ Everything becomes" ,ELLIPSIS>
 	(DESC "blur")
 	(LDESC 0)
 	(SYNONYM BLUR)
-	(ADJECTIVE SMALL LARGE GREEN)
+	(ADJECTIVE SMALL BIG GREEN)
 	(FLAGS NDESCBIT PERSONBIT)>
 
 <OBJECT WHITE-ROOM
@@ -243,7 +244,7 @@ Everything becomes" ,ELLIPSIS>
 	(DESC "white room")
 	(LDESC 0)
 	(SYNONYM ROOM)
-	(ADJECTIVE PEARLY WHITE CLEAN GREY GRAY)
+	(ADJECTIVE PEARLY WHITE CLEAN GREY ;GRAY)
 	(FLAGS NDESCBIT)>
 
 <OBJECT LUMP
@@ -297,12 +298,15 @@ Everything becomes" ,ELLIPSIS>
 	(FLAGS NDESCBIT)>
 
 <ROUTINE DARK-FUNCTION ()
-	 <COND (<VERB? QUIT RESTART RESTORE SCORE VERSION SAVE ;AGAIN HELP
-		       	   VERBOSE BRIEF SUPER-BRIEF SCRIPT UNSCRIPT FOOTNOTE
-                   P1 P2 P3 FJORDS DESIGN BBBB $WEIGHT $LOC SHOWME>
+	 <COND (<VERB? QUIT RESTART RESTORE SCORE VERSION SAVE HELP
+		       	   VERBOSE BRIEF SUPER-BRIEF SCRIPT UNSCRIPT UNDO>
 		<>)
+           ;(<VERB? P1 P2 P3 FJORDS DESIGN BBBB $LOC MOVEME>
+        <>)
 	       (,DONT-FLAG
-		<>)
+		<SETG DONT-FLAG <>>
+        <TELL "Stop being negative. You won't accomplish anything here." CR>
+        <FUCKING-CLEAR>)
 	       (<VERB? PANIC YELL>
 		<TELL
 "You yell as loudly as you can, but no sound emerges." CR>)
@@ -327,43 +331,43 @@ Everything becomes" ,ELLIPSIS>
 		<TELL
 ". You realise you are carrying the thing in your hand, and
 quickly identify it as not being the source of the noise." CR>)
-	       (<AND <VERB? DROP>
-		     <EQUAL? ,PRSO ,OTHER-THING>
-		     <EQUAL? ,DARK-FLAG ,OFFICE ,PDW>
-		     <IN? ,OTHER-THING ,PLAYER>>
-		<TELL
+	       (<AND <VERB? DROP THROW THROW-AT THROW-THROUGH>
+		         <EQUAL? ,PRSO ,OTHER-THING>
+		         <EQUAL? ,DARK-FLAG ,OFFICE ,PDW>
+		         <IN? ,OTHER-THING ,PLAYER>>
+		    <TELL
 "It gives off a loud thunk, which startles you and jerks you to your senses.">
-        <COND (<AND <EQUAL? ,DARK-FLAG ,PDW>
-                    ,IMMOVABLE>
-               <TELL
+            <COND (<AND <EQUAL? ,DARK-FLAG ,PDW>
+                        ,IMMOVABLE>
+                   <TELL
 " At that point, you realise that there is another noise you can hear.
 That other noise is someone's voice - namely " D ,SLARTY "'s , who is
 shaking you and telling you to wake up. You open your eyes just as you
 remember what you were sent to do, and that you don't want to be here" ,ELLIPSIS>)
-              (ELSE
-               <TELL " You realise that you have found yourself in" ,ELLIPSIS CR>)>
-		<LEAVE-DARK>)
+                  (ELSE
+                   <TELL " You realise that you have found yourself in" ,ELLIPSIS CR>)>
+		    <LEAVE-DARK>)
 	       (<AND <OR <EQUAL? ,PRSO ,OTHER-THING ,CLATTER>
-		         <EQUAL? ,PRSI ,OTHER-THING ,CLATTER>>
-		     <NOT <AND <VERB? DROP>
-			 		<EQUAL? ,PRSO ,OTHER-THING>>>>
-		<COND (<NOT <EQUAL? ,DARK-FLAG ,OFFICE ,PDW>>
-		       <>)
-		      (<VERB? LISTEN>
-		       <TELL "The clattering is all that can catch your attention." CR>)
-              (<AND <SEE-VERB?>
-                    <EQUAL? ,OTHER-THING ,PRSO ,PRSI>>
-		       <TELL "No, it's not "><THE-J ,THING T><TELL ", it's "><ITALICIZE "another"><TELL" thing." CR>)
-		      (T
-		       <>)>)
+		             <EQUAL? ,PRSI ,OTHER-THING ,CLATTER>>
+		         <NOT <AND <VERB? DROP>
+		    	     		<EQUAL? ,PRSO ,OTHER-THING>>>>
+		    <COND (<NOT <EQUAL? ,DARK-FLAG ,OFFICE ,PDW>>
+		           <>)
+		          (<VERB? LISTEN>
+		           <TELL "The clattering is all that can catch your attention." CR>)
+                  (<AND <SEE-VERB?>
+                        <EQUAL? ,OTHER-THING ,PRSO ,PRSI>>
+		           <TELL "No, it's not "><THE-J ,THING T><TELL ", it's "><ITALICIZE "another"><TELL" thing." CR>)
+		          (T
+		           <>)>)
 	       (<AND <EQUAL? ,DARK-FLAG ,INTERVIEW-ROOM ,RECEPTION>
-		     <VERB? EXAMINE LOOK>
-		     <EQUAL? ,PRSO ,DARK-OBJECT ,BLUR <>>
-		     <MISSING?>>
-		<TELL
+		         <VERB? EXAMINE LOOK>
+		         <EQUAL? ,PRSO ,DARK-OBJECT ,BLUR <>>
+		         <MISSING?>>
+		    <TELL
 "It isn't that dark. As your eyes accustom to the newfound light,
 you notice the walls of the room you appear to be in. The walls
-are a grey-ish, white colour. In front of you, a ">
+are a grey-ish colour. In front of you, a ">
 		<MOVE ,BLUR ,HERE>
 		<THIS-IS-IT ,BLUR>
 		<MOVE ,WHITE-ROOM ,HERE>
@@ -376,8 +380,10 @@ are a grey-ish, white colour. In front of you, a ">
             <REPLACE-ADJ? ,BLUR ,W?BLACK ,W?GREEN>
 			;<PUTP ,BLUR ,P?SDESC "large green blur">)>
 		<TELL " blur looks at you disapprovingly." CR>)
-	       (<AND <OR <EQUAL? ,PRSO ,WHITE-ROOM ,BLUR>
-		         <EQUAL? ,PRSI ,WHITE-ROOM ,BLUR>>
+	       (<AND <VISIBLE? ,BLUR>
+             <OR <EQUAL? ,PRSO ,WHITE-ROOM ,BLUR>
+		         <EQUAL? ,PRSI ,WHITE-ROOM ,BLUR>
+                 <VERB? HELLO SAY>>
 		     <NOT <VERB? WALK>>>
 		<COND (<NOT <EQUAL? ,DARK-FLAG ,INTERVIEW-ROOM ,RECEPTION>>
 		       <CANT-SEE ,P-IT-OBJECT>)
@@ -386,13 +392,14 @@ are a grey-ish, white colour. In front of you, a ">
 				   <AND <VERB? HELLO>
 			  			<EQUAL? ,PRSO ,BLUR ,ROOMS <> ,PLAYER>>
 				   <AND <VERB? SAY>
-				   		<IOBJ? BLUR>>>
+				   		<EQUAL? ,PRSI <> ,ROOMS ,BLUR>>>
 		       <TELL "The blur clears its throat and comes into focus, appearing in the shape of a w">
 			   <COND (<EQUAL? ,DARK-FLAG ,RECEPTION>
-					<TELL "aiter, who then walks off into the distance. Odd">)
+					<TELL "aiter, who then walks off into the distance. Odd. A">)
 			  		 (ELSE
-					<TELL "hite mouse, which is on the table next to you">)>
-               <TELL ". A bright light illuminates the room, showing you to be in" ,ELLIPSIS>
+					<TELL
+"hite mouse, which is on the table next to you. You hear two tiny mouse paws clap twice, when a">)>
+               <TELL " bright light illuminates the room, showing you to be in" ,ELLIPSIS>
 		       <LEAVE-DARK>)>)
 	       (<AND <EQUAL? ,DARK-FLAG ,ENTRY-HALL ,GLACIER-1>
 		     <VERB? RUB>
@@ -420,10 +427,12 @@ identified as a chunk of ice), which is in the middle of a vast landscape" ,ELLI
 				  <LEAVE-DARK>)>)
 		      (<EQUAL? ,DARK-FLAG ,ENTRY-HALL>
 		       <COND (<VERB? EXAMINE RUB>
-			      <TELL "It seems warmish." CR>)
-			     (<VERB? PUSH>
-			      <TELL "The lump gives out a startling CLICK, and the lights turn on, which lights up the" ,ELLIPSIS>
-			      <LEAVE-DARK>)>)>)
+			          <TELL
+"It seems warmish. Oh, and it's a little loose, it seems, like you could move it in some way." CR>)
+			         (<VERB? PUSH MOVE>
+			          <TELL
+"The lump gives out a startling CLICK, and everything turns on, which lights up the" ,ELLIPSIS>
+			          <LEAVE-DARK>)>)>)
 	       (<AND <EQUAL? ,DARK-FLAG ,ARK ,BAR>
 		     <VERB? SMELL>
 		     <EQUAL? ,PRSO ,DARK-OBJECT <>>
@@ -476,16 +485,33 @@ unravel before your eyes in" ,ELLIPSIS !\  D ,BAR !\!>)>
 		       <>)>)
 	       (T
 		    <SETG DARK-COUNTER <+ ,DARK-COUNTER 1>>
-		    <COND (<AND ,DARK-CONTROLLED>
+		    <COND (<AND ,DARK-CONTROLLED
+                        ;<MISSING?>
+                        <NOT ,IMMOVABLE>>
                    <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
 		           <COND (<EQUAL? ,CURRENT-EXIT 8>
 		    	          <SETG CURRENT-EXIT 0>)>
-		           <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>
+		           <MOVE ,BLUR ,LOCAL-GLOBALS>
+		           <MOVE ,WHITE-ROOM ,LOCAL-GLOBALS>
+                   <MOVE ,BUBBLE ,LOCAL-GLOBALS>
+                   <MOVE ,BARBECUE ,LOCAL-GLOBALS>
+		           <MOVE ,DARKY-ROOM ,LOCAL-GLOBALS>
+                   <MOVE ,LUMP ,LOCAL-GLOBALS>
+                   <MOVE ,CLATTER ,LOCAL-GLOBALS>
+                   <MOVE ,OTHER-THING ,LOCAL-GLOBALS>
+                   <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>
                    <COND (<OR <AND <EQUAL? ,DARK-FLAG ,GLACIER-1>
                                    <NOT <FSET? ,GLACIER-1 ,SADRADIOBIT>>>
-                              <EQUAL? ,DARK-FLAG ,PDW>>
+                              <AND <EQUAL? ,DARK-FLAG ,PDW>
+                                   <FSET? ,PDW ,SADRADIOBIT>>>
                           <SETG CURRENT-EXIT <+ ,CURRENT-EXIT 1>>
-                          <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>)>)>
+                          <SETG DARK-FLAG <GET ,DARK-EXIT-TABLE ,CURRENT-EXIT>>)>
+                   <IF-P-DEBUGGING-PARSER
+                    <COND (<T? ,P-DBUG>
+                           <HLIGHT ,H-BOLD>
+                           <TELL "(Set current exit to ">
+                           <D-J ,DARK-FLAG>
+                           <BOLDEN ".)|">)>>)>
 		<COND (<VERB? LOOK>
 		       <BOLDEN "Dark">
 			   <CRLF>)>
@@ -515,7 +541,7 @@ unravel before your eyes in" ,ELLIPSIS !\  D ,BAR !\!>)>
 		       <TELL CR "You need help!" CR>)
 		      ;(T
 		       <RTRUE>)>
-		<FUCKING-CLEAR>)>>  
+		<RFATAL>)>>  
 
 <CONSTANT DARK-EXIT-TABLE
 	<PTABLE
@@ -529,11 +555,12 @@ unravel before your eyes in" ,ELLIPSIS !\  D ,BAR !\!>)>
 	 BAR ;WHALE>>
 
 <ROUTINE MISSING? ()
-	 <COND (<OR ,DARK-CONTROLLED
-		    <G? ,DARK-COUNTER 4>>
-		<RTRUE>)
+	 <COND (<OR <AND ,DARK-CONTROLLED
+                     <NOT ,IMMOVABLE>>
+		        <G? ,DARK-COUNTER 4>>
+		    <RTRUE>)
 	       (T
-		<RFALSE>)>>
+		    <RFALSE>)>>
 
 <ROUTINE DARK-ONE ()
 	 <TELL "You can ">
@@ -607,7 +634,7 @@ or who you are or how you got there." CR>>
 	<PUTP ,PLAYER ,P?ACTION ,PLAYER-F>
 	<SETG DARK-COUNTER 0>
 	;<SETG LYING-COUNTER 0>
-	<SETG DARK-CONTROLLED <>>
+	;<SETG DARK-CONTROLLED <>>
     <COND (<NOT <EQUAL? ,DARK-FLAG ,OFFICE>>
            <ROB ,DARK-OBJECT ,PLAYER>)>
 	;<COND (<NOT <EQUAL? ,DARK-FLAG ,ENTRY-BAY>>
@@ -628,17 +655,17 @@ or who you are or how you got there." CR>>
            <COND (<NOT <FSET? ,INTERVIEW-ROOM ,SADRADIOBIT>>
                   <INCREMENT-SCORE 15 T>)>
 		   <QUEUE I-ASK-DEATH 6>
+           <QUEUE I-WHATEVER-DEAD 30>
            <FSET ,INTERVIEW-ROOM ,SEENBIT>
 		   <SETG KILL-NOW? T>
            ;<SIXCR> <CHANGE-PART 9>)
 		  (<EQUAL? ,DARK-FLAG ,ARK>
 		   <MOVE ,BUBBLE ,LOCAL-GLOBALS>
 		   <MOVE ,DARKY-ROOM ,LOCAL-GLOBALS>
-		   <QUEUE I-CRASH -1>
+		   ;<QUEUE I-CRASH -1>
            ;<SIXCR> <CHANGE-PART 2 7>)
 		  (<EQUAL? ,DARK-FLAG ,ENTRY-HALL>
 		   <MOVE ,LUMP ,LOCAL-GLOBALS>
-		   <QUEUE I-MORPHER-CAPTAIN -1>
            ;<SIXCR> <CHANGE-PART 2 4>)
 		  (<EQUAL? ,DARK-FLAG ,GLACIER-1>
            <COND (<AND <NOT ,IMMOVABLE>

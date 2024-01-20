@@ -7,24 +7,26 @@
 	(LOC LOCAL-GLOBALS)
 	(DESC "Milliways")
 	(SYNONYM RESTAURANT END UNIVERSE MILLIWAYS)
-	(ADJECTIVE END AT)
+	(ADJECTIVE END AT MILLIWAYS)
 	(FLAGS NARTICLEBIT)
+    (GENERIC RESTAURANT-G)
 	(ACTION RESTAURANT-F)>
 
 <ROUTINE RESTAURANT-F ()
 	 <COND (<VERB? LEAVE DISEMBARK>
 		    <V-WALK-AROUND>)
-	       (<VERB? THROUGH WALK-TO BOARD>
+	       (<AND <VERB? THROUGH WALK-TO BOARD>
+                 <IN-REST? ,PLAYER>>
 		    <TELL "You're in it!" CR>)
-           (<VERB? FIND>
+           (<VERB? FIND WALK-TO>
             <COND (<IN-REST? ,PLAYER>
                    <ALREADY ,WINNER "in it">)
                   (ELSE
                    <TELL ,DO-YOURSELF CR>)>)>>
 
 <ROUTINE IN-REST? (OBJ)
-   <COND (<OR <EQUAL? <META-LOC .OBJ> ,RECEPTION ,CAR-PARK ,THIRD-C ,DINING-HALL ,KITCHEN ,DRESSING-ROOM-REU>
-	          <EQUAL? <LOC .OBJ>      ,RECEPTION ,CAR-PARK ,THIRD-C ,DINING-HALL ,KITCHEN ,DRESSING-ROOM-REU>>
+   <COND (<OR <EQUAL? <META-LOC .OBJ> ,RECEPTION ,CAR-PARK ,THIRD-C ,DINING-HALL ,KITCHEN ,DRESSING-ROOM-REU ,FIRST-CLASS>
+	          <EQUAL? <LOC .OBJ>      ,RECEPTION ,CAR-PARK ,THIRD-C ,DINING-HALL ,KITCHEN ,DRESSING-ROOM-REU ,FIRST-CLASS>>
 	      <RTRUE>)
 	     (T
 	      <RFALSE>)>>
@@ -36,7 +38,7 @@
     (UP ;PER ;TO-THIRD-C TO THIRD-C)
     ;(DOWN PER CANNOT-GO)
     (FLAGS LIGHTBIT ONBIT)
-    (GLOBAL TABLE-RANDOM CAR-PARK-ACCESS-DOOR CAR-PARK-PANEL RESTAURANT)
+    (GLOBAL TABLE-RANDOM CAR-PARK-ACCESS-DOOR CAR-PARK-PANEL RESTAURANT WAITER)
     (ACTION RECEPTION-F)
     (THINGS <> RECEPTION GLOBAL-ROOM-F
             <> (SET STAIRS STEPS) STAIRS-F)>
@@ -44,7 +46,12 @@
 <ROUTINE RECEPTION-F (RARG)
      ;<MOVE ,HOTBLACK-CAR ,GLOBAL-OBJECTS>
      <CAR-PARK-CHANGE 1>
-     <COND (<EQUAL? .RARG ,M-LOOK>
+     <COND (<AND <EQUAL? .RARG ,M-ENTER>
+                 ,SCOREMAD
+                 <NOT <OR <QUEUED? FORD-FOLLOW>
+                          <RUNNING? FORD-FOLLOW>>>>
+            <QUEUE FORD-FOLLOW 1>)
+           (<EQUAL? .RARG ,M-LOOK>
             <TELL "This is the reception">
             <COND (<FSET? ,RECEPTION ,SEENBIT>
                    <TELL " of Milliways">)>
@@ -70,28 +77,50 @@ You can walk up a set of stairs to the Third Class." CR>
 <ROUTINE RECEPTION-TO-CAR-PARK ()
      <COND (,MAX-ALLOWED
             <ITALICIZE "Accepted.">
-            <TELL CR CR "The door slides open in silence." CR CR>
+            <TELL CR CR "The door slides open in silence." CR ;CR>
             <FSET ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
             <CAR-PARK-CHANGE 0>
             <QUEUE CLOSE-SECOND-DOOR 2>
-            ,DINING-HALL)
+            ,CAR-PARK)
            (<FSET? ,CAR-PARK-ACCESS-DOOR ,OPENBIT>
             <CAR-PARK-CHANGE 0>
             <SETG BEEN-ALREADY-CAR <+ ,BEEN-ALREADY-CAR 1>>
             ,CAR-PARK)
-           (<IN? ,FIRST-CLASS-CARD ,PLAYER>
-            <TELL "You flash your access card against the panel and stroll through." CR CR>
+           (<HELD? ,FIRST-CLASS-CARD>
+            <TELL "You flash your access card against the panel and stroll through." CR ;CR>
             <CAR-PARK-CHANGE 0>
             <SETG BEEN-ALREADY-CAR <+ ,BEEN-ALREADY-CAR 1>>
             ,CAR-PARK)
            (<G? ,BEEN-ALREADY-CAR 1>
-            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR CR>
+            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR ;CR>
             <CAR-PARK-CHANGE 0>
             <SETG BEEN-ALREADY-CAR <+ ,BEEN-ALREADY-CAR 1>>
             ,CAR-PARK)
            (ELSE
-            <TELL "The car park management computer denies access. \"You don't have an access card.\"" CR>
+            <TELL "The car park management computer denies access. \"You don't have an access card" ,PIC>
             <RFALSE>)>>
+
+<OBJECT MENU
+    (LOC RECEPTION)
+    (DESC "laminated menu")
+    (SYNONYM BROCHURE MENU)
+    (ADJECTIVE FOOD LAMINATED)
+    (FLAGS TAKEBIT TRYTAKEBIT READBIT)
+    (TEXT "MENU||
+[Unfortunately, none of the languages you understand.
+English is not a written language people know, apparently.]")>
+
+<OBJECT WAITER
+    (LOC LOCAL-GLOBALS)
+    (DESC "waiter")
+    (SYNONYM WAITER WAITERS)
+    (ACTION WAITER-F)>
+
+<ROUTINE WAITER-F ()
+    <COND (<VERB? WHERE WHAT-ABOUT FIND $CALL SEARCH-FOR WALK-TO>
+           <TELL "You attempt to find a waiter, but they're never here when you need them." CR>)
+          (<NOT <VERB? ASK-ABOUT ASK-FOR>>
+           <TELL "The waiters are never here. You know that. Just like most restaurants." CR>)>>
 
 <ROOM CAR-PARK
     (LOC ROOMS)
@@ -121,10 +150,10 @@ cubicle) or to the east (to Hotblack Desiato's ship, among others).")
                  (SHIP SHIPS LOADS TONS HUNDREDS SPACESHIP STARSHIP CAR CARS) CANT-ENTER-OBJECT
             <> (BATHROOM TOILET) CANT-ENTER-OBJECT
             ;[(HOTBLACK DESIATO\'S DESIATO STUNT PERSONAL HIS) (SHIP SPACESHIP STARSHIP) CANT-ENTER-OBJECT]
-            (BUZZING FLICKERING BUZZY FLICKERY) (LIGHT BUZZ) UNIMPORTANT-THING-F
+            (BUZZING FLICKERING BUZZY FLICKERY) (LIGHT BUZZ) USELESS
             (MAINTENANCE SERVICE CLEANING TOILET) (ROBOT WORKER CLEANER) WORKER-ROBOT-F
             (DARK TIME TELEPORT TELEPORTA PERSONAL) (CUBICLE CUBICLES PORTAL BEAM) N-PORTAL-F)
-    (GLOBAL CAR-PARK-ACCESS-DOOR CAR-PARK-PANEL RESTAURANT)
+    (GLOBAL CAR-PARK-ACCESS-DOOR CAR-PARK-PANEL RESTAURANT WAITER)
     (FLAGS LIGHTBIT ONBIT)>
 
 <ROUTINE ENTER-HOTBLACK ("OPT" (UNMOV <>))
@@ -135,7 +164,7 @@ cubicle) or to the east (to Hotblack Desiato's ship, among others).")
 "You step inside the ship" ,ELLIPSIS " and the hatch slides shut behind you,
 leaving you in a dark nearly as terrifying as all the others before
 it, although there is no shock so you feel the fear even greater than
-previous times" ,ELLIPSIS "">
+previous times" ,ELLIPSIS>
            <CHANGE-PART 2>
            <QUEUE I-STUNT-SHIP -1>
            <COND (<NOT <IN? ,PEANUT-PACKET ,PLATE>>
@@ -149,7 +178,7 @@ previous times" ,ELLIPSIS "">
     <COND (<VERB? FIND EXAMINE LISTEN>
            <TELL "It's somewhere in the toilet." CR>)
           (ELSE
-           <UNIMPORTANT-THING-F>)>>
+           <USELESS>)>>
 
 <ROUTINE N-PORTAL-F ()
     <COND (<VERB? WALK-TO BOARD THROUGH LEAP>
@@ -203,8 +232,8 @@ guests feel welcome and less affected by the shock. ">
 <OBJECT HOTBLACK-CAR
     (LOC CAR-PARK)
     (OWNER HOTBLACK)
-    (DESC "personal ship")
-    (ADJECTIVE HOTBLACK DESIATO\'S DESIATO STUNT PERSONAL HIS SHIP
+    (DESC "Hotblack Desiato's personal ship") ;"AAAARGH"
+    (ADJECTIVE HOTBLACK DESIATO\'S DESIATO STUNT PERSONAL ;HIS SHIP
                SPACESHIP STARSHIP BLACK JET EBONY VANTABLACK VOID COOL)
     (SYNONYM SHIP SPACESHIP STARSHIP DOOR HATCH HATCHWAY CRUISER)
     (FLAGS NARTICLEBIT NDESCBIT)
@@ -248,7 +277,7 @@ D ,RESTAURANT ", and then you can also exit in style!" CR>)
     (DOWN TO RECEPTION)
     (NE PER THIRD-C-TO-DINING-HALL)
 	;(UP PER CANNOT-GO)
-    (GLOBAL SECOND-CLASS-ACCESS-DOOR SECOND-CLASS-PANEL RESTAURANT)
+    (GLOBAL SECOND-CLASS-ACCESS-DOOR SECOND-CLASS-PANEL RESTAURANT WAITER)
     (ACTION THIRD-C-F)
     (FLAGS LIGHTBIT ONBIT)
     (THINGS (THIRD CLASS) (THIRD-CLASS CLASS AREA) GLOBAL-ROOM-F
@@ -259,10 +288,10 @@ D ,RESTAURANT ", and then you can also exit in style!" CR>)
     <PUTP ,SECOND-CLASS-PANEL ,P?SDESC "second class access panel">
     <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?THIRD-CLASS ,W?SECOND-CLASS>
     <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?THIRD ,W?SECOND>
-    <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?SOUTHWEST ,W?NORTHEAST>
+    <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?SOUTHWEST ,W?NE>
     <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?THIRD-CLASS ,W?SECOND-CLASS>
     <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?THIRD ,W?SECOND>
-    <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?SOUTHWEST ,W?NORTHEAST>
+    <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?SOUTHWEST ,W?NE>
     <COND (<EQUAL? .RARG ,M-LOOK>
            <COND (<NOT <FSET? ,FORD ,SEENBIT>>
                   <TELL
@@ -277,20 +306,20 @@ explosion that is happening outside. You need to get through!">)>
 <ROUTINE THIRD-C-TO-DINING-HALL ()
      <COND (,MAX-ALLOWED
             <ITALICIZE "Accepted.">
-            <TELL CR CR "The door slides open in silence." CR CR>
+            <TELL CR CR "The door slides open in silence." CR ;CR>
             <FSET ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
             <QUEUE CLOSE-SECOND-DOOR 2>
             ,DINING-HALL)
            (<FSET? ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
-            <TELL "You sneak through into the second class area." CR CR>
+            <TELL "You sneak through into the second class area." CR ;CR>
             <FSET ,FORD ,SEENBIT>
             ,DINING-HALL)
            (<G? ,BEEN-ALREADY-HALL 1>
-            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR CR>
+            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR ;CR>
             ,DINING-HALL)
-           (<IN? ,FIRST-CLASS-CARD ,PLAYER>
+           (<HELD? ,FIRST-CLASS-CARD>
             <FIRST-YOU "swiping" ,FIRST-CLASS-CARD ,SECOND-CLASS-PANEL>
-            <CRLF>
+            ;<CRLF>
             <FSET ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
             <SETG BEEN-ALREADY-HALL <+ ,BEEN-ALREADY-HALL 1>>
             <QUEUE CLOSE-SECOND-DOOR 2>
@@ -303,7 +332,7 @@ explosion that is happening outside. You need to get through!">)>
     (LOC LOCAL-GLOBALS)
     (SDESC "second class access door")
     (SYNONYM ACCESS DOOR)
-    (ADJECTIVE SECOND CLASS SECOND-CLASS ACCESS NORTHEAST)
+    (ADJECTIVE SECOND CLASS SECOND-CLASS ACCESS NE)
     (ACTION SECOND-CLASS-ACCESS-DOOR-F)
     (GENERIC DOOR-G)
     (FLAGS DOORBIT ;BADRADIOBIT)>
@@ -332,7 +361,7 @@ explosion that is happening outside. You need to get through!">)>
     (LOC LOCAL-GLOBALS)
     (SDESC "second class access panel")
     (SYNONYM PANEL)
-    (ADJECTIVE SECOND CLASS SECOND-CLASS ACCESS NORTHEAST DOOR)
+    (ADJECTIVE SECOND CLASS SECOND-CLASS ACCESS NE DOOR)
     (FLAGS SURFACEBIT ;BADRADIOBIT)
     (ACTION MANAGEMENT-PANEL-F)>
 
@@ -360,7 +389,7 @@ to the first class.")
     (WEST SORRY "The area is under maintenance.")
     ;(DOWN PER CANNOT-GO)
 	;(UP PER CANNOT-GO)
-    (GLOBAL SECOND-CLASS-ACCESS-DOOR SECOND-CLASS-PANEL RESTAURANT TABLE-RANDOM MAX-DRESS-DOOR)
+    (GLOBAL SECOND-CLASS-ACCESS-DOOR SECOND-CLASS-PANEL RESTAURANT TABLE-RANDOM MAX-DRESS-DOOR WAITER)
     (THINGS (TIGHTLY PACKED TIGHT CROWDED BUSY) (PEOPLE ALIENS CROWD MOB) CROWD-F
             (DINING SECOND CLASS) (HALL CLASS SECOND-CLASS AREA) GLOBAL-ROOM-F)
     (ACTION DINING-HALL-F)
@@ -369,26 +398,34 @@ to the first class.")
 <OBJECT BOUNCER
     (LOC DINING-HALL)
     (DESC "bouncer")
+    (TEXT "A burly security guard, keeping people like you out of the first class area.")
     (ADJECTIVE SECURITY SAFETY)
     (SYNONYM BOUNCER GUARD MAN)
     (FLAGS PERSONBIT NDESCBIT)
     (ACTION BOUNCER-F)>
 
 <ROUTINE BOUNCER-F ()
-    <COND (<PERSON-F ,BOUNCER>
+    <COND (<AND <VERB? SHOW GIVE>
+                <DOBJ? MINERAL-WATER>>
+           <TELL "That would get you arrested." CR>
+           <RTRUE>)
+          (<PERSON-F ,BOUNCER>
            <RTRUE>)>>
 
 <ROUTINE DINING-HALL-F (RARG)
     <COND (<EQUAL? .RARG ,M-ENTER>
-           <DEQUEUE SHUT-CUPBOARD-DOOR>
+           <QUEUE I-FIRST-CLASS-IDIOT 1>
+           <COND (<NOT <FSET? ,FIRST-CLASS-IDIOT ,MUNGBIT>>
+                  <MOVE ,FIRST-CLASS-IDIOT ,HERE>)>
+           ;<DEQUEUE SHUT-CUPBOARD-DOOR>
            <PUTP ,SECOND-CLASS-ACCESS-DOOR ,P?SDESC "third class access door">
            <PUTP ,SECOND-CLASS-PANEL ,P?SDESC "third class access panel">
            <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?SECOND-CLASS ,W?THIRD-CLASS>
            <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?SECOND ,W?THIRD>
-           <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?NORTHEAST ,W?SOUTHWEST>
+           <REPLACE-ADJ? ,SECOND-CLASS-ACCESS-DOOR ,W?NE ,W?SOUTHWEST>
            <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?SECOND-CLASS ,W?THIRD-CLASS>
            <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?SECOND ,W?THIRD>
-           <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?NORTHEAST ,W?SOUTHWEST>
+           <REPLACE-ADJ? ,SECOND-CLASS-PANEL ,W?NE ,W?SOUTHWEST>
            <COND (<AND <FSET? ,DARK-OBJECT ,SADRADIOBIT>
                        <NOT <FSET? ,DINING-HALL ,BADRADIOBIT>>>
                   <FSET ,DINING-HALL ,RADPLUGBIT>
@@ -407,40 +444,54 @@ and beckons to you to go to him, which you do. \"You know this
 man?\" he asks you, pointing at " D ,ZAPHOD " Beeblebrox. You
 say that you do, explaining that even if you do know him, you
 only recently met him. He stops you there with a finger and says
-that he needs to talk to you." CR>)>)>>
+that you need to have a chat with the policeman." CR>)
+                  (<PROB 5>
+                   <TELL <PICK-ONE <PLTABLE "Zaphod" "Ford">> " "
+                         <PICK-ONE <PLTABLE "leaps across the table and crashes into another person's chair!"
+                                            "stands up and shouts, \"I DARE YOU TO-- wait, what what it again?\"">>
+                         " He sits back down, mumbling an apology." CR>)
+                  (<PROB 5>
+                   <TELL CR
+"One of the waiters streaks right pass you! You attempt to grab
+ahold of them, but you fail very successfully, that is, if only
+you were trying to fail. Then the waiter glides out." CR>)
+                  (<PROB 5>
+                   <TELL CR
+"Trillian says some joke that makes the three laugh very hard, and all you strain
+in to hear what they're saying, you can't hear and feel you're missing out." CR>)>)>>
 
 <ROUTINE DINING-HALL-TO-FIRST-CLASS ()
      <COND (,MAX-ALLOWED
-            <TELL "\"Lucky bugger,\" mutters the bouncer as you pass through. \"Got on old Max's register.\"" CR CR>
+            <TELL "\"Lucky bugger,\" mutters the bouncer as you pass through. \"Got on old Max's register" ,PIC ;CR>
             ,FIRST-CLASS)
            (<IN? ,TOWEL ,PLAYER>
             <TELL
-"The bouncer approves of your towel, mistakenly believing you to be a waiter, and allows you through." CR CR>
+"The bouncer approves of your towel, mistakenly believing you to be a waiter, and allows you through." CR ;CR>
             ,FIRST-CLASS)
            (<OR ;<IN? ,MAX-CARD ,PLAYER>
-                <IN? ,FIRST-CLASS-CARD ,PLAYER>>
+                <HELD? ,FIRST-CLASS-CARD>>
             <TELL
-"The bouncer swipes your card for you, impressed you would have such a card, nevertheless letting you in." CR CR>
+"The bouncer swipes your card for you, impressed you would have such a card, nevertheless letting you in." CR ;CR>
             ,FIRST-CLASS)
            (ELSE
             <TELL "The bouncer stops you. \"Hold up, buddy!\" he shouts.
-\"Where's your card? Or" ,ELLIPSIS " nope, no towel. Not a waiter. " ,NOPE "go through.\"" CR>
+\"Where's your card? Or" ,ELLIPSIS " nope, no towel. Not a waiter. " ,NOPE "go through" ,PIC>
             <RFALSE>)>>
 
 <ROUTINE DINING-HALL-TO-THIRD-C ()
      <COND (,MAX-ALLOWED
-            <ITALICIZE "\"Accepted.\"">
-            <TELL CR CR "The door slides open in silence." CR CR>
+            <ITALICIZE "Accepted.">
+            <TELL CR CR "The door slides open in silence." CR ;CR>
             <FSET ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
             <QUEUE CLOSE-SECOND-DOOR 2>
             ,THIRD-C)
            (<FSET? ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
-            <TELL "You walk back into the Third Class." CR CR>
+            <TELL "You walk back into the Third Class." CR ;CR>
             ,THIRD-C)
            (<G? ,BEEN-ALREADY-HALL 1>
-            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR CR>
+            <TELL "\"Oh, it's you,\" says the computer, opening the door automatically and closing it behind you." CR ;CR>
             ,THIRD-C)
-           (<IN? ,FIRST-CLASS-CARD ,PLAYER>
+           (<HELD? ,FIRST-CLASS-CARD>
             <FIRST-YOU "swiping" ,FIRST-CLASS-CARD ,SECOND-CLASS-PANEL>
             <CRLF>
             <FSET ,SECOND-CLASS-ACCESS-DOOR ,OPENBIT>
@@ -453,24 +504,19 @@ that he needs to talk to you." CR>)>)>>
 
 <ROUTINE ENTER-KITCHEN? ()
      <COND (<IN? ,TOWEL ,PLAYER>
-            <QUEUE SHUT-CUPBOARD-DOOR 1>
             ,KITCHEN)
            (ELSE
-            ;<GOTO ,KITCHEN>
-            ;<V-LOOK>
             <TELL
-"Just as you are about to step inside" ,ELLIPSIS "" CR CR
-"\"Hold on a minute!\" shouts a voice. \"Where's your dishcloth?\"
-says the head cook, stepping out from behind an assortment of pots
-and pans. \"Go back and get it!\" and promptly throws you out of
-the kitchen.">
+"Just as you are about to step inside" ,ELLIPSIS CR CR "\"Hold on
+a minute!\" shouts a voice. \"Where's your dishcloth?\" says the
+head cook, stepping out from behind an assortment of pots and pans.
+\"Go back and get it!\" and promptly throws you out of the kitchen.">
             <COND (,MAX-ALLOWED
                    <TELL
 " You complain that you are on Max Quordlepleen's access register
 and therefore should be allowed to enter, but the cook scoffs at
 your rich-person behaviour and slams the door.">)>
             <CRLF>
-            ;<GOTO ,DINING-HALL>
             <RFALSE>)>>
 
 
@@ -504,7 +550,7 @@ your rich-person behaviour and slams the door.">)>
 
 <ROUTINE ENTER-DRESSING-ROOM? ()
      <COND (,MAX-ALLOWED
-            <TELL "\"Looks like you're on the register. Enter.\"" CR CR>
+            <TELL "\"Looks like you're on the register. Enter" ,PIC CR>
             <COND (<FSET? ,DRESSING-ROOM-REU ,RADPLUGBIT>
                    <REPLACE-ADJ? ,MAX-DRESS-DOOR ,W?EAST ,W?WEST>
                    <REPLACE-ADJ? ,MAX-DRESS-DOOR ,W?MAX ,W?DINING>
@@ -524,7 +570,7 @@ your rich-person behaviour and slams the door.">)>
            (ELSE
             <TELL
 "The computer denies your access, stating that your name is not on Max
-Quordlepleen's special card, nor is your name on " D ,REGISTER ,PAUSES>
+Quordlepleen's special card, nor is your name on his " D ,REGISTER ,PAUSES>
             <RFALSE>)>>
 
 
@@ -532,12 +578,12 @@ Quordlepleen's special card, nor is your name on " D ,REGISTER ,PAUSES>
 "FORD'S SATCHEL"
 <OBJECT SATCHEL
 	(LOC DINING-HALL)
-	(DESC "satchel")
+	(DESC "Ford's satchel")
     ;(LDESC "Ford's satchel is on the floor here.")
 	(DESCFCN SATCHEL-D)
-	(SYNONYM SATCHEL)
+	(SYNONYM SATCHEL BAG PURSE MANPURSE)
 	(ADJECTIVE BATTERED LEATHER BULKY FORD\'S)
-	(FLAGS CONTBIT TRYTAKEBIT TAKEBIT ;SEARCHBIT OPENABLEBIT)
+	(FLAGS CONTBIT TRYTAKEBIT TAKEBIT NARTICLEBIT OPENABLEBIT)
 	(CAPACITY 30)
 	(SIZE 28)
     (OWNER FORD)
@@ -706,7 +752,7 @@ or something." CR>)
 
 ;"*****************************
   ********** KITCHEN **********
-  **** Over 700 lines long ****
+  **** Over 800 lines long ****
   **** last time I checked ****
   *****************************
 "
@@ -718,7 +764,7 @@ or something." CR>)
 	;(UP PER CANNOT-GO)
     (NW TO DINING-HALL)
     (FLAGS LIGHTBIT ONBIT)
-    (GLOBAL RESTAURANT)
+    (GLOBAL RESTAURANT WAITER)
     (ACTION KITCHEN-F)
     (THINGS <> KITCHEN GLOBAL-ROOM-F
             (MANY PILING PILED STACKED) (STACKS LOTS TONS HUNDREDS POTS PANS DISHES POT PAN DISH) DISHES-F)>
@@ -727,7 +773,7 @@ or something." CR>)
     <COND (<EQUAL? .RARG ,M-LOOK>
            <TELL
 "The kitchen is bustling with pots, pans, dishes, ">
-           <COND (<NOT <FSET? ,OVEN ,SECRETBIT>>
+           <COND (<NOT <FSET? ,OVEN ,INVISIBLE>>
                   <TELL "an oven">
                   <COND (<FSET? ,OVEN ,OPENBIT>
                          <TELL " (open)">)>
@@ -750,7 +796,16 @@ or something." CR>)
                              (ELSE
                               <TELL "but it's empty">)>)>
                 <RETURN>>
-           <TELL ". The only exit is to the northwest." CR>)>>
+           <TELL ". The only exit is to the northwest." CR>)
+          (<EQUAL? .RARG ,M-END>
+           <SHUT-CUPBOARD-DOOR>
+           <COND (<PROB 10>
+                  <TELL CR "A waiter zooms in, "
+                        <PICK-ONE <PLTABLE "mumbles something to the chef about you and then about the cupboard"
+                                           "throws a dirty frob in the cupboard and grabs a strange glass, pours a jynnan tonnyx"
+                                           "sweeps a bunch of dishes out of the way and puts them back"
+                                           "turns some bolts on the wall with a wrench">>
+                        ", and dashes out." CR>)>)>>
 
 
 <ROUTINE DISHES-F ()
@@ -761,9 +816,9 @@ or something." CR>)
            <RTRUE>)
           (<VERB? SEARCH MOVE>
            <TELL "You spend a bit of time moving the pots and pans about. ">
-           <COND (<FSET? ,OVEN ,SECRETBIT>
+           <COND (<FSET? ,OVEN ,INVISIBLE>
                   <TELL "You see an oven amidst the pans, and clear a space around it.">
-                  <FCLEAR ,OVEN ,SECRETBIT>)
+                  <FCLEAR ,OVEN ,INVISIBLE>)
                  (ELSE
                   <TELL "Nothing is found.">)>
            <CRLF>
@@ -782,7 +837,7 @@ important hidden behind. But not now, it isn't your job." CR>)
     (DESC "oven")
     (SYNONYM OVEN MICROWAVE HEATER KNOB)
     (ADJECTIVE MICROWAVE HEATING)
-    (FLAGS NDESCBIT CONTBIT OPENABLEBIT TRANSBIT SECRETBIT VOWELBIT ;INVISIBLE)
+    (FLAGS NDESCBIT CONTBIT OPENABLEBIT TRANSBIT INVISIBLE ;SECRETBIT VOWELBIT)
     (CAPACITY 100)
     (ACTION OVEN-F)>
 
@@ -794,14 +849,14 @@ important hidden behind. But not now, it isn't your job." CR>)
                     <AND <NOUN-USED? ,OVEN ,W?KNOB>
                          <VERB? TURN>>>
                 ;<FSET? ,OVEN ,OPENBIT>>
-           <COND (<NOT <FSET? ,OVEN ,OPENBIT>>
+           <COND (<FSET? ,OVEN ,OPENBIT>
                   <TELL "Nothing happens. It's still open." CR>
                   <RTRUE>)>
            <TELL "You rotate the knob to full power. Inside, you can hear strain on the power.">
            <COND (<AND <HELD? ,GUIDE ,OVEN> ;"Not Thing because Thing protects it."
                        <NOT <HELD? ,GUIDE ,THING>>>
                   <COND (<VISIBLE? ,GUIDE>
-                         <TELL !\  ,GUIDE-NAME
+                         <TELL " " ,GUIDE-NAME
 " fries and blows its inner circuits, but leaves the inside of the oven clean.">
                          ;<SET X T>)>
                   <FSET ,GUIDE ,BADRADIOBIT>)>
@@ -852,7 +907,7 @@ and you can feel your heart breaking into tiny metaphorical pieces." CR>
                          <FSET ,GUIDE ,BADRADIOBIT>)>
                   <COND (<AND <HELD? ,THING ,SINK>
                               <VISIBLE? ,THING>>
-                         <TELL " The Thing empties much more water than it could have contained.">
+                         <TELL " The Thing empties much more water than it should have contained.">
                          <SET X T>)>
                   <COND (<AND <HELD? ,PLATE ,SINK>
                               ;<VISIBLE? ,PLATE>>
@@ -869,7 +924,7 @@ and you can feel your heart breaking into tiny metaphorical pieces." CR>
                   <TELL <PICK-ONE <PLTABLE "A single drop comes out of the tap"
                                            "Two drops fall out of the tap"
                                            "A steady stream of water comes out
-of the tap, but the water is so hot that it eveaporates almost immediately">>
+of the tap, but the water is so hot that it evaporates almost immediately">>
                         ,PAUSES>)>)
           (<VERB? EXAMINE>
            <TELL "A large sink. Underneath it is a bunch of pipes and bolts.">
@@ -877,7 +932,8 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
                        <NOUN-USED? ,SINK ,W?BOLTS ,W?SCREW ,W?SCREWS>>
                   <TELL " One of the bolts is loose.">)>
            <PRINT-CONT ,SINK>
-           <FSET ,SINK ,SADRADIOBIT>)
+           <FSET ,SINK ,SADRADIOBIT>
+           <CRLF>)
           (<AND <VERB? FIX TURN>
                 <DOBJ? SINK>>
            <COND (<AND <NOT <NOUN-USED? ,SINK ,W?PIPES ,W?PIPE ,W?BOLT>>
@@ -885,7 +941,7 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
                   <ACTUALLY <> "the loose bolt">)>
            <FSET ,SINK ,SADRADIOBIT>
            <COND (<IOBJ? WRENCH>
-                  <COND (<FSET? ,SINK ,BADRADIOBIT>
+                  <COND (<NOT <FSET? ,SINK ,BADRADIOBIT>>
                          <TELL "You turn the bolt until it is securely fastened." CR>
                          <FSET ,SINK ,BADRADIOBIT>)
                         (ELSE
@@ -907,7 +963,8 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
 
 <ROUTINE WATER-PORTION-F ()
 	 <COND ;(<VERB? SGIVE> <RFALSE>)
-	       (<VERB? THROUGH BOARD SWIM>
+	       (<AND <VERB? THROUGH BOARD SWIM>
+                 <DOBJ? WATER-PORTION>>
 		    <TELL "Trying to swim in a tiny portion of water is like trying to make Marvin happy." CR>
 		    <RTRUE>)
 	       (<AND <VERB? FILL>
@@ -915,13 +972,15 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
                  <DOBJ? WATER-PORTION>>
 		    <PERFORM ,V?PUT-IN ,PRSO ,PRSI>
             <RTRUE>)
-           (<VERB? DRINK EAT>
-            <TELL "Just because it comes from a tap in a high-class restaurant doesn't mean you should drink it." CR>
-            <RTRUE>)
-           (<AND <VERB? PUT-IN PUT> ;<NOT .PI?>>
+           (<AND <VERB? DRINK EAT>
+                 <DOBJ? WATER-PORTION>>
+            <TELL
+"Just because it comes from a tap in a high-class restaurant doesn't mean you should drink it." CR>)
+           (<AND <VERB? PUT-IN PUT>
+                 <DOBJ? WATER-PORTION DYE-PORTION-1 DYE-PORTION-2 BLASTER-PORTION-1 BLASTER-PORTION-2>>
 	    	<COND (<AND ,PRSI 
-                        <NOT <IOBJ? PLATE>>>
-	    	       <THE-J ,WATER-PORTION T T>
+                        <NOT <IOBJ? PLATE RUM-GLASS WINE-GLASS>>>
+	    	       <THE-J ,PRSO ;,WATER-PORTION T T>
                    <TELL !\ >
                    <COND (<NOT <FSET? ,PRSI ,CONTBIT>>
                           <TELL "slips right off">)
@@ -929,56 +988,104 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
                           <TELL "leaks through">)>
                    <TELL " of ">
                    <THE-J ,PRSI T><TELL " and evaporates immediately." CR>
-	    	       <REMOVE ,WATER-PORTION>
+	    	       <REMOVE ,PRSO ;,WATER-PORTION>
                    <RTRUE>)
-	    	      (<DOBJ? PLATE>
+	    	      (<AND <IOBJ? PLATE>
+                        <DOBJ? WATER-PORTION>>
 	    	       <COND (<NOT <FIRST? ,PLATE>>
-	    		          <MOVE ,WATER-PORTION ,PLAYER>
+	    		          <MOVE ,WATER-PORTION ,PLATE>
 	    		          <TELL "The " D ,PLATE " is now full of water." CR>
                           <RTRUE>)
 	    		         ;(T
-	    		          <TELL "The water slips through your fingers, and onto the floor, where it evaporates." CR>
+	    		          <TELL "The water slips through your fingers, and " <GROUND-DESC> ", where it evaporates." CR>
 	    		          <REMOVE ,WATER-PORTION>
                           <RTRUE>)>)
 		          (T
-		           <TELL "The water slips through your fingers, and onto the floor, where it evaporates." CR>
+		           <THE-J ,PRSO ;,WATER-PORTION T T>
+                   <TELL " slips through your fingers, and " <GROUND-DESC> ", where it evaporates." CR>
 	    	       <REMOVE ,WATER-PORTION>
                    <RTRUE>)>)
 	       (<VERB? DROP GIVE>
 		    <COND (<AND <VERB? DROP>
 		    	        <IN? ,WATER-PORTION ,PLATE>>
-		           <TELL "The water slips through your fingers, and onto the floor, where it evaporates." CR>
+		           <THE-J ,PRSO ;,WATER-PORTION T T>
+                   <TELL " slips through your fingers, and " <GROUND-DESC> ", where it evaporates." CR>
 	        	   <REMOVE ,WATER-PORTION>
                    <RTRUE>)
 	              (<VERB? THROW>
-		           <TELL "The water splashes on the walls and evaporates immediately." CR>
+		           <THE-J ,PRSO ;,WATER-PORTION T T>
+                   <TELL " splashes on the walls and evaporates immediately." CR>
 		           <REMOVE ,WATER-PORTION>
                    <RTRUE>)>)>
      <RFALSE>>
 
+<OBJECT DYE-PORTION-1
+	(IN LOCAL-GLOBALS)
+	(SYNONYM DYE QUANTITY LIQUID PORTION)
+    (ADJECTIVE DYE RED)
+	(SDESC "quantity of dye")
+    (CONT-SDESC "quantity of dye")
+	(FLAGS ;TRYTAKEBIT TAKEBIT ;EATBIT ;DRINKBIT)
+	(ACTION WATER-PORTION-F)
+    (GENERIC RED-DYE-G)
+	(SIZE 4)>
+
+<OBJECT DYE-PORTION-2
+	(IN LOCAL-GLOBALS)
+	(SYNONYM DYE QUANTITY LIQUID PORTION)
+    (ADJECTIVE DYE RED)
+	(SDESC "quantity of dye")
+    (CONT-SDESC "quantity of dye")
+	(FLAGS ;TRYTAKEBIT TAKEBIT ;EATBIT ;DRINKBIT)
+	(ACTION WATER-PORTION-F)
+    (GENERIC RED-DYE-G)
+	(SIZE 4)>
+
+<OBJECT BLASTER-PORTION-1
+	(IN LOCAL-GLOBALS)
+	(SYNONYM PGGB BLASTER QUANTITY LIQUID PORTION)
+    (ADJECTIVE PAN GALACTIC GARGLE BLASTER)
+	(SDESC "quantity of pan galactic gargle blaster")
+    (CONT-SDESC "quantity of pan galactic gargle blaster")
+	(FLAGS ;TRYTAKEBIT TAKEBIT ;EATBIT ;DRINKBIT)
+	(ACTION WATER-PORTION-F)
+    (GENERIC BLASTER-G)
+	(SIZE 4)>
+
+<OBJECT BLASTER-PORTION-2
+	(IN LOCAL-GLOBALS)
+	(SYNONYM PGGB BLASTER QUANTITY LIQUID PORTION)
+    (ADJECTIVE PAN GALACTIC GARGLE BLASTER)
+	(SDESC "quantity of pan galactic gargle blaster")
+    (CONT-SDESC "quantity of pan galactic gargle blaster")
+	(FLAGS ;TRYTAKEBIT TAKEBIT ;EATBIT ;DRINKBIT)
+	(ACTION WATER-PORTION-F)
+    (GENERIC BLASTER-G)
+	(SIZE 4)>
 
 
 <OBJECT CUPBOARD
     (LOC KITCHEN)
     (DESC "cupboards")
     (SYNONYM CUPBOARD CUPBOARDS CUBPOARD CUBPOARDS DOOR ;"People make this mistake a lot"
-             SHELF SHELVES DRAWER DRAWERS WALL LOTS LINE ROW LINES LOT ;(A LOT of cupboards)
+             SHELF SHELVES DRAWER DRAWERS WALL LOTS LINE
+             ROW LINES LOT ;(A LOT of cupboards)
              ROWS HUNDREDS LOADS ONE ANOTHER)
-    (ADJECTIVE MANY LINED BIG LARGE COMPLICAT COMPLEX UPON)
+    (ADJECTIVE MANY LINED BIG COMPLICAT COMPLEX ON)
     (FLAGS CONTBIT OPENBIT NDESCBIT PLURALBIT ;SEARCHBIT TRANSBIT)
     (ACTION CUPBOARD-F)>
 
 <GLOBAL CUPBOARD-PUZZLE
     <LTABLE <> RUM-GLASS
-            <> PLATE
             <> BLASTER
             <> RED-DYE
             <> WINE-GLASS
+            <> PLATE
             <> <> ;DUCT-TAPE
             <> <>>>
 
 <GLOBAL CUP-PROB
-    <TABLE 60
+    <TABLE 50
            60
            60
            60
@@ -1003,10 +1110,10 @@ of the tap, but the water is so hot that it eveaporates almost immediately">>
                  <HELD? ,PRSO>>
             <TELL 
 "As you place "><THE-J ,PRSO T><TELL " inside the open cupboard, a voice says \"Ooh! Is that ">
-<THE-J ,PRSO <>><TELL "? Thank you" ,ELLIPSIS "\" And the cupboard swallows the object, briefly distracted
-from its opening-and-closing door business as it decides just where to place "><THE-J ,PRSO T>
-<TELL ", which disappears behind miles of shelves." CR CR "Behind you, the chef chuckles to himself.
-\"You're never getting that back, you know.\"" CR>
+<THE-J ,PRSO <>><TELL "? Thank you" ,ELLIPSIS "\" And the cupboard swallows the object, briefly
+distracted from its opening-and-closing door business as it decides just where to place ">
+            <THE-J ,PRSO T><TELL ", which disappears behind miles of shelves." CR CR "Behind you,
+the chef chuckles to himself. \"You're never getting that back, you know" ,PIC>
             <REMOVE ,PRSO>
             ;<SETG CUPBOARD-SHUTTING T>
             <SETG CUPBOARD-ENTRANCED T>
@@ -1029,30 +1136,39 @@ from its opening-and-closing door business as it decides just where to place "><
            (<VERB? ATTACK>
             <TELL "\"Well that's not very nice!\" A disembodied voice shouts." CR>)>>
 
-<ROUTINE SHUT-CUPBOARD-DOOR ("AUX" FOUND FIN THINGY CUP ;OBJ)
-    <COND (,CUPBOARD-ENTRANCED
-           <QUEUE SHUT-CUPBOARD-DOOR 2>
+<GLOBAL WAIT-CUPOARD <>>
+
+<ROUTINE SHUT-CUPBOARD-DOOR ("AUX" FOUND FIN THINGY CUP TRUE?)
+    <COND (,WAIT-CUPOARD
+           <SETG WAIT-CUPOARD <>>
+           <RTRUE>)
+          (,CUPBOARD-ENTRANCED
+           <SETG WAIT-CUPOARD T>
            <SETG ENTRANCED T>
            <SETG CUPBOARD-ENTRANCED <>>
            <RTRUE>)>
-    <QUEUE SHUT-CUPBOARD-DOOR 1>
+    ;<QUEUE SHUT-CUPBOARD-DOOR 1>
     <SETG ENTRANCED <>>
     <CRLF>
     <DO (NUM 1 13 2)
          <COND (<EQUAL? <GET ,CUPBOARD-PUZZLE .NUM> T>
                 <TELL "The open cupboard door shuts. " ;CR>
                 <PUT ,CUPBOARD-PUZZLE .NUM <>>
-                ;<MOVE <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,LOCAL-GLOBALS>
-                ;<FSET <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,INVISIBLE>
-                <FSET <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,SECRETBIT>
-                <FCLEAR <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,SEENBIT>
-                <FCLEAR <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,TOUCHBIT>
+                <COND (<AND <=? <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,PLATE>
+                            <NOT <IN? ,PLATE ,CUPBOARD>>>
+                       <PUT ,CUPBOARD-PUZZLE <+ .NUM 1> <>>)>
+                <COND (<GET ,CUPBOARD-PUZZLE <+ .NUM 1>>
+                       <FSET <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,INVISIBLE>
+                       <FCLEAR <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,SEENBIT>
+                       <FCLEAR <GET ,CUPBOARD-PUZZLE <+ .NUM 1>> ,TOUCHBIT>)>
                 <SET FOUND .NUM>
                 <RETURN>)>>
     <SETG CUPBOARD-SHUTTING <>>
     <DO (NUM 1 13 2)
-         <COND (<PROB <GET ,CUP-PROB <SET FIN </ <- .NUM 1> 2>>>>
-                <COND (<NOT <EQUAL? .FIN 8>>
+         <COND (<SET TRUE? <PROB <GET ,CUP-PROB <SET FIN </ <- .NUM 1> 2>>>>>
+                <COND (<T? ,P-DBUG>
+                       <TELL "(Num: " N .NUM "  Final Prob Num: " N .FIN "  Correct: " N .TRUE? ")" CR>)>
+                <COND (<NOT <EQUAL? <GET ,CUP-PROB .FIN> 100>>
                        <PUT ,CUP-PROB .FIN 0>)>
                 <TELL "A">
                 <COND (.FOUND <TELL "nother">)>
@@ -1062,22 +1178,23 @@ from its opening-and-closing door business as it decides just where to place "><
                        <TELL ", revealing ">
                        <THE-J .THINGY <>>
                        <FCLEAR .THINGY ,INVISIBLE>
-                       <FCLEAR .THINGY ,SECRETBIT>)>
-                <TELL !\.>
+                       <FCLEAR .THINGY ,INVISIBLE>)>
+                <TELL ".">
                 <RETURN>)
                (ELSE
                 <COND (<0? <GET ,CUP-PROB .FIN>>
-                       <PUT ,CUP-PROB .FIN 60>)>)>>
+                       <PUT ,CUP-PROB .FIN 40>)>)>>
     <CRLF>>
 
 <OBJECT RUM-GLASS
     (LOC CUPBOARD)
     (DESC "rum glass")
-    (SYNONYM GLASS)
+    (SYNONYM GLASS CUP)
     (ADJECTIVE RUM)
     (DESCFCN RUM-GLASS-D)
-    (FLAGS CONTBIT TAKEBIT TRYTAKEBIT ;INVISIBLE SECRETBIT OPENBIT)
+    (FLAGS CONTBIT TAKEBIT TRYTAKEBIT INVISIBLE ;SECRETBIT OPENBIT)
     (ACTION RUM-GLASS-F)
+    (GENERIC GLASS-G) ;"Not in wine object because that may affect other things like ALCOHOL"
     (SIZE 5)>
 
 <ROUTINE RUM-GLASS-D ()
@@ -1087,10 +1204,11 @@ from its opening-and-closing door business as it decides just where to place "><
 <ROUTINE RUM-GLASS-F ()
     <COND (<AND <VERB? TAKE>
                 <OR ,ENTRANCED
-                    <NOT <IN? ,BLASTER ,CUPBOARD>>>>
+                    <NOT <IN? ,RUM-GLASS ,CUPBOARD>>>>
            <PUT ,CUPBOARD-PUZZLE 2 <>>
            <RFALSE>)
-          (<VERB? TAKE>
+          (<AND <TOUCHING?>
+                <IN? ,RUM-GLASS ,CUPBOARD>>
            <TELL ,REPLACE CR>
            <RTRUE>)
           (<AND <VERB? THROW>
@@ -1101,6 +1219,8 @@ from its opening-and-closing door business as it decides just where to place "><
                   <TELL ", spilling the contents">)>
            <TELL "!" CR>
            <REMOVE ,RUM-GLASS>)
+          (<VERB? POUR ;EMPTY>
+           <TELL "No, no thanks. I'd rather not waste what's in the glass." CR>)
           (<VERB? EXAMINE SEARCH LOOK-INSIDE>
            <COND (<AND ,WINE-RUM
                        ,BLASTER-RUM>
@@ -1117,9 +1237,9 @@ from its opening-and-closing door business as it decides just where to place "><
     (LOC CUPBOARD)
     (DESC "wine glass")
     (DESCFCN WINE-GLASS-D)
-    (SYNONYM GLASS)
+    (SYNONYM GLASS CUP GOBLET)
     (ADJECTIVE WINE)
-    (FLAGS CONTBIT TAKEBIT TRYTAKEBIT ;INVISIBLE SECRETBIT OPENBIT)
+    (FLAGS CONTBIT TAKEBIT TRYTAKEBIT INVISIBLE ;SECRETBIT OPENBIT)
     (ACTION WINE-GLASS-F)
     (SIZE 4)>
 
@@ -1130,10 +1250,11 @@ from its opening-and-closing door business as it decides just where to place "><
 <ROUTINE WINE-GLASS-F ()
     <COND (<AND <VERB? TAKE>
                 <OR ,ENTRANCED
-                    <NOT <IN? ,BLASTER ,CUPBOARD>>>>
-           <PUT ,CUPBOARD-PUZZLE 10 <>>
+                    <NOT <IN? ,WINE-GLASS ,CUPBOARD>>>>
+           <PUT ,CUPBOARD-PUZZLE 8 <>>
            <RFALSE>)
-          (<VERB? TAKE>
+          (<AND <TOUCHING?>
+                <IN? ,WINE-GLASS ,CUPBOARD>>
            <TELL ,REPLACE CR>
            <RTRUE>)
           (<AND <VERB? THROW>
@@ -1144,6 +1265,8 @@ from its opening-and-closing door business as it decides just where to place "><
                   <TELL ", spilling the contents">)>
            <TELL "!" CR>
            <REMOVE ,WINE-GLASS>)
+          (<VERB? POUR ;EMPTY>
+           <TELL "No, no thanks. I'd rather not waste what's in the glass." CR>)
           (<VERB? EXAMINE SEARCH LOOK-INSIDE>
            ;<TELL "The wine glass is quite well designed. ">
            <COND (<AND ,WINE-WINE
@@ -1163,7 +1286,7 @@ from its opening-and-closing door business as it decides just where to place "><
     (DESCFCN PLATE-D)
     (SYNONYM PLATE DISH TRAY)
     (ADJECTIVE COOKING HEATPROOF HEAT-PROO)
-    (FLAGS TAKEBIT TRYTAKEBIT SURFACEBIT ;INVISIBLE SECRETBIT CONTBIT OPENBIT)
+    (FLAGS TAKEBIT TRYTAKEBIT SURFACEBIT INVISIBLE ;SECRETBIT CONTBIT OPENBIT)
     (GENERIC DINNER-G)
     (ACTION PLATE-F)
     (CAPACITY 100)
@@ -1177,12 +1300,13 @@ from its opening-and-closing door business as it decides just where to place "><
 <ROUTINE PLATE-F ("AUX" X Y)
     <COND (<AND <VERB? TAKE>
                 <OR ,ENTRANCED
-                    <NOT <IN? ,BLASTER ,CUPBOARD>>>>
-           <PUT ,CUPBOARD-PUZZLE 4 <>>
+                    <NOT <IN? ,PLATE ,CUPBOARD>>>>
+           <PUT ,CUPBOARD-PUZZLE 10 <>>
            <RFALSE>)
           (<VERB? OPEN CLOSE>
            <HAR-HAR>)
-          (<VERB? TAKE>
+          (<AND <TOUCHING?>
+                <IN? ,PLATE ,CUPBOARD>>
            <TELL ,REPLACE CR>
            <RTRUE>)
           (<VERB? EXAMINE SEARCH LOOK-INSIDE>
@@ -1204,17 +1328,17 @@ everything on the tray - it's just that you know what's on the tray." CR>)>)>
           (<AND <VERB? PUT PUT-IN>
                 <IOBJ? OVEN>>
            <COND (<IN? ,MEAT-DISH ,PLATE>
-                  <COND (<IN? ,WATER ,PLATE>
+                  <COND (<IN? ,WATER-PORTION ,PLATE>
                          <TELL "You place it in the oven, satisfied with the ingredients on it." CR>
-                         <MOVE ,MEAT-DISH ,OVEN>)
+                         <MOVE ,PLATE ,OVEN>)
                         (ELSE
                          <TELL "There isn't any water, so the meat will just get burnt if it is put in the oven." CR>)>)
-                 (<IN? ,WATER ,PLATE>
+                 (<IN? ,WATER-PORTION ,PLATE>
                   <TELL "What! Just water?" CR>)
-                 (<IN? ,PEANUT-PACKET ,PLATE>
+                 ;(<IN? ,PEANUT-PACKET ,PLATE>
                   <TELL "That sounds stupid." CR>)
                  (ELSE
-                  <TELL "Really? Come on." CR>)>)
+                  <WONT-HELP>)>)
           (<AND <VERB? PUT PUT-IN>
                 <IOBJ? PLATE>>
            <COND (<DOBJ? MEAT-DISH>
@@ -1264,7 +1388,7 @@ everything on the tray - it's just that you know what's on the tray." CR>)>)>
                                 <THE-J .X T>
                                 <TELL ,PAUSES>)
                                (ELSE
-                                <COND (,USING-SPORFE
+                                <COND (<=? ,PRSN ,SPORFE>
                                        <TELL
 "Using the sporfe, you measure one spoonful and sprinkle it onto the
 tray. You place the bottle down, and it is immediately whisked away." CR>
@@ -1289,7 +1413,8 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
     ;(LDESC "There is a pot of red food dye here.")
     (SYNONYM DYE POT)
     (ADJECTIVE RED FOOD LIQUID)
-    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT ;INVISIBLE SECRETBIT OPENBIT)
+    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT INVISIBLE ;SECRETBIT OPENBIT)
+    (GENERIC RED-DYE-G)
     (ACTION RED-DYE-F)
     (SIZE 13)>
 
@@ -1298,12 +1423,13 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
            <TELL "It is a liquid food dye.">)
           (<AND <VERB? TAKE>
                 <OR ,ENTRANCED
-                    <NOT <IN? ,BLASTER ,CUPBOARD>>>>
-           <PUT ,CUPBOARD-PUZZLE 8 <>>
+                    <NOT <IN? ,RED-DYE ,CUPBOARD>>>>
+           <PUT ,CUPBOARD-PUZZLE 6 <>>
            <RFALSE>)
           (<VERB? DRINK>
            <HAR-HAR>)
-          (<VERB? TAKE>
+          (<AND <TOUCHING?>
+                <IN? ,RED-DYE ,CUPBOARD>>
            <TELL ,REPLACE CR>
            <RTRUE>)
           (<VERB? OPEN CLOSE>
@@ -1319,11 +1445,15 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                   <TELL "You'll have to be more specific about which glass." CR>)
                  (<HELD? ,WINE-GLASS>
                   <TELL "(into the wine glass)" CR>
-                  <COND (,WINE-WINE
+                  <COND ;(<IN? ,WINE-GLASS ,CUPBOARD>
+                         <TELL "You have to be holding it.">)
+                        (,WINE-WINE
                          <TELL "You've already poured some dye in there.">)
                         (ELSE
                          <TELL "You pour some food dye in the glass.">
-                         <SETG WINE-WINE T>)>
+                         <SETG WINE-WINE T>
+                         <MOVE ,DYE-PORTION-1 ,WINE-GLASS>
+                         <PUTP ,DYE-PORTION-1 ,P?SDESC "quantity of red dye in the wine glass">)>
                   <CRLF>)
                  (<HELD? ,RUM-GLASS>
                   <TELL "(into the rum glass)" CR>
@@ -1331,7 +1461,9 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                          <TELL "You've already poured some dye in there.">)
                         (ELSE
                          <TELL "You pour some food dye in the glass.">
-                         <SETG WINE-RUM T>)>
+                         <SETG WINE-RUM T>
+                         <MOVE ,DYE-PORTION-2 ,RUM-GLASS>
+                         <PUTP ,DYE-PORTION-2 ,P?SDESC "quantity of red dye in the rum glass">)>
                   <CRLF>)
                  (ELSE
                   <RFALSE>)>)
@@ -1346,14 +1478,18 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                          <TELL "You've already poured some dye in there.">)
                         (ELSE
                          <TELL "You pour some dye in the glass.">
-                         <SETG WINE-RUM T>)>
+                         <SETG WINE-RUM T>
+                         <MOVE ,DYE-PORTION-2 ,RUM-GLASS>
+                         <PUTP ,DYE-PORTION-2 ,P?SDESC "quantity of red dye in the rum glass">)>
                   <CRLF>)
                  (<EQUAL? ,WINE-GLASS ,PRSO ,PRSI>
                   <COND (,WINE-WINE
                          <TELL "You've already poured some dye in there.">)
                         (ELSE
                          <TELL "You pour some dye in the glass.">
-                         <SETG WINE-WINE T>)>
+                         <SETG WINE-WINE T>
+                         <MOVE ,DYE-PORTION-1 ,WINE-GLASS>
+                         <PUTP ,DYE-PORTION-1 ,P?SDESC "quantity of red dye in the wine glass">)>
                   <CRLF>)
                  (ELSE
                   <RFALSE>)>)>>
@@ -1365,23 +1501,26 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
     (LDESC "You can see a bottle with some Pan Galactic Gargle Blaster here.")
     (SYNONYM BOTTLE BLASTER PGGB)
     (ADJECTIVE PAN GALACTIC GARGLE PAN-GALACTIC)
-    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT ;INVISIBLE SECRETBIT OPENBIT)
+    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT INVISIBLE ;SECRETBIT OPENBIT)
     (GENERIC BLASTER-G)
     (ACTION BLASTER-F)
     (SIZE 10)>
 
 <ROUTINE BLASTER-F ()
     <COND (<VERB? EXAMINE>
-           <TELL "It looks like water, but is a much more volatile liquid." CR>)
+           <TELL
+"It looks like water, but is a much more volatile liquid,
+mainly through the tiniest hint of grey it has which defines it." CR>)
           (<AND <VERB? TAKE>
                 <OR ,ENTRANCED
                     <NOT <IN? ,BLASTER ,CUPBOARD>>>>
-           <PUT ,CUPBOARD-PUZZLE 6 <>>
-           <FCLEAR ,BLASTER-ON-TRAY ,SECRETBIT>
+           <PUT ,CUPBOARD-PUZZLE 4 <>>
+           ;<FCLEAR ,BLASTER-ON-TRAY ,SECRETBIT>
            <RFALSE>)
           (<VERB? DRINK>
-           <TELL "Are you stupid? What, just drink something like that? No thanks.">)
-          (<VERB? TAKE>
+           <TELL "Are you stupid? What, just drink something like that? No thanks." CR>)
+          (<AND <TOUCHING?>
+                <IN? ,BLASTER ,CUPBOARD>>
            <TELL ,REPLACE CR>
            <RTRUE>)
           (<VERB? OPEN CLOSE>
@@ -1389,7 +1528,8 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
           (<AND <VERB? THROW>
                 <NOT <INTBL? ,HERE ,NORWAY-ROOMS <LTBEG ,NORWAY-ROOMS>>>>
            <TELL "It smashes " <GROUND-DESC> " and goes everywhere!" CR>
-           <REMOVE ,BLASTER>)
+           <REMOVE ,BLASTER>
+           <RTRUE>)
           (<AND <VERB? FILL>
                     ,PRSI
                     <DOBJ? WATER-PORTION>>
@@ -1405,7 +1545,9 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                          <TELL "You've already poured some " ,GALACT " in there.">)
                         (ELSE
                          <TELL "You pour some " ,GALACT " in the glass.">
-                         <SETG BLASTER-WINE T>)>
+                         <SETG BLASTER-WINE T>
+                         <MOVE ,BLASTER-PORTION-1 ,WINE-GLASS>
+                         <PUTP ,BLASTER-PORTION-1 ,P?SDESC "quantity of pan galactic gargle blaster in wine glass">)>
                   <CRLF>)
                  (<HELD? ,RUM-GLASS>
                   <TELL "(into the rum glass)" CR>
@@ -1413,7 +1555,9 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                          <TELL "You've already poured some " ,GALACT " in there.">)
                         (ELSE
                          <TELL "You pour some " ,GALACT " in the glass.">
-                         <SETG BLASTER-RUM T>)>
+                         <SETG BLASTER-RUM T>
+                         <MOVE ,BLASTER-PORTION-2 ,RUM-GLASS>
+                         <PUTP ,BLASTER-PORTION-2 ,P?SDESC "quantity of pan galactic gargle blaster in the rum glass">)>
                   <CRLF>)
                  (ELSE
                   <RFALSE>)>)
@@ -1428,36 +1572,21 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
                          <TELL "You've already poured some " ,GALACT " in there.">)
                         (ELSE
                          <TELL "You pour some " ,GALACT " in the glass.">
-                         <SETG BLASTER-RUM T>)>
+                         <SETG BLASTER-RUM T>
+                         <MOVE ,BLASTER-PORTION-2 ,RUM-GLASS>
+                         <PUTP ,BLASTER-PORTION-2 ,P?SDESC "quantity of pan galactic gargle blaster in the rum glass">)>
                   <CRLF>)
                  (<EQUAL? ,WINE-GLASS ,PRSO ,PRSI>
                   <COND (,BLASTER-WINE
                          <TELL "You've already poured some " ,GALACT " in there.">)
                         (ELSE
                          <TELL "You pour some " ,GALACT " in the glass.">
-                         <SETG BLASTER-WINE T>)>
+                         <SETG BLASTER-WINE T>
+                         <MOVE ,BLASTER-PORTION-1 ,WINE-GLASS>
+                         <PUTP ,BLASTER-PORTION-1 ,P?SDESC "quantity of pan galactic gargle blaster in the wine glass">)>
                   <CRLF>)
                  (ELSE
                   <RFALSE>)>)>>
-
-<OBJECT BLASTER-ON-TRAY ;"I use this to be able to get three nouns at once with"
-    (LOC PLATE)         ;"the sporfe-thing... But I honestly dunno if it works."
-    (DESC "[FOO!! Bug #02!]")
-    (LDESC "[FOO!! Bug #02!]")
-    (SYNONYM BOTTLE BLASTER PGGB)
-    (ADJECTIVE PAN GALACTIC GARGLE PAN-GALACTIC)
-    (FLAGS SECRETBIT NDESCBIT NARTICLEBIT)
-    (GENERIC BLASTER-G)
-    (ACTION BLASTER-ON-TRAY-F)
-    (SIZE 0)>
-
-<ROUTINE BLASTER-ON-TRAY-F ()
-    %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: running from BLASTER-ON-TRAY to BLASTER...]|">)>>
-    <COND (<DOBJ? BLASTER-ON-TRAY>
-           <PERFORM ,PRSA ,BLASTER ,PRSI>)
-          (<IOBJ? BLASTER-ON-TRAY>
-           <PERFORM ,PRSA ,PRSO ,BLASTER>)>
-    <RTRUE>>
 
 ;<OBJECT DUCT-TAPE
     (LOC CUPBOARD)
@@ -1465,7 +1594,7 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
     ;(LDESC "You can see a roll of duct tape here.")
     (SYNONYM ROLL TAPE)
     (ADJECTIVE DUCT DUCK)
-    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT ;INVISIBLE SECRETBIT)
+    (FLAGS ;CONTBIT ;OPENABLEBIT TAKEBIT TRYTAKEBIT INVISIBLE ;SECRETBIT)
     (ACTION DUCT-TAPE-F)
     (SIZE 7)>
 
@@ -1498,7 +1627,7 @@ tray. You place the bottle down, and it is immediately whisked away." CR>
     (DESC "Max Quordlepleen's Dressing Room")
     (SW PER TO-DINING-HALL)
     (OUT PER TO-DINING-HALL)
-    (GLOBAL RESTAURANT MAX-DRESS-DOOR)
+    (GLOBAL RESTAURANT MAX-DRESS-DOOR WAITER)
     (FLAGS LIGHTBIT ONBIT)
     (THINGS (MAX QUORDLEPL DRESSING) ROOM GLOBAL-ROOM-F)
     (ACTION DRESSING-ROOM-REU-F)>
@@ -1566,13 +1695,13 @@ southwest is the " D ,DINING-HALL " area." CR>)>>
            <TELL
 "A keychain with a bunch of keys on it, for many different purposes.
 One is them is allegedly Hotblack Desiato's, but it would take years
-to find the right one all by yourself. You count through a few to 
+to find the right one all by yourself. You count through a few to
 prove that this is, in fact, true: ">
            <PERFORM ,V?COUNT ,KEYSET>
            <RTRUE>)
           (<VERB? SEARCH COUNT LOOK-THROUGH>
-           <TELL "One.. two.. three..">
-           <WORD-FROM-NUMBERS <PICK-ONE <PLTABLE 4 14 42 100 222 911 2356 4566 12345 19891 32767>>>
+           <TELL "One. two. three.">
+           <WORD-FROM-NUMBERS <PICK-ONE <PLTABLE 4 14 42 100 222 911 2356 4566 12345 19891>>>
            <TELL " " ,ELLIPSIS ".  You get the idea." CR>
            <RTRUE>)>>
 
@@ -1588,32 +1717,133 @@ and an exit at the southern end of the room.")
     (SOUTH TO DINING-HALL)
     (NORTH SORRY "Get on the stage? Sorry, I'm not going to let you do it.")
     (ACTION FIRST-CLASS-F)
-    (GLOBAL RESTAURANT)
+    (GLOBAL RESTAURANT WAITER)
     (FLAGS LIGHTBIT ONBIT)
     (THINGS (FIRST CLASS) (CLASS FIRST-CLA AREA ROOM) GLOBAL-ROOM-F)>
 
 <ROUTINE FIRST-CLASS-F (RARG)
-    <COND (<AND <EQUAL? .RARG ,M-END>
+    <COND (<AND <EQUAL? .RARG ,M-ENTER>>
+           <MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>
+           <SETG IDIOT-WAY <>>)
+          (<AND <EQUAL? .RARG ,M-END>
                 <NOT <FSET? ,FIRST-CLASS ,RADPLUGBIT>>>
            <INCREMENT-SCORE 15>
-           <FSET ,FIRST-CLASS ,RADPLUGBIT>)>
-    <MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>
-    <RFALSE>>
+           <FSET ,FIRST-CLASS ,RADPLUGBIT>
+           <MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>)
+          (<=? .RARG ,M-END>
+           <COND (<PROB 15>
+                  <TELL CR "The crowd lets out a range of ">
+                  <ITALICIZE "ooohs">
+                  <TELL " and ">
+                  <ITALICIZE "aaahs">
+                  <TELL " as some distant galaxy is obliterated by "
+                        <PICK-ONE <PLTABLE "nuclear pasta" "the crust of neutron stars"
+                                           "the attack of some interstellar war over
+the amount of credits owed as recompensation for a past war" "the depressurising time-lock
+of the plant Krikkit bursting open" "the well-known white robots of Krikkit running around
+and rampaging for the last time">> ,PAUSES>)
+                 (<PROB 10>
+                  <TELL CR
+"The band on the stage reaches a great climax to their song, and then "
+<PICK-ONE <PLTABLE "lowers to a quiet" "begins a new song">> ,PAUSES>)
+                 (<PROB 10>
+                  <TELL CR "A waiter glides gracefully between the tables, "
+                        <PICK-ONE <PLTABLE "receives an order from some VIP-of-the-VIPs guest"
+                                           "serves a drink">>
+                        ", and rushes out looking very stressed." CR>)
+                 (<PROB 5>
+                  <TELL CR "A creature from the audience weeps as their home planet is crushed to smithereens." CR>)>)>>
 
 <OBJECT STAGE
     (LOC FIRST-CLASS)
     (DESC "stage")
-    (DESCFCN STAGE-D)
     (SYNONYM STAGE PLATFORM)
     (ADJECTIVE NORTHERN NORTH)
-    (FLAGS ;NDESCBIT SURFACEBIT)
-    (CAPACITY 200)>
+    (FLAGS SURFACEBIT NDESCBIT)
+    (CAPACITY 200)
+    (ACTION STAGE-F)>
 
-<ROUTINE STAGE-D ()
-    <COND (<FIRST? ,STAGE>
-           <OPEN-ANYTHING ,STAGE <>>)>>
+<OBJECT BAND
+    (LOC STAGE)
+    (DESC "orchestral band")
+    (SYNONYM BAND MUSICIANS PLAYERS MUSIC)
+    (ADJECTIVE BIG ORCHESTRA MUSIC)
+    (FLAGS NDESCBIT VOWELBIT)
+    (ACTION STAGE-F)>
+
+<ROUTINE STAGE-F ()
+    <COND (<VERB? CLIMB-ON BOARD CLIMB-UP SIT LIE WALK-TO PLAY>
+           <TELL
+"That accounts for too much more programming than the author can handle.
+You see, the notorious cupboard puzzle you by now will have completed
+(though passing it successfully is another thing, since the items you
+put in it are lost forever) took up a lot of headspace and so in short
+too complicated." CR>)
+          (<AND <OR <VERB? TELL YES NO SORRY SAY HELLO ASK-ABOUT
+                       ASK-FOR ASK-CONTEXT-ABOUT ASK-CONTEXT-FOR>
+                    <ORDERING?>>
+                <EQUAL? ,BAND ,PRSO ,PRSI>>
+           <TELL "They're too busy playing songs." CR>)
+          (<AND <VERB? LISTEN>
+                <EQUAL? ,BAND ,PRSO ,PRSI>>
+           <TELL "The">
+           <SAY-MELODY>)
+          (<VERB? EXAMINE LOOK-ON LOOK-INSIDE SEARCH>
+           <TELL "At the back of the stage a">
+           <SAY-MELODY>)>>
+
+<ROUTINE SAY-MELODY ()
+    <TELL " band is playing some strange song, which ">
+    <APPLY <PICK-NEXT ,ALL-SONGS>>>
+
+<CONSTANT ALL-SONGS
+    <LTABLE 0 SONG1 SONG2 SONG3>>
+
+<ROUTINE SONG1 ()
+    <TELL
+"seems to be in 4/4, but every now and again it changes to a crazy
+7/8 (or is it 7/4? What really is the difference anyway?) and then
+back quite soon after. It's quite sad, but overall reminds you of
+something Marvin would make. Hold on, you've heard this song before
+on Earth..." CR>>
+
+<ROUTINE SONG2 ()
+    <TELL "has audible lyrics that go something like this:" CR CR "   ">
+    <ITALICIZE <PICK-ONE <PLTABLE
+"Aldebaran's great, okay,
+|    Algol's pretty neat,
+|    Betelgeuse's pretty girls
+|    Will knock you off your feet.|
+|    They'll do anything you like
+|    Real fast and then real slow,
+|    But if you have to take me apart to get me there
+|    Then I don't want to go."
+"Singing,
+|    Take me apart, take me apart,
+|    What a way to roam
+|    And if you have to take me apart to get me there
+|    I'd rather stay at home."
+"Sirius is paved with gold
+|    Or so I've heard it said
+|    By nuts who then go on to say
+|    \"See Tau before you're dead.\"|
+|    I'll gladly take the high road
+|    Or even take the low,
+|    But if you have to take me apart to get me there
+|    Then I, for one, won't go."
+"Singing,
+|    Take me apart, take me apart,
+|    You must be off your head,
+|    And if you try to take me apart to get me there
+|    I'll stay right here in bed.">>>
+    <CRLF>>
+
+<ROUTINE SONG3 ()
+    <TELL "may or may not be a classical and much
+more relaxed version of one of Disaster Area's songs." CR>>
 
 
+;" DOOR STUFF "
 
 <ROUTINE FIND-DOOR-PANEL (DOOR)
     <COND (<EQUAL? .DOOR ,SECOND-CLASS-ACCESS-DOOR>
@@ -1668,7 +1898,7 @@ and an exit at the southern end of the room.")
 
 <ROOM STUNT-SHIP
     (LOC ROOMS)
-    (SYNONYM HGRF)
+    (SYNONYM HGRF) ;"I don't remember putting this here, but..."
     (SDESC "Darkness")
     (OUT PER OUT-STUNT)
     (DOWN PER OUT-STUNT)
@@ -1695,11 +1925,6 @@ and an exit at the southern end of the room.")
 <ROUTINE STUNT-SHIP-F (RARG)
     <COND (<EQUAL? .RARG ,M-ENTER>
            ;"Clear score"
-           ;<TELL CR
-,ELLIPSIS " And all of the knowledge is gone. You forget what you were thinking about,
-whatever miserable thing it was. You congratulate yourself for stopping the
-descent of your score." CR>
-		   ;<INCREMENT-SCORE 25 T>
            <FCLEAR ,MARVIN ,SADRADIOBIT>
            <FCLEAR ,MARVIN ,RADPLUGBIT>
 		   <DEQUEUE I-LOSE-IT-EVERY-TURN>
@@ -1708,7 +1933,6 @@ descent of your score." CR>
            <MOVE ,ZAPHOD ,STUNT-SHIP>
            <MOVE ,TRILLIAN ,STUNT-SHIP>
            <MOVE ,FORD ,STUNT-SHIP>
-           <MOVE ,MARVIN ,STUNT-SHIP>
            ;<BOLDEN "Dark">
            ;<TELL CR "It is pitch dark. You can't see a thing." CR>
            <V-LOOK>
@@ -1717,7 +1941,8 @@ descent of your score." CR>
           (<AND <EQUAL? .RARG ,M-BEG>
                 <NOT <FSET? ,STUNT-SHIP ,LIGHTBIT>>>
            <FCLEAR ,GRUES ,INVISIBLE>
-		   <COND ;(<VERB? LOOK>
+		   <FCLEAR ,DARK-OBJECT ,DARKBIT>
+           <COND ;(<VERB? LOOK>
                   <BOLDEN "Dark">
                   <TELL CR "It is pitch dark. You can't see a thing." CR>)
                  (ELSE
@@ -1732,7 +1957,8 @@ descent of your score." CR>
                          <TELL CR "It is pitch dark. You can't see a thing." CR>
                          <SETG USED-LOOK-DARK T>
                          <RTRUE>)
-                        (<SEE-VERB?>
+                        (<OR <SEE-VERB?>
+                             <VERB? INVENTORY>>
                          <TOO-DARK>)
                         (<OR <VERB? WAIT-FOR WAIT-UNTIL LISTEN>
                              <NOT ,USED-LOOK-DARK>>
@@ -1762,17 +1988,20 @@ descent of your score." CR>
                   <RTRUE>)
                  (<AND <OR <REMOTE-VERB?>
                            <AND <TOUCHING?>
-                                <VISIBLE? ,PRSO>
-                                <VISIBLE? ,PRSI>>>
+                                <NOT <IN? ,PRSO ,ESCAPE-POD>>>>
+                       <NOT <VERB? WAIT-FOR WAIT-UNTIL>>
                        <NOT <ORDERING?>>>
                   <TOO-BAD-SIT-HIDE>
                   <RTRUE>)>)
           (<EQUAL? .RARG ,M-LOOK>
-           <COND (<FSET? ,STUNT-SHIP ,SADRADIOBIT>
-                  <COND (<=? 2 ,VERBOSITY>
-                         <TELL
-"The stunt ship is nearly as dark on the
-inside as it appeared to be on the outside. ">)>
+           <COND (T ;<FSET? ,STUNT-SHIP ,SADRADIOBIT>
+                  <COND (<OR <=? 2 ,VERBOSITY>
+                             <NOT <FSET? ,STUNT-SHIP ,SADRADIOBIT>>>
+                         <TELL "The ">
+                         <COND (<FSET? ,STUNT-SHIP ,SADRADIOBIT>
+                                <TELL "stunt ">)>
+                         <TELL "ship is nearly as dark
+on the inside as it appeared to be on the outside. ">)>
                   <TELL "A console ">
                   <COND (<FSET? ,ESCAPE-POD ,SADRADIOBIT>
                          <TELL "on the other side of the ship">)
@@ -1785,7 +2014,8 @@ made up of a loudspeaker built into the wall">
                          <TELL " that looks very broken,">)>
                   <TELL
 " and a microphone on the console); and one red button. ">
-                  <COND (<=? 2 ,VERBOSITY>
+                  <COND (<AND <=? 2 ,VERBOSITY>
+                              <FSET? ,STUNT-SHIP ,SADRADIOBIT>>
                          <TELL
 "That's it; nothing more, which seems quite odd.
 But hey, this is a stunt ship - it's not meant
@@ -1797,11 +2027,10 @@ to support people. ">)>
                   <TELL
 " an escape pod (literally just a platform labeled TELEPORT)." CR>
                   <COND (<FIRST? ,ESCAPE-POD>
-                         <PRINT-CONT ,ESCAPE-POD <> 0 <> T>)>)
-                 (ELSE
-                  <FSET ,STUNT-SHIP ,SADRADIOBIT>
-                  ;<FSET ,STUNT-SHIP ,BADRADIOBIT>
-                  <RTRUE>)>)
+                         <PRINT-CONT ,ESCAPE-POD <> 0 <> T>)>)>
+           ;<FSET ,STUNT-SHIP ,SADRADIOBIT>
+           ;<FSET ,STUNT-SHIP ,BADRADIOBIT>
+           <RTRUE>)
           (<EQUAL? .RARG ,M-END>
            <SETG USED-LOOK-DARK <>>)>>
 
@@ -1836,11 +2065,11 @@ to support people. ">)>
           (<EQUAL? ,STUNT-COUNTER 4>
            <TELL CR
 "\"Shush, " D ,FORD ",\" replies a second voice that seems familiarly like "
-D ,TRILLIAN "'s voice. \"I can't see anything yet. Don't spoil the surprise.\"" CR>)
+D ,TRILLIAN "'s voice. \"I can't see anything yet. Don't spoil the surprise" ,PIC>)
           (<EQUAL? ,STUNT-COUNTER 5>
            <TELL CR
 "\"No, that's exactly it! It's pitch dark!\" says " D ,FORD
-". \"Froody! I love flotation tanks.\"" CR>)
+". \"Froody! I love flotation tanks" ,PIC>)
           (<EQUAL? ,STUNT-COUNTER 6>
            <TELL CR
 "\"Alright, guys.\" " D ,ZAPHOD "'s deep voice echoes around the invisible room, which
@@ -1874,7 +2103,8 @@ the window. So much for going out in style" ,ELLIPSIS>
            <MOVE ,DARK-OBJECT ,DARK>
            ;<INIT-STATUS-LINE>
            <UPDATE-STATUS-LINE>
-           <I-REALISE>)>
+           <I-REALISE>
+           <MOVE ,MARVIN ,STUNT-SHIP>)>
     <SETG STUNT-COUNTER <+ ,STUNT-COUNTER 1>>
     <FUCKING-CLEAR>>
 
@@ -1942,7 +2172,8 @@ tensing, look to Dr. Dan Streetmentioner's Time Traveller's Handbook
 of 1001 Tense Formations) perished in Disaster Area concerts throughout
 time, were unearthed - literally - below miles of solid rock, in an
 enormous underground chamber filled with frozen water. All of them
-were in suspended animation, and have no memories at all. But you are dead." T>)
+were in suspended animation, and have no memories at all. But you
+are dead. And so close to the end as well..." <> T>)
           (<0? <MOD ,SUN-CRASH 2>>
            <TELL CR "The ship " <PICK-ONE 
                                     <PLTABLE
@@ -1953,7 +2184,8 @@ were in suspended animation, and have no memories at all. But you are dead." T>)
            <COND (<=? ,SUN-CRASH 18 22 24>
                   <TELL
 " The heat is getting very intense now. You don't know how much longer you have!">)>
-           <CRLF>)>>
+           <CRLF>)>
+    <SETG SUN-CRASH <+ ,SUN-CRASH 1>>>
 
 
 <OBJECT CONSOLE
@@ -1984,7 +2216,7 @@ were in suspended animation, and have no memories at all. But you are dead." T>)
     <COND (<OR <VERB? SLAP PUSH>
                <AND <VERB? ATTACK>
                     <VERB-WORD? ,W?HIT>>>
-           <COND (ELSE ;<FSET? ,REMOTE-CONTROL ,RADPLUGBIT>
+           <COND (<FSET? ,REMOTE-CONTROL ,RADPLUGBIT>
                   <TELL "The escape pod crackles and emits a very bright light. ">
                   <COND (<AND <FSET? ,ESCAPE-POD ,SADRADIOBIT>
                               <ORDERING?>
@@ -2007,7 +2239,7 @@ the next game is all in your imagination." CR>
                          <UPDATE-STATUS-LINE>
                          <FINISH>
                          <RFATAL>)
-                        (<AND <FSET? ,ESCAPE-POD ,SADRADIOBIT>
+                        (<AND ;<FSET? ,ESCAPE-POD ,SADRADIOBIT>
                               <SET OBJ <FIRST? ,ESCAPE-POD>>
                               <NEXT? .OBJ>>
                          <TELL "All of the things">)
@@ -2156,17 +2388,19 @@ isn't meant to support people [ahem" ,ELLIPSIS "]">
                         (ELSE
                          <THE-J ,LOUDSPEAKER T>)>
                   <TELL ", saying \"">
-                  <VOICE>)>)
+                  <VOICE>)>
+           <RTRUE>)
           (<VERB? PLUG PUT-IN>
-		   <COND (<IOBJ? LOUDSPEAKER>
-		          <PERFORM ,V?PLUG ,LOUDSPEAKER ,PRSO>
-                  <RTRUE>)
-		         (<DOBJ? RADIO>
+		   <COND (<DOBJ? RADIO>
                   <COND (<NOT <FSET? ,LOUDSPEAKER ,RADPLUGBIT>>
 					     <FSET ,LOUDSPEAKER ,RADPLUGBIT>
 					     <TELL "Plugged." CR>)
 				        (ELSE
 					     <TELL "But it's aready plugged in!" CR>)>
+                  <RTRUE>)
+                 (<AND <IOBJ? LOUDSPEAKER>
+                       <NOT <DOBJ? LOUDSPEAKER>>>
+		          <PERFORM ,V?PLUG ,LOUDSPEAKER ,PRSO>
                   <RTRUE>)
                  (ELSE
 		          <RFALSE>)>)>>
@@ -2194,12 +2428,12 @@ isn't meant to support people [ahem" ,ELLIPSIS "]">
   4 - Bottom left.
   5 - Bottom right."
 <GLOBAL ESCAPE-CODE
-    <ITABLE 4 (BYTE) 0>>
+    <TABLE 0 0 0 0>>
 
 <GLOBAL ESCAPE-SET
-    <ITABLE 4 (BYTE) 0>>
+    <TABLE 0 0 0 0>>
 
-<ROUTINE VOICE ("AUX" A Z)
+<ROUTINE VOICE ("OPT" X "AUX" A Z)
     <COND (<0? <GET ,ESCAPE-CODE 0>>
            %<DEBUG-CODE
                <COND (<T? ,P-DBUG>
@@ -2211,9 +2445,10 @@ isn't meant to support people [ahem" ,ELLIPSIS "]">
                    <COND (<T? ,P-DBUG>
                           <TELL N <GET ,ESCAPE-CODE .X>>)>>>
            %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "]|">)>>)>
-    <COND (<FSET? ,LOUDSPEAKER ,RADPLUGBIT>
+    <COND (<AND <FSET? ,LOUDSPEAKER ,RADPLUGBIT>
+                <NOT .X>>
                       <TELL
-<PICK-ONE <PLTABLE "Do you copy?" "I repeat:" "You hear?" "I repeat,">> !\ >)>
+<PICK-ONE <PLTABLE "Do you copy?" "I repeat:" "I repeat,">> !\ >)>
     <DO (Y 0 3)
         <SET A <GET ,ESCAPE-CODE .Y>>
         <COND (<OR <FSET? ,LOUDSPEAKER ,RADPLUGBIT>
@@ -2247,5 +2482,9 @@ isn't meant to support people [ahem" ,ELLIPSIS "]">
            <COND (<FSET? ,ESCAPE-POD ,SADRADIOBIT>
                   <TELL ,YOU-ARE CR>)
                  (ELSE
+                  <COND (<AND <FSET? ,LOUDSPEAKER ,RADPLUGBIT>
+                              <HELD? ,RADIO>>
+                         <TELL "You'll have to unplug the radio first." CR>
+                         <RTRUE>)>
                   <TELL "You step on." CR>
                   <FSET ,ESCAPE-POD ,SADRADIOBIT>)>)>>

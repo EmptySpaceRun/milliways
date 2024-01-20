@@ -19,7 +19,8 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
         CTHAT *                <THAT-THEY .X 1>
         THAT *                 <THAT-THEY .X>
         CTHAT+VERB * *:STRING  <THAT-THEY .X 1 .Y>
-        THAT+VERB * *:STRING   <THAT-THEY .X 0 .Y>>
+        THAT+VERB * *:STRING   <THAT-THEY .X 0 .Y>
+        ;"THAT-THEM *            <THAT-THEY .X 0 <> T>">
 
 <REPLACE-DEFINITION SEE-VERB?
 <ROUTINE SEE-VERB? ()
@@ -55,7 +56,7 @@ Copyright (c) 1988 Infocom, Inc.  All rights reserved."
 <DEFMAC ONE? ('TERM)
 	<FORM EQUAL? .TERM 1 T>>
 
-<SETG CANT "You can't ">
+;<SETG CANT "You can't ">
 
 <SETG C-ENABLED? 0>
 <SETG C-ENABLED 1>

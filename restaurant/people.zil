@@ -41,19 +41,21 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
 <ROUTINE PLAYER-F ("OPTIONAL" (ARG <>) "AUX" (L <>) X MRK)
  <COND (<EQUAL? ,PRSO ,PLAYER> <PUTP ,PLAYER ,P?SDESC "yourself"> ;<RFALSE>)
        (ELSE                   <PUTP ,PLAYER ,P?SDESC "you">      ;<RFALSE>)>
- <COND (<NOT <VISIBLE? ,BLASTER>>
+ ;<COND (<NOT <VISIBLE? ,BLASTER>>
         <FSET ,BLASTER-ON-TRAY ,INVISIBLE>)
        (ELSE
         <FCLEAR ,BLASTER-ON-TRAY ,INVISIBLE>)>
- <COND (<AND <VERB? SAY TELL>
-             <NOT <EQUAL? ,PLAYER ,PRSO ,PRSI>>
-             ;<NOT <ORDERING?>>>
-        <COND (<OR <AND <NOUN-USED? ,PRSO ,W?MRKUG>
-                        <SET MRK ,W?MRKUG>>
-                   <AND <NOUN-USED? ,PRSO ,W?MRIVG>
-                        <SET MRK ,W?MRIVG>>
-                   <AND <NOUN-USED? ,PRSO ,W?MRIUG>
-                        <SET MRK ,W?MRIUG>>>
+ <COND (<AND <OR <VERB? TELL>
+                 <AND <VERB? SAY>
+                      ,PRSI>>
+             <NOT <EQUAL? ,PLAYER ,PRSO ,PRSI>>>
+        <COND (<AND <VERB? SAY>
+                    <OR <AND <NOUN-USED? ,PRSO ,W?MRKUG>
+                             <SET MRK ,W?MRKUG>>
+                        <AND <NOUN-USED? ,PRSO ,W?MRIVG>
+                             <SET MRK ,W?MRIVG>>
+                        <AND <NOUN-USED? ,PRSO ,W?MRIUG>
+                             <SET MRK ,W?MRIUG>>>>
                %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: MRKUG called]|">)>>
                <COND (<EQUAL? .MRK ,W?MRKUG>
                       <PUTP ,MRKUG-OBJECT ,P?SDESC "Mrkug">)
@@ -64,15 +66,18 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
                <SETG PRSO ,MRKUG-OBJECT>
                <SET X T>
                <RFALSE>)
-              (<OR <NOUN-USED? ,PRSO ,W?YES ,W?Y ,W?OK>>
+              (<AND <VERB? SAY>
+                    <OR <NOUN-USED? ,PRSO ,W?YES ,W?Y ,W?OK>>>
                %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: YES called]|">)>>
                <SETG PRSO ,YES-OBJECT>
                <SET X T>)
-              (<OR <NOUN-USED? ,PRSO ,W?NO ,W?NOPE ,W?N>>
+              (<AND <VERB? SAY>
+                    <OR <NOUN-USED? ,PRSO ,W?NO ,W?NOPE ,W?N>>>
                %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: NO called]|">)>>
                <SETG PRSO ,NO-OBJECT>
                <SET X T>)
-              (<OR <NOUN-USED? ,PRSO ,W?HELLO ,W?HI ,W?GREETINGS>>
+              (<AND <VERB? SAY>
+                    <OR <NOUN-USED? ,PRSO ,W?HELLO ,W?HI ,W?GREETINGS>>>
                %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: HELLO called]|">)>>
                <SETG PRSO ,HELLO-OBJECT>
                <SET X T>)>
@@ -84,17 +89,19 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
                    <D-J ,PRSO>
                    <TELL !\] CR>
                    <HLIGHT ,H-NORMAL>)>>
-        <COND (<EQUAL? ,INTQUOTE ,PRSO ,PRSI>
+        <COND (<AND <EQUAL? ,INTQUOTE ,PRSO ,PRSI>
+                    <NOT <SPEAKING-VERB?>>>
                <SETG CLOCK-WAIT T>
                <TELL "Please refrain from using quotes; I don't understand them." CR>
                <RTRUE>)
-              (<OR <DOBJ? MRKUG-OBJECT YES-OBJECT NO-OBJECT HELLO-OBJECT>
+              (<OR <DOBJ? MRKUG-OBJECT YES-OBJECT NO-OBJECT HELLO-OBJECT INTQUOTE>
                    ;<EQUAL? ,HERE ,PDW ,INTERVIEW-ROOM>>
                %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: running V-SAY through speech objects]|">)>>
                ;<PERFORM ,V?SAY ,PRSO ,PRSI>
                <V-SAY>
                <RTRUE>)
-              (<AND <NOT <VERB-WORD? ,W?SPEAK ,W?TALK ,W?CHAT>>
+              (<AND <NOT <ORDERING?>>
+                    <NOT <VERB-WORD? ,W?SPEAK ,W?TALK ,W?CHAT>>
                     <NOT <FSET? ,PRSO ,PERSONBIT>>
                     <NOT <IN? ,PLAYER ,STUNT-SHIP>>
                     <QCONTEXT-GOOD?>>
@@ -123,7 +130,7 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
                 <EQUAL? ,PLAYER ,PRSO ,PRSI>>
 		   <HAR-HAR>
 		   <RTRUE>)
-          (<EQUAL? ,BLASTER-ON-TRAY ,PRSO ,PRSI>
+          ;(<EQUAL? ,BLASTER-ON-TRAY ,PRSO ,PRSI>
            <BLASTER-ON-TRAY-F>
            <RTRUE>)
           (<EQUAL? ,PRSO ,PLAYER>
@@ -190,7 +197,13 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
 			         <PRE-TAKE>
 			         <RTRUE>)
 			        (T
-			         <PERFORM ,V?TAKE ,PRSO>
+			         <COND (<ORDERING?>
+                            <SET X ,WINNER>
+                            <RESET-WINNER>
+                            ;[<TELL "PLAYER-F: ASKING "><TELL-D-LOC .X><TELL " FOR "><TELL-D-LOC ,PRSO><CRLF>]
+                            <PERFORM ,V?ASK-FOR .X ,PRSO>)
+                           (ELSE
+                            <PERFORM ,V?TAKE ,PRSO>)>
 			         <RTRUE>)>)>)
 	      (T
            <RFALSE>)>)
@@ -198,14 +211,16 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
 	         <NOT <VERB? SEARCH-FOR>>
              <NOT <EVERYWHERE-VERB?>>
 	         <FSET? ,PRSI ,SECRETBIT>
-	         <NOT <FSET? ,PRSI ,SEENBIT>>>
+	         <NOT <FSET? ,PRSI ,SEENBIT>>
+             <NOT <EQUAL? ,PRSI ,BLASTER>>>
 	    <NOT-FOUND ,PRSI>
 	    <RTRUE>)
        (<AND <T? ,PRSO>
 	         <NOT <VERB? FIND WALK>>
              <NOT <EVERYWHERE-VERB?>>
 	         <FSET? ,PRSO ,SECRETBIT>
-	         <NOT <FSET? ,PRSO ,SEENBIT>>>
+	         <NOT <FSET? ,PRSO ,SEENBIT>>
+             <NOT <EQUAL? ,PRSO ,BLASTER>>>
 	    <NOT-FOUND ,PRSO>
 	    <RTRUE>)
        ;(<AND <T? ,AWAITING-REPLY>
@@ -254,6 +269,9 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
                       <TELL CR "[You just wasted a turn doing that very slowly.]" CR>)>)>)>
     <RFALSE>>
 
+<GLOBAL SCREAMING-ACTION <>>
+<GLOBAL CAREFUL-ACTION <>>
+
 <ROUTINE TOO-BAD-SIT-HIDE ("AUX" (LOCS <LOC ,PLAYER>))
 	;<MOVE ,WINNER ,HERE>
 	;<FIRST-YOU "standing up">
@@ -270,7 +288,7 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
 	<COND (<EQUAL? .P ,BUTLER ,DOCTOR>
 	       <TELL "Pardon me, "TN", but">)
 	      (T <TELL "Wait a mo'.">)>
-	<TELL " I asked you a question.\"" CR>>
+	<TELL " I asked you a question" ,PIC>>
 
 <CONSTANT M-OTHER 42>
 
@@ -292,7 +310,7 @@ Copyright (C) 1986 Infocom, Inc.  All rights reserved."
 	(TEXT
 "Marvin, the Paranoid Android, is sulking. His eyes glow with a dull
 light that makes you feel even more miserable. He stands, silently,
-and waits for something bad to happen to him, which it always does.")
+and waits for something bad to happen to himself, which it always does.")
 	(SYNONYM MARVIN MARV ROBOT ANDROID PARANOID)
 	(ADJECTIVE DEPRESSED SAD PARANOID MARVIN SULKING)
 	(CHARACTER 1)
@@ -304,8 +322,9 @@ and waits for something bad to happen to him, which it always does.")
 	(ACTION MARVIN-F)>
 
 <GLOBAL LIFE-PAIN <>>
+<GLOBAL MARVIN-CAN-SPIEL? T>
 
-<ROUTINE MARVIN-F (RARG)
+<ROUTINE MARVIN-F (RARG "AUX" X)
 	;<QUEUE I-MARVIN -1>
 	;<COND (<EQUAL? .RARG ,M-WINNER>)>
 		   <COND (<AND <VERB? HELLO>
@@ -313,12 +332,23 @@ and waits for something bad to happen to him, which it always does.")
 		          <TELL "Marvin ignores you." CR>
 		          <RTRUE>)
                  (<OR <AND <VERB? ASK-FOR>
-				 	       <EQUAL? ,PRSO ,MARVIN>>
+				 	       <EQUAL? ,PRSO ,MARVIN>
+                           <SET X ,PRSO>
+                           <SETG PRSO ,PRSI>
+                           <SETG PRSI .X>>
+                      <AND <ORDERING?>
+                           <NOT <DOBJ? MARVIN>>
+                           <IOBJ? PLAYER>
+                           <VERB? GIVE>>
                       <AND <ORDERING?>
                            <NOT <IOBJ? MARVIN>>
                            <DOBJ? PLAYER>
-                           <VERB? GIVE>>>
-                  <COND (<IOBJ? HALLWAY3>
+                           <VERB? SGIVE>
+                           <SET X ,PRSO>
+                           <SETG PRSO ,PRSI>
+                           <SETG PRSI .X>>>
+                  ;[<TELL "MARVIN-F: ASKING "><TELL-D-LOC .X><TELL " FOR "><TELL-D-LOC ,PRSO><CRLF>]
+                  <COND (<DOBJ? HALLWAY3>
                          <TELL "\"I can't help you">
                          <COND (<FSET? ,MARVIN ,SADRADIOBIT>
                                 <TELL " if you don't be more specific">)
@@ -327,7 +357,7 @@ and waits for something bad to happen to him, which it always does.")
 ", and I'm not sure why I would, or what relief from my pain helping you could do">)>
                          <TELL ,PIC>
                          <RTRUE>)
-                        (<IOBJ? RADIO>
+                        (<DOBJ? RADIO>
                          <COND (<FSET? ,MARVIN ,SADRADIOBIT>
                                 <COND (<IN? ,RADIO ,MARVIN>
                                        <TELL
@@ -343,7 +373,7 @@ though,\" and crushes the plant with his iron fist - and ">
                                        <THE-J ,RADIO T>
                                        <TELL " and turns away." CR>)
                                       (ELSE
-                                       <TELL "\"I don't have it.\"" CR>)>)
+                                       <TELL "\"I don't have it" ,PIC>)>)
                                (ELSE
                                 <COND (<IN? ,RADIO ,MARVIN>
                                        <TELL "\"And what does it concern you if I have it?\"" CR>)
@@ -352,9 +382,10 @@ though,\" and crushes the plant with his iron fist - and ">
                                        <D-J ,RADIO>
                                        <TELL ,PAUSES>)>)>
                          <RTRUE>)>)
-				 (<VERB? KISS>
+				 (<AND <VERB? KISS>
+                       <NOT <ORDERING?>>>
                   <TELL "Oh God, no. It's not worth it." CR>)
-                 (<AND <VERB? ATTACK KILL>
+                 (<AND <VERB? ATTACK KILL SLAP>
                        <DOBJ? MARVIN>
                        <NOT <EQUAL? ,WINNER ,MARVIN>>>
 				  <COND (<NOT <FSET? ,MARVIN ,RADPLUGBIT>>
@@ -400,14 +431,14 @@ are stinging and your brain feels like it could implode." CR>
                                    <RTRUE>)
 							      (ELSE 
 								   <JIGS-UP
-"Instead of having to deal with the torture of listening to Marvin talk about life,
-you recite a few verses of poetry. By the second line of the third verse,
+"Instead of having to deal with the torture of listening to Marvin talk about
+life, you recite a few verses of poetry. By the second line of the third verse,
 you have caused yourself a brain haemorrhage.">)>)
-						  (<AND <EQUAL? ,PRSI ,OBJECT-OF-GAME>>
+						  (<IOBJ? OBJECT-OF-GAME>
 						   <TELL 
 "\"Being clever doesn't always make you happy, you know. Look at me, brain
 the size of a planet, how many points do you think I've got? I used to have
-thousands of points. Now it's at minus thirty zillion, last time I counted.\"" CR>
+thousands of points. Now it's at minus thirty zillion, last time I counted" ,PIC>
                            <RTRUE>)>)
 				 (<AND <ORDERING?>
 						<EQUAL? ,WINNER ,MARVIN>>
@@ -433,7 +464,7 @@ thousands of points. Now it's at minus thirty zillion, last time I counted.\"" C
                          <TELL "\"I did that already. Speaking of which, why do I still help you?\"" CR>)
 						(ELSE
 						 <COND (,DONT-FLAG
-						 		<TELL "\"Fine, then.\"" CR>
+						 		<TELL "\"Fine, then" ,PIC>
 								;<RESET-WINNER>
 								<RTRUE>)
                                (<AND ,SCOREMAD
@@ -461,19 +492,29 @@ thing I have above you in this context is being able to find the right key and
 having the access clearance to be able to unlock the door. But be quick about it.
 If you start acting like you normally do, which is benightedly stupid, then I won't
 help you - whatever weird trance you are currently in could only be temporary,
-so I have to be careful.\"" CR>
+so I have to be careful" ,PIC>
                                               <FSET ,MARVIN ,RADPLUGBIT>
                                               <FSET ,MARVIN ,BADRADIOBIT>)>)
                                       (<AND <VERB? GIVE>
                                             <IOBJ? PLAYER>>
                                        <RESET-WINNER>
-                                       <PERFORM ,V?ASK-FOR ,MARVIN ,PRSO>)
+                                       <PERFORM ,V?ASK-FOR ,MARVIN ,PRSO>
+                                       <RTRUE>)
+                                      (<AND <VERB? SGIVE>
+                                            <DOBJ? PLAYER>>
+                                       <RESET-WINNER>
+                                       <PERFORM ,V?ASK-FOR ,MARVIN ,PRSI>
+                                       <RTRUE>)
+                                      (<AND <VERB? ASK-FOR>
+                                            <NOT <DOBJ? PLAYER>>>
+                                       <RESET-WINNER>
+                                       <PERFORM ,PRSA ,PRSO ,PRSI>)
                                       (ELSE
                                        <TELL
 "\"I can't be bothered to do it, with this pain in the diodes along my right
 side. But it was interesting to see you try and to get me to help you accomplish
 your obviously human problems - 'human' justifying the selfish aspect of them.
-Ugh! " ,HUMANS " (and not to mention carelessly) annoying. Oh, never mind" ,ELLIPSIS "\"" CR>)>
+Ugh! " ,HUMANS " (and not to mention carelessly) annoying. Oh, never mind" ,ELLIPSIS !\" CR>)>
                                 <RTRUE>)
                                (<AND <VERB? OPEN>
                                      <DOBJ? HOTBLACK-CAR>
@@ -486,7 +527,7 @@ Ugh! " ,HUMANS " (and not to mention carelessly) annoying. Oh, never mind" ,ELLI
                                                      <TELL "You still want help" ,MARVIN-ANGRY>)>
                                               <TELL ,PIC>
                                 ;<COND (<FSET? ,MARVIN ,RADPLUGBIT>
-                                       <TELL "Give me the key.\"" CR>)
+                                       <TELL "Give me the key" ,PIC>)
                                       (ELSE
                                        <TELL "Do it yourself.\"">)>
                                 <RTRUE>)>)
@@ -497,25 +538,30 @@ Ugh! " ,HUMANS " (and not to mention carelessly) annoying. Oh, never mind" ,ELLI
                                 <RFALSE>)
                                (ELSE
 						        <TELL "\"Why should I? ">
-                                <COND (<IN? ,MARVIN ,CAR-PARK>
+                                <COND (<NOT ,MARVIN-CAN-SPIEL?>
+                                       <TELL
+"Would it benefit me? (That's a rhetorical question, but I doubt you could tell.)\"" CR>)
+                                      (<IN? ,MARVIN ,CAR-PARK>
                                        <TELL
 "You just left me on that planet, for approximately five hundred and seventy-six
 thousand million years, and show no understanding! Well, I guess you can't because
 you're not intelligent enough to be able to even fathom what I'm thinking.||\"When
 Milliways was created, I became the Head of Parking Cars. Can you believe that? Me,
-with a" ,BRAIN ", and here I am - parking cars. Life is so terribly painful.">
-                                       <COND (<IN? ,MARVIN ,STUNT-SHIP>
-                                              <TELL
-" Thank whatever minor god there is out there which I can
-curse that we're all going to die in a fiery inferno soon.">)>
-                                       <TELL !\" CR>)
+with a" ,BRAIN ", and here I am - parking cars. Life is so terribly painful" ,PIC>)
+                                      (<IN? ,MARVIN ,STUNT-SHIP>
+                                       <TELL
+"You're no help to me or the world. Thank whatever minor god there is out there
+that I can curse that we're all going to die in a fiery inferno soon" ,PIC>)
                                       (ELSE
                                        <TELL
 ,HUMANS "stupid and useless. I am not any menial robot, I am a
-robot with a" ,BRAIN ". A" ,BRAIN "! And yet here I am" ,ELLIPSIS "\"" CR>
-						               ;<RESET-WINNER>)>)>)>)
+robot with a" ,BRAIN ". A" ,BRAIN "! And yet here I am" ,ELLIPSIS !\" CR>
+						               ;<RESET-WINNER>)>
+                                <SETG MARVIN-CAN-SPIEL? <>>
+                                <RTRUE>)>)>)
 			     (<AND <VERB? GIVE>
-			    	   <NOT <ORDERING?>>>
+			    	   <NOT <ORDERING?>>
+                       <IOBJ? MARVIN>>
 			      <COND (<AND ,PLUG-POINT
                               <DOBJ? RADIO>>
 			      		 <TELL "Marvin thanks you for the radio, and ">
@@ -529,7 +575,7 @@ robot with a" ,BRAIN ". A" ,BRAIN "! And yet here I am" ,ELLIPSIS "\"" CR>
 			    		 <MOVE ,PLANT ,MARVIN>
                          <MOVE ,MARVIN ,RAMP>
                          <COND (<IN? ,PLAYER ,WHALE-CRATER>
-                                <TELL CR "You are left in some sort of darkness" ,ELLIPSIS "" CR CR>
+                                <TELL CR "You are left in some sort of darkness" ,ELLIPSIS "" CR ;CR>
                                 <V-LOOK>)>
 			    		 <RTRUE>)
                         (<DOBJ? KEYSET>
@@ -547,13 +593,13 @@ what he thinks of humans, and another more audible one about how ">
 miserably slowly over to Hotblack Desiato's car, and makes a barely
 noticeable glance at the set of keys, before unlocking the door to
 the starcruiser. He then trundles back to you.|\"See?\" he moans.
-\"Easy.\"" CR>)
+\"Easy" ,PIC>)
                                (<FSET? ,MARVIN ,BADRADIOBIT>
                                 <TELL "\"You think I will help you now" ,MARVIN-ANGRY !\? !\" CR>)
                                (ELSE
                                 <TELL
 "\"And what am I supposed to do with it? " ,HUMANS "demanding
-without even knowing what they are demanding. No thanks.\"" CR>)>
+without even knowing what they are demanding. No thanks" ,PIC>)>
                          <RTRUE>)
 			    		(ELSE
 			    		 <TELL "Marvin downright refuses the offer." CR>
@@ -598,31 +644,28 @@ a Kill-O-Zap gun giving you the same intimidating stare." CR>)
                         ;<EQUAL? ,PRSO ,PLAYER>>
                     <RESET-WINNER>
 	    	    	<PERFORM ,V?ASK-ABOUT ,BENJY ,PRSO>
-                    <SETG WINNER ,BENJY>)
+                    ;<SETG WINNER ,BENJY>)
 	    	    ;(<VERB? WHO WHAT-ABOUT WHAT>
-	    	    	<TELL "\"That's not my problem.\"" CR>)
+	    	    	<TELL "\"That's not my problem" ,PIC>)
 	    	    (<VERB? YES>
                     <RESET-WINNER>
-	    	    	<PERFORM ,V?ASK-ABOUT ,BENJY ,YES-OBJECT>
-                    <SETG WINNER ,BENJY>)
+	    	    	<PERFORM ,V?YES>)
                 (<VERB? NO>
                     <RESET-WINNER>
-                	<PERFORM ,V?ASK-ABOUT ,BENJY ,NO-OBJECT>
-                    <SETG WINNER ,BENJY>)
+	    	    	<PERFORM ,V?NO>)
 	    	    (<VERB? HELLO>
                     <RESET-WINNER>
 	    	        <PERFORM ,V?HELLO ,BENJY>
-                    ;<TELL "\"No introductions. I know who you are.\"" CR>
-                    <SETG WINNER ,BENJY>)
+                    ;<SETG WINNER ,BENJY>)
 	    	    (ELSE
 	    	    	<TELL
 "\"I'm not sure how well you know me, but I know one thing: No-one
 messes with me or Percy. Just don't! You'll end up deader inside
-than before! And that includes telling us what to do.\"" CR>
-	    		    ;<FUCKING-CLEAR>)>
+than before! And that includes telling us what to do" ,PIC>)>
             <RTRUE>)
 	    (<AND <VERB? ASK-ABOUT>
-                <DOBJ? BENJY>>
+                <DOBJ? BENJY>
+                <DOBJ? PLAYER YES-OBJECT NO-OBJECT MAGRATHEA OBJECT-OF-GAME>>
 	        <PERFORM ,V?ASK-ABOUT ,PERCY ,PRSI>)>>
 
 <ROUTINE MOUSEFIND ()
@@ -649,66 +692,53 @@ than before! And that includes telling us what to do.\"" CR>
 	(ACTION PERCY-F)>
 
 <ROUTINE PERCY-F ()
- <COND 
-    (<VERB? EXAMINE>
-	 <TELL "Percy the mouse is on the right hand side. He is in a sort of " D ,BOTTLE-MOUSE ,PAUSES>)
-	(<VERB? RUB ATTACK TAKE>
-	 <TELL "Percy gives you a threating look accompanied by
+ <COND (<VERB? EXAMINE>
+	    <TELL "Percy the mouse is on the right hand side. He is in a sort of " D ,BOTTLE-MOUSE ,PAUSES>)
+	   (<VERB? RUB ATTACK TAKE>
+	    <TELL "Percy gives you a threating look accompanied by
 a Kill-O-Zap gun giving you the same intimidating stare." CR>)
-	(<ORDERING?>
-     <COND (<AND <VERB? WHAT WHO WHAT-ABOUT> 
-                 ;<EQUAL? ,PRSO ,PLAYER>>
-	 	    <RESET-WINNER>
-            <PERFORM ,V?ASK-ABOUT ,PERCY ,PRSO>
-            <SETG WINNER ,PERCY>)
-	       (<VERB? YES>
-            <RESET-WINNER>
-	    	<PERFORM ,V?ASK-ABOUT ,BENJY ,YES-OBJECT>
-            <SETG WINNER ,PERCY>)
-           (<VERB? NO>
-            <RESET-WINNER>
-            <PERFORM ,V?ASK-ABOUT ,BENJY ,NO-OBJECT>
-            <SETG WINNER ,PERCY>)
-	       (<VERB? HELLO>
-            <RESET-WINNER>
-	 	    <TELL "Percy nods." CR>
-            <SETG WINNER ,PERCY>)
-	       (ELSE
-	 	    <TELL "\"Don't tell us what to do, Earthling.\"" CR>
-	 	    ;<FUCKING-CLEAR>)>
-     <RTRUE>)
-	(<AND <VERB? ASK-ABOUT>
-          <DOBJ? PERCY>>
-	 <COND (<EQUAL? ,PRSI ,PLAYER>
-	        <TELL ,YOUR-BRAIN !\" CR>)
-	       (<EQUAL? ,PRSI ,W?WHY ,V?WHY>
-	        <TELL ,BUT-WHY " he replies." CR>)
-           (<EQUAL? ,PRSI ,YES-OBJECT>
-            <COND (,AWAITING-REPLY
-                   <RESET-WINNER>
-                   <PERFORM ,V?YES>
-                   <SETG WINNER ,PERCY>)
-                  (ELSE
-                   <PERFORM ,V?YES>)>
-            <RTRUE>)
-           (<EQUAL? ,PRSI ,NO-OBJECT>
-            <COND (,AWAITING-REPLY
-                   <RESET-WINNER>
-                   <PERFORM ,V?NO>
-                   <SETG WINNER ,PERCY>)
-                  (ELSE
-                   <PERFORM ,V?NO>)>
-            <RTRUE>)
-           (<EQUAL? ,PRSI ,MAGRATHEA>
-            <TELL "\"We work for Magrathea.">
-            <COND (<RUNNING? I-MOUSE-BLAB>
-                   <TELL " Anyway, ">
-                   <DEQUEUE I-MOUSE-BLAB>
-                   <I-MOUSE-BLAB>)
-                  (ELSE
-                   <TELL !\" CR>)>)
-	       (<COMMON-ASK-ABOUT ,PERCY ,PRSI>
-	        <RTRUE>)>)>>
+	   (<ORDERING?>
+        <COND (<VERB? WHAT WHO WHAT-ABOUT>
+	    	   <RESET-WINNER>
+               <PERFORM ,V?ASK-ABOUT ,PERCY ,PRSO>
+               <SETG WINNER ,PERCY>)
+	          (<VERB? YES>
+               <RESET-WINNER>
+	    	   <PERFORM ,V?NO>)
+              (<VERB? NO>
+               <RESET-WINNER>
+	    	   <PERFORM ,V?YES>)
+	          (<VERB? HELLO>
+               <RESET-WINNER>
+	    	   <TELL "Percy nods." CR>
+               ;<SETG WINNER ,PERCY>)
+	          (ELSE
+	    	   <TELL "\"Don't tell us what to do, Earthling" ,PIC>
+	    	   ;<FUCKING-CLEAR>)>
+        <RTRUE>)
+	   (<AND <VERB? ASK-ABOUT>
+             <DOBJ? PERCY>>
+	    <COND (<EQUAL? ,PRSI ,PLAYER>
+	           <TELL ,YOUR-BRAIN !\" CR>)
+	          (<EQUAL? ,PRSI ,MAGRATHEA>
+               <TELL "\"We OWN Magrathea">
+               <COND (<RUNNING? I-MOUSE-BLAB>
+                      <TELL ". Anyway, ">
+                      <DEQUEUE I-MOUSE-BLAB>
+                      <I-MOUSE-BLAB T>)
+                     (ELSE
+                      <TELL ,PIC>)>)
+              (<EQUAL? ,PRSI ,SLARTY ,PDW>
+               <TELL "\"" D ,SLARTY "? We fired him just after he
+made those fjords! What an old guy. He can keep the workshop, though">
+               <COND (<RUNNING? I-MOUSE-BLAB>
+                      <TELL ". Anyway, ">
+                      <DEQUEUE I-MOUSE-BLAB>
+                      <I-MOUSE-BLAB T>)
+                     (ELSE
+                      <TELL ,PIC>)>)
+	          (<COMMON-ASK-ABOUT ,PERCY ,PRSI>
+	           <RTRUE>)>)>>
 
 
 
@@ -735,21 +765,94 @@ a Kill-O-Zap gun giving you the same intimidating stare." CR>)
 	<COND (<NOT <FSET? ,FORD ,SEENBIT>>
 		   <COND (<VERB? FIND>
 				  <TELL "Not here." CR>)
-				 (<AND <VERB? ASK-ABOUT ;ASK-CONTEXT-ABOUT TELL-ABOUT>
+				 (<AND <VERB? ASK-ABOUT TELL-ABOUT>
 					   <EQUAL? ,PRSI ,FORD>>
 				  <RFALSE>)
 				 (T
-				  <TELL "You can't see him here!" CR>
+				  <TELL ,NOPE "see him here!" CR>
 				  <FUCKING-CLEAR>)>)
 		  (ELSE
-		   <COND (<AND <VERB? ASK-ABOUT>
+		   <COND (<VERB? EXAMINE>
+                  <TELL
+"Ten years ago, he got stuck on Earth, and has been your friend ever since.
+You trust him, and he'll stay by your side, or Zaphod's side. And Zaphod
+usually stays by Trillian's side. But he's still your friend." CR>)
+                 (<VERB? ATTACK KILL SLAP>
+                  <TELL "Ford?! Why on Earth would you do that now?" CR>)
+                 (<AND <OR <ORDERING?>
+                           <AND <VERB? ASK-ABOUT>
+                                <DOBJ? FORD>>>
+                       <NOT <IN? ,PLAYER ,DINING-HALL>>>
+                  <TELL "Ford seems busy scanning the room, as if looking for exits." CR>)
+                 (<AND <VERB? SHOW>
+                       <IOBJ? FORD>>
+                  <PERFORM ,V?ASK-ABOUT ,FORD ,PRSO>
+                  <RTRUE>)
+                 (<AND <VERB? ASK-ABOUT>
 		   			   <DOBJ? FORD>>
-				  <COMMON-ASK-ABOUT ,FORD ,PRSI>)
+				  <COND (<IOBJ? TOWEL>
+                         <TELL "\"Didn't I give that back to you on Earth?.." ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? WAITER>
+                         <TELL
+"\"Waiters? There are waiters here?\" He slumps even further into his chair. \"Eh, I don't need one anyway" ,PIC>)
+                        (<IOBJ? FORD>
+                         <TELL "\"Whaddaya mean who am I?\" he stutters in an incoherent hit-and-run of emotions." CR>
+                         <RTRUE>)
+                        (<IOBJ? SATCHEL>
+                         <TELL "\"Hey, that's mine! Be careful with it and don't do anything bad" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? MINERAL-WATER>
+                         <TELL
+"Ford's eyes widen and he puts a finger drunkedly to his mouth.
+\"Shhh! Just because I'm acting weird and paranoid doesn't mean
+they aren't out to steal MY PRRECCIOUSS mineral water" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? BEER>
+                         <COND (<AND <NOUN-USED? ,BEER ,W?AREA>
+                                     <ADJ-USED? ,BEER ,W?DISASTER>>
+                                <PERFORM ,V?ASK-ABOUT ,FORD ,HOTBLACK>)
+                               (<OR <NOUN-USED? ,BEER ,W?BEER ,W?VODKA ,W?ALCOHOL>
+                                    <NOUN-USED? ,BEER ,W?WINE ,W?WHISKY ,W?DRINK>>
+                                <TELL
+"\"Hah. That's my specialty. Oh, except for Pan Galactic Gargle Blasters. I hate those.\"" CR>)>
+                         <RTRUE>)
+                        (<IOBJ? HOTBLACK>
+                         <COND (<NOT <FSET? ,HOTBLACK ,SADRADIOBIT>>
+                                <FSET ,HOTBLACK ,SADRADIOBIT>
+                                <TELL
+"\"Hey, I used to know Disaster Area! Yeah, like, the guys in it.
+Hotblack Desiato. He was one of my best friends. All of us would
+laugh at him while he was in the back, playing on his ajuitar. We
+hated those songs, but he-- he loved them. He couldn't resist making
+more and more and more and...\"|His eyes tear up. \"Sorry, I dunno.
+He was a nice guy. It's just. Well">)
+                               (<NOT <FSET? ,HOTBLACK ,BADRADIOBIT>>
+                                <FSET ,HOTBLACK ,BADRADIOBIT>
+                                <TELL
+"\"There were times when we would go around the lunch halls on Betelgeuse Five
+pretending to be Health Officers - those damn robots were so easy to reprogram
+anyway - and confiscate food from people. The best part were the excuses. I
+remember Hotblack once telling the robot to say the food was 'made by Betelgeuse
+Fours'! That was so funny.\"|He is almost bawling by now. \"So what? I don't care
+now. He turned on us when he became famous, just like every other rich person in
+the Galaxy would.\" He attempts to turn around in his chair to look at the door to
+first class, but his hand slips when trying to grab the top of his chair, and
+settles in a position where huis legs are on the seat and his back on the floor.
+\"I saw his ship - the big black ship - in the car park when going here. Now who
+could help us steal it as payback for what he did to me..">)
+                               (ELSE
+                                <TELL
+"\"Oh, come on! I had this whole emotional moment earlier talking
+about him and you can't remember anything? Well, that's too bad">)>
+                         <TELL ,PIC>
+                         <RTRUE>)
+                        (<COMMON-ASK-ABOUT ,FORD ,PRSI>
+                         <RTRUE>)>)
 		   		 (<AND <ORDERING?>
 					   <EQUAL? ,WINNER ,FORD>>
 				  <COND (<VERB? WHY NO YES>
-				  		 <TELL "\"I dunno,\" he replies. \"Ask Marvin. Or the Guide. Probably the Guide.\"" CR>
-				  		 ;<RESET-WINNER>)
+				  		 <TELL "\"I dunno,\" he replies. \"Ask Marvin. Or the Guide. Probably the Guide" ,PIC>)
 						(<VERB? WHO WHAT WHAT-ABOUT ;WHAT-TIME>
 						 <PERFORM ,V?ASK-ABOUT ,FORD ,PRSO>
 						 <RTRUE>)
@@ -761,44 +864,50 @@ a Kill-O-Zap gun giving you the same intimidating stare." CR>)
 							   (ELSE
 							    <TELL D ,FORD "'s too drunk to notice you." CR>)>
 						 ;<RESET-WINNER>)>
-				  <RTRUE>)>
-		   <RFALSE>)>>
+				  <RTRUE>)
+                 (<AND <VERB? GIVE>
+                       <IOBJ? FORD>>
+                  <TELL "Ford explains his load is too heavy, and he doesn't
+want to drop anything because he might softlock himself if you then steal it." CR>)>)>>
 
 <ROUTINE FORD-D ()
 	<COND (<IN? ,FORD ,CAR-PARK> ;"ZAPHOD is undescribed."
-		   <TELL D ,FORD " and " D ,ZAPHOD " are wandering around the car park, admiring the cars." CR>) 
-		  (<IN? ,FORD ,STUNT-SHIP>
-		   <TELL D ,FORD " is frantically searching the ship for exits." CR>)
+		   <TELL D ,FORD " and " D ,ZAPHOD " are wandering around the car park, admiring the cars." ;CR>) 
+		  (<AND <IN? ,FORD ,STUNT-SHIP>
+                <FSET? ,STUNT-SHIP ,SADRADIOBIT>>
+		   <TELL D ,FORD " is frantically searching the ship for exits." ;CR>)
+          (<IN? ,FORD ,STUNT-SHIP> ;"ZAPHOD and TRILLIAN are undescribed."
+           <TELL D ,ZAPHOD " and " D ,TRILLIAN " are here." CR 
+                 D ,FORD " is looking around, confused, and then looks at you wide-eyed." ;CR>
+           <FSET ,STUNT-SHIP ,SADRADIOBIT>)
 		  (<EQUAL? <LOC ,FORD> ,RECEPTION ,THIRD-C> ;"In reception, and Third Class."
-		   <TELL D ,FORD " is drunkenly bouncing along the foyer." CR>)
+		   <TELL D ,FORD " is drunkenly bouncing along the foyer." ;CR>)
 		  (ELSE
-		   <TELL ,YOU-SEE  D ,FORD " here, laughing with " D ,TRILLIAN " and " D ,ZAPHOD ". All of them are drunk." CR>
-		   ;<COND (<IN? ,SATCHEL ,DINING-HALL>
-		   		  <TELL "By Ford's side is his satchel." CR>)>)>>
+		   <TELL ,YOU-SEE  D ,FORD " here, laughing with " D ,TRILLIAN " and " D ,ZAPHOD ". All of them are drunk." ;CR>)>>
 
 <ROUTINE I-FORD-JOINS ("AUX" X)
-    <TELL CR "\"Hey, you OK?\" Ford says, ">
-    <COND (<IN? ,PLAYER ,RECEPTION>
-           <TELL "hopping down the steps">)
-          (<OR <IN? ,PLAYER ,KITCHEN>
-               <IN? ,PLAYER ,THIRD-C>>
-           <TELL "popping his head through the doorway">)
-          (<IN? ,PLAYER ,FIRST-CLASS>
-           <TELL "stepping cautiously">)
-          (<IN? ,PLAYER ,CAR-PARK>
-           <TELL "strolling">)
-          (<IN? ,PLAYER ,DINING-HALL>
-           <TELL "standing up">
-           <SET X T>)>
-    <COND (<NOT .X>
-           <TELL " into ">
-           <THE-J ,HERE T>)>
-    <TELL
+     <TELL CR "\"Hey, you OK?\" Ford says, ">
+     <COND (<IN? ,PLAYER ,RECEPTION>
+            <TELL "hopping down the steps">)
+           (<OR <IN? ,PLAYER ,KITCHEN>
+                <IN? ,PLAYER ,THIRD-C>>
+            <TELL "popping his head through the doorway">)
+           (<IN? ,PLAYER ,FIRST-CLASS>
+            <TELL "stepping cautiously">)
+           (<IN? ,PLAYER ,CAR-PARK>
+            <TELL "strolling">)
+           (<IN? ,PLAYER ,DINING-HALL>
+            <TELL "standing up">
+            <SET X T>)>
+     <COND (<NOT .X>
+            <TELL " into ">
+            <THE-J ,HERE T>)>
+     <TELL
 ". \"Thought I heard you screaming. Oh hey, whatever.
 I'll follow you now.\" " D ,ZAPHOD " and " D ,TRILLIAN
 <PICK-ONE ,TRAILS-ALONG> ", after " D ,FORD ,PAUSES>
-    <FORD-FOLLOW T>
-    <QUEUE FORD-FOLLOW 1>>
+     <FORD-FOLLOW T>
+     <QUEUE FORD-FOLLOW 1>>
 
 <ROUTINE FORD-FOLLOW ("OPT" (QUIET <>))
     <COND (<OR <IN? ,PLAYER ,DARK>
@@ -812,9 +921,6 @@ I'll follow you now.\" " D ,ZAPHOD " and " D ,TRILLIAN
     <MOVE ,FORD ,HERE>
     <MOVE ,ZAPHOD ,HERE>
     <MOVE ,TRILLIAN ,HERE>
-    ;"<FORD-D>
-    <TRILLIAN-D>
-    <ZAPHOD-D>"
     <QUEUE FORD-FOLLOW 1>>
 
 <OBJECT TRILLIAN
@@ -832,20 +938,77 @@ I'll follow you now.\" " D ,ZAPHOD " and " D ,TRILLIAN
 	<COND (<NOT <FSET? ,FORD ,SEENBIT>>
 		   <COND (<VERB? FIND>
 				  <TELL "Not here." CR>)
-				 (<AND <VERB? ASK-ABOUT ;ASK-CONTEXT-ABOUT TELL-ABOUT>
+				 (<AND <VERB? ASK-ABOUT TELL-ABOUT>
 					   <EQUAL? ,PRSI ,TRILLIAN>>
 				  <RFALSE>)
 				 (T
-				  <TELL "You can't see her here!" CR>
+				  <TELL ,NOPE "see her here!" CR>
 				  <FUCKING-CLEAR>)>)
 		  (ELSE
-		   <COND (<AND <VERB? ASK-ABOUT>
+		   <COND (<VERB? EXAMINE>
+                  <TELL
+"She's fairly good-looking, you can admit. You first met her at some
+party in Islington, but that didn't end well, as Zaphod picked her up
+(\"call me Phil\"). You were getting pretty close to getting her phone
+number, but that ended with a highly improbable concidence involving
+Trillian picking you up in the Heart of Gold and a lot of crazy adventures.
+Her dark hair flows in ways which makes your eyes trail round---|
+You realise you've just been staring at her for who knows how long, and
+look away in shame." CR>
+                  <RTRUE>)
+                 (<VERB? ATTACK KILL SLAP>
+                  <TELL "Trillian? Oh, come on. You can't just go around hitting everybody you know." CR>)
+                 (<AND <OR <ORDERING?>
+                           <AND <VERB? ASK-ABOUT>
+                                <DOBJ? TRILLIAN>>>
+                       <NOT <IN? ,PLAYER ,DINING-HALL>>>
+                  <TELL "\"Really, I don't think it's that important. Can it wait?\"" CR>)
+                 (<AND <VERB? SHOW>
+                       <IOBJ? TRILLIAN>>
+                  <PERFORM ,V?ASK-ABOUT ,TRILLIAN ,PRSO>
+                  <RTRUE>)
+                 (<AND <VERB? ASK-ABOUT>
 		   			   <DOBJ? TRILLIAN>>
-				  <COMMON-ASK-ABOUT ,TRILLIAN ,PRSI>)
+				  <COND (<OR <AND <IOBJ? BEER>
+                                  <OR <NOUN-USED? ,BEER ,W?BEER ,W?VODKA ,W?ALCOHOL>
+                                      <NOUN-USED? ,BEER ,W?WINE ,W?WHISKY ,W?DRINK>>>
+                             <IOBJ? BLASTER>>
+                         <TELL "\"Want one?\" she asks. \"Have a drink. Enjoy yourself.\"
+Then she chuckles at whatever expression you are wearing and turns back to Zaphod and Ford.
+\"Oh, but don't let Zaphod have any more drinks" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? WAITER>
+                         <TELL
+"\"It's not worth trying. Literally. The author is telling you to stop trying: it's a red herring" ,PIC>)
+                        (<OR <AND <IOBJ? BEER>
+                                  <NOUN-USED? ,BEER ,W?AREA>
+                                  <ADJ-USED? ,BEER ,W?DISASTER>>
+                             <IOBJ? HOTBLACK>>
+                         <TELL "\"I didn't realise until pretty recently that that was supposed to be music" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? MENU>
+                         <TELL "\"Dunno,\" she admits, \"can't read galactic-speke.\"">
+                         <COND (<NOT <FSET? ,MENU ,SADRADIOBIT>>
+                                <FSET ,MENU ,SADRADIOBIT>
+                                <TELL " [Yes, that's how it's spelt.]">)>
+                         <CRLF>
+                         <RTRUE>)
+                        (<IOBJ? MARVIN>
+                         <TELL "\"Yeah, I know. In the car park. I'm glad I have no access card to get into there" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? FORD>
+                         <TELL
+"\"Ford Prefect. Or whatever his name really is. Gee, one drink and you're already forgetting things" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? ZAPHOD>
+                         <TELL "\"He's getting more annoying by the day. I think I should break up with him" ,PIC>
+                         <RTRUE>)
+                        (<COMMON-ASK-ABOUT ,TRILLIAN ,PRSI>
+                         <RTRUE>)>)
 		   		 (<AND <ORDERING?>
 					   <EQUAL? ,WINNER ,TRILLIAN>>
 				  <COND (<VERB? WHY NO YES>
-				  		 <TELL "\"I dunno,\" she replies. \"Ask Marvin.\"" CR>
+				  		 <TELL "\"I dunno,\" she replies. \"Ask Marvin" ,PIC>
 				  		 ;<RESET-WINNER>)
 						(<VERB? WHO WHAT WHAT-ABOUT ;WHAT-TIME>
 						 <PERFORM ,V?ASK-ABOUT ,TRILLIAN ,PRSO>
@@ -856,20 +1019,24 @@ I'll follow you now.\" " D ,ZAPHOD " and " D ,TRILLIAN
                                (ELSE
                                 <TELL D ,TRILLIAN " smiles disinterestedly and looks away." CR>)>
 						 ;<RESET-WINNER>)>
-				  <RTRUE>)>
-		   <RFALSE>)>>
+				  <RTRUE>)>)>>
 
 <ROUTINE TRILLIAN-D ()
 	<COND (<IN? ,FORD ,CAR-PARK>
-		   <TELL D ,TRILLIAN " is attempting to start a conversation with " D ,MARVIN ,PAUSES>)
-		  (<IN? ,FORD ,STUNT-SHIP> ;"ZAPHOD is undescribed"
+		   <TELL D ,TRILLIAN " is attempting to start a conversation with " D ,MARVIN ".">)
+		  (<AND <IN? ,FORD ,STUNT-SHIP>
+                <FSET? ,STUNT-SHIP ,SADRADIOBIT>> ;"ZAPHOD is undescribed"
 		   <TELL
 D ,TRILLIAN " and " D ,ZAPHOD " are panicking and
-pushing on the walls, trying to make something work." CR>)
+pushing on the walls, trying to make something work." ;CR>)
+          (<IN? ,FORD ,STUNT-SHIP> ;"See FORD-D"
+           <TELL "">
+           <RFALSE>)
 		  (<EQUAL? <LOC ,FORD> ,RECEPTION ,THIRD-C> ;"In reception, and Third Class."
-		   <TELL D ,TRILLIAN " is deep in thought as she walks past you." CR>)
+		   <TELL D ,TRILLIAN " is deep in thought as she walks past you." ;CR>)
 		  (ELSE
-		   <TELL ""> ;"See FORD-D")>>
+		   <TELL ""> ;"See FORD-D"
+           <RFALSE>)>>
 
 <OBJECT ZAPHOD
 	(LOC DINING-HALL ;GLOBAL-OBJECTS)
@@ -890,19 +1057,72 @@ pushing on the walls, trying to make something work." CR>)
 					   <EQUAL? ,PRSI ,ZAPHOD>>
 				  <RFALSE>)
 				 (T
-				  <TELL "You can't see him here!" CR>
+				  <TELL ,NOPE "see him here!" CR>
 				  <FUCKING-CLEAR>)>)
 		  (ELSE
-		   <COND (<AND <VERB? ASK-ABOUT>
-		   			   <DOBJ? ZAPHOD>>
-				  <COMMON-ASK-ABOUT ,ZAPHOD ,PRSI>)
+		   <COND (<VERB? EXAMINE>
+                  <TELL
+"Zaphod, the former president of the galaxy until he stole the Heart of Gold,
+is the cousin of Ford Prefect. Oh, and he has two heads and three arms. Other
+than that, you could describe him simply as a perfect circus candidate. (Oh,
+come on, he's not that bad.)" CR>
+                  <RTRUE>)
+                 (<VERB? ATTACK KILL SLAP>
+                  <TELL "Why not? (No, actually, don't.)" CR>
+                  <RTRUE>)
+                 (<AND <OR <ORDERING?>
+                           <AND <VERB? ASK-ABOUT>
+                                <DOBJ? ZAPHOD>>>
+                       <NOT <IN? ,PLAYER ,DINING-HALL>>>
+                  <TELL "\"No time for that now!\"" CR>
+                  <RTRUE>)
+                 (<AND <VERB? ASK-ABOUT>
+		   			   <DOBJ? ZAPHOD>
+                       <IN? ,ZAPHOD ,DINING-HALL>>
+				  <COND (<OR <AND <IOBJ? BEER>
+                                  <OR <NOUN-USED? ,BEER ,W?BEER ,W?VODKA ,W?ALCOHOL>
+                                      <NOUN-USED? ,BEER ,W?WINE ,W?WHISKY ,W?DRINK>>>
+                             <IOBJ? BLASTER>>
+                         <TELL "\"I'm on diet!\" he says, downing a "
+<PICK-ONE <PLTABLE "martini" "gargle blaster" "glass of rosé">> " in
+record time. \"You know thtath- thass- THHHHH--- You know what I mean" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? WAITER>
+                         <TELL "\"Forget about it, man. They're not coming" ,PIC>
+                         <RTRUE>)
+                        (<IOBJ? MENU>
+                         <COND (<VISIBLE? ,MENU>
+                                <TELL
+"\"Just looks like a bunch of squiggly lines to me. Oh, look, there's a donkey in that corner!\"" CR>)
+                               (ELSE
+                                <TELL
+"\"There's a menu? Oh, right. I never use the menu anyways, I just
+order the drinks. They have any drink you can think of. Finding the
+waiters is another thing,\" he adds, popping an olive in his mouth." CR>)>
+                         <RTRUE>)
+                        (<IOBJ? MARVIN>
+                         <TELL "\"Marvin? I haven't seen him for days. I'm feeling much better!\"" CR>
+                         <RTRUE>)
+                        (<IOBJ? TRILLIAN>
+                         <TELL "\"She's fine!\" he calls to the universe. [Not that there's much of it left.]
+\"I think it's going well. Yeah, it's going great. Right?\" He turns to his wine glass, realises it isn't where
+it wasn't where he left it last and peers at the nearest person, who seems to be " <PICK-ONE <PLTABLE "Ford"
+"a passing waiter (who heads as fast as he can through the door into the kitchen)" "you">> ,PAUSES>
+                         <RTRUE>)
+                        (<IOBJ? ZAPHOD>
+                         <TELL "\"I know, I'm just so apmazng. AMAZING.
+I hate these typos, they make me sound like I'm drunk. Okay, fine, I am" ,PIC>
+                         <RTRUE>)
+                        (<COMMON-ASK-ABOUT ,ZAPHOD ,PRSI>
+                         <RTRUE>)>)
 		   		 (<AND <VERB? GIVE>
-                       <IOBJ? ZAPHOD>>
+                       <IOBJ? ZAPHOD>
+                       <NOT <ORDERING?>>>
                   <COND (<OR <DOBJ? BLASTER>
-                           <AND <DOBJ? RUM-GLASS>
-                                ,BLASTER-RUM>
-                           <AND <DOBJ? WINE-GLASS>
-                                ,BLASTER-WINE>>
+                             <AND <DOBJ? RUM-GLASS>
+                                  ,BLASTER-RUM>
+                             <AND <DOBJ? WINE-GLASS>
+                                  ,BLASTER-WINE>>
                          <TELL D ,ZAPHOD
 " waves it away and gets the message across to you (in a slurred voice)
 that he is on a sort of diet, and can't have more than ten " ,GALACT "s
@@ -913,7 +1133,7 @@ had to if he wanted to become president again." CR>)>)
 				  <COND (<VERB? WHY NO YES>
 				  		 <TELL
 "\"Do you think I can be bothered to deal with your
-problems?\" he replies. \"I have plenty of my own.\"" CR>
+problems?\" he replies. \"I have plenty of my own" ,PIC>
 				  		 ;<RESET-WINNER>)
 						(<VERB? WHO WHAT WHAT-ABOUT ;WHAT-TIME>
 						 <PERFORM ,V?ASK-ABOUT ,ZAPHOD ,PRSO>
@@ -926,51 +1146,21 @@ problems?\" he replies. \"I have plenty of my own.\"" CR>
 D ,ZAPHOD " is afraid right now, you can savour this
 moment. Not that he could really help much anyway." CR>)
 							   (ELSE
-							    <TELL D ,ZAPHOD "'s too drunk to notice you." CR>)>
-						 ;<RESET-WINNER>)>
-				  <RTRUE>)>
-		   <RFALSE>)>>
+							    <TELL D ,ZAPHOD "'s too drunk to notice you." CR>)>)>
+				  <RTRUE>)>)>>
 
 <ROUTINE ZAPHOD-D ()
 	<COND (<IN? ,FORD ,CAR-PARK>
-		   <TELL ""> ;"See FORD-D")
+		   <TELL ""> ;"See FORD-D"
+           <RFALSE>)
 		  (<IN? ,FORD ,STUNT-SHIP> 
-		   <TELL ""> ;"See TRILLIAN-D")
+		   <TELL ""> ;"See TRILLIAN-D"
+           <RFALSE>)
 		  (<EQUAL? <LOC ,FORD> ,RECEPTION ,THIRD-C>
-		   <TELL D ,ZAPHOD " knocks his heads together." CR>)
+		   <TELL D ,ZAPHOD " knocks his heads together." ;CR>)
 		  (ELSE
-		   <TELL ""> ;"See FORD-D")>>
-
-;<ROUTINE FORD-F ("OPTIONAL" (ARG <>) "AUX" OBJ X)
- <COND (<==? .ARG ,M-WINNER>
-	<COND (<NOT <GRAB-ATTENTION ,FORD>> <RFATAL>)
-	      (<SET X <COM-CHECK ,FORD>>
-	       <COND (<==? .X ,M-FATAL> <RFALSE>)
-		     (<==? .X ,M-OTHER> <RFATAL>)
-		     (T <RTRUE>)>)
-	      (T
-	       <FUCKING-CLEAR>
-	       <TELL "Ford, busy scanning the sky">
-	       <COND (<EQUAL? ,HERE ,PUB>
-		      <TELL " through the window">)>
-	       <TELL ", ignores you." CR>)>)
-       (<SET OBJ <ASKING-ABOUT? ,FORD>>
-	<COND (<NOT <GRAB-ATTENTION ,FORD .OBJ>>
-	       <RFATAL>)
-	      (<EQUAL? .OBJ ,THIRD-PLANET>
-	       <TELL
-"Ford explains that the Earth has been demolished. To cheer you up, he points
-out that there are an awful lot of little planets like that around, and the
-Earth wasn't even a particularly nice one." CR>)
-	      (<SET X <COMMON-ASK-ABOUT ,FORD .OBJ>>
-	       <COND (<==? .X ,M-FATAL> <RFALSE>) (T <RTRUE>)>)
-	      (T <TELL-DUNNO ,FORD .OBJ>)>)
-       (<AND <VERB? ALARM SHAKE>
-	     <EQUAL? <GETP ,FORD ,P?LDESC> 14 ;"asleep">>
-	<TELL "Rather like trying to wake the dead." CR>)
-       (T <PERSON-F ,FORD .ARG>)>>
-
-
+		   <TELL ""> ;"See FORD-D"
+           <RFALSE>)>>
 
 
 
@@ -1017,8 +1207,7 @@ Earth wasn't even a particularly nice one." CR>)
 	<COND (<FSET? ,FIRST-CLASS-IDIOT ,MUNGBIT>
 		   <TELL "who is slumped over a table sleeping (hopefully).">)
 		  (ELSE
-		   <TELL "sipping sherry.">)>
-	<CRLF>>
+		   <TELL "sipping sherry.">)>>
 
 <ROUTINE FIRST-CLASS-IDIOT-F ()
   <COND (<NOT <FSET? ,FIRST-CLASS-IDIOT ,MUNGBIT>>
@@ -1026,11 +1215,12 @@ Earth wasn't even a particularly nice one." CR>)
            <TELL "A snobbish idiot, sipping sherry and staring at you disdainfully." CR>)
 		  (<AND <VERB? ASK-ABOUT TELL-ABOUT>
 				<EQUAL? ,PRSO ,FIRST-CLASS-IDIOT>>
-		   <THE-J ,FIRST-CLASS-IDIOT T T><TELL " sniffs in disgust and turns away." CR>)
+		   <THE-J ,FIRST-CLASS-IDIOT T T>
+           <TELL " sniffs in disgust and turns away." CR>)
           (<AND <ORDERING?>
                 <EQUAL? ,WINNER ,FIRST-CLASS-IDIOT>>
-		   <THE-J ,FIRST-CLASS-IDIOT T T><TELL " sniffs in disgust and turns away." CR>
-		   ;<RESET-WINNER>)
+		   <THE-J ,FIRST-CLASS-IDIOT T T>
+           <TELL " sniffs in disgust and turns away." CR>)
 		  (<OR <AND <VERB? GIVE>
 		  			<IOBJ? FIRST-CLASS-IDIOT>
 					<NOT <DOBJ? FIRST-CLASS-IDIOT>>>
@@ -1038,14 +1228,15 @@ Earth wasn't even a particularly nice one." CR>)
 		  			<DOBJ? FIRST-CLASS-IDIOT>
 					<NOT <DOBJ? FIRST-CLASS-IDIOT>>>>
 		   <COND (<NOT <IN? ,FIRST-CLASS-IDIOT ,FIRST-CLASS>>
-		   		  <THE-J ,FIRST-CLASS-IDIOT T T><TELL " looks annoyed. \"Can't you see I'm doing something right now?\"" CR>
+		   		  <THE-J ,FIRST-CLASS-IDIOT T T>
+                  <TELL " looks annoyed. \"Can't you see I'm extremely busy
+right now? You can wait for me in the First Class if you want to say something" ,PIC>
 				  <RTRUE>)>			
 		   <COND (<OR <DOBJ? RUM-GLASS>
 		   			  <IOBJ? RUM-GLASS>>
-		   		  <THE-J ,FIRST-CLASS-IDIOT T T><TELL
-" stares at you, confused. \"Who puts something that
-isn't rum in a rum glass?!\"||The idiot hands you the
-glass back. \"Go and get a wine glass!" CR>
+		   		  <THE-J ,FIRST-CLASS-IDIOT T T><TELL " stares at
+you, shocked. \"Who puts something that isn't rum in a rum glass?!\"|
+|The idiot hands you the glass back. \"Go and get a proper glass!" CR>
 				  <RTRUE>)
                  (<OR <DOBJ? BLASTER>
                       <IOBJ? BLASTER>>
@@ -1056,9 +1247,9 @@ glass back. \"Go and get a wine glass!" CR>
                        		 ,BLASTER-WINE>
 						 <TELL
 "Confused about the free offering but not arguing with it,
-the idiot drinks the \"wine\" mixture.|
-|Six seconds later, he is asleep - you hope. The glass smashes
-on the floor, and an automatic robot clears it up and leaves." CR>
+the idiot drinks the \"wine\" mixture.||Six seconds later,
+he is asleep - only, you hope. The glass smashes on the
+floor,  and an automatic robot clears it up and leaves." CR>
 						 <REMOVE ,WINE-GLASS>
 						 <FSET ,FIRST-CLASS-IDIOT ,MUNGBIT>
 						 <RTRUE>)
@@ -1077,20 +1268,12 @@ absolutely cannot believe I just drunk that stuff.\"">)>
                   <CRLF>
 				  <RTRUE>)>)
 		  (<TOUCHING?>
-		   <THE-J ,FIRST-CLASS-IDIOT T T><TELL " stares sharply at you as you approach, so you decide against it." CR>)>)
+		   <THE-J ,FIRST-CLASS-IDIOT T T>
+           <TELL " stares sharply at you as you approach, so you decide against it." CR>)>)
    (ELSE
 	<COND (<VERB? EXAMINE>
-		   <THE-J ,FIRST-CLASS-IDIOT T T><TELL " is slumped over a table, sleeping (hopefully)." CR>)
-		  ;(<VERB? SEARCH>
-		   <COND (<IN? ,FIRST-CLASS-CARD ,FIRST-CLASS-IDIOT>
-		   		  ;<TELL "You find and pick up his " D ,FIRST-CLASS-CARD ,PAUSES>
-				  ;<MOVE ,FIRST-CLASS-CARD ,PLAYER>
-				  <COND (<NOT <FSET? ,FIRST-CLASS-CARD ,SADRADIOBIT>>
-				  		 <INCREMENT-SCORE 20>
-                         <FSET ,FIRST-CLASS-CARD ,SADRADIOBIT>)>
-				  ;<FSET ,FIRST-CLASS-CARD ,SADRADIOBIT>)
-				 (ELSE
-				  ;<TELL "You find nothing of interest." CR>)>)>)>>
+		   <THE-J ,FIRST-CLASS-IDIOT T T>
+           <TELL " is slumped over a table, sleeping (hopefully)." CR>)>)>>
 
 <GLOBAL IDIOT-OHERE:OBJECT <>>
 <GLOBAL IDIOT-WAY T>
@@ -1098,7 +1281,8 @@ absolutely cannot believe I just drunk that stuff.\"">)>
 <ROUTINE I-FIRST-CLASS-IDIOT ()
     <COND (<OR <IN? ,PLAYER ,FIRST-CLASS>
 			   <FSET? ,FIRST-CLASS-IDIOT ,MUNGBIT>>
-           <MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>)
+           %<DEBUG-CODE <COND (<T? ,P-DBUG><BOLDEN "|[DEBUG: Moving Idiot to F-Class]|">)>>
+           ;<MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>)
 
           (ELSE ;"This is where it gets complicated..."
            <COND (<IN? ,FIRST-CLASS-IDIOT ,FIRST-CLASS>
@@ -1111,7 +1295,7 @@ absolutely cannot believe I just drunk that stuff.\"">)>
                   <SETG IDIOT-OHERE ,DINING-HALL>
                   <COND (,IDIOT-WAY
                          <MOVE ,FIRST-CLASS-IDIOT ,FIRST-CLASS>
-                         <QUEUE I-FIRST-CLASS-IDIOT 5>)
+                         <QUEUE I-FIRST-CLASS-IDIOT 3>)
                         (ELSE
                          <MOVE ,FIRST-CLASS-IDIOT ,THIRD-C>
                          <QUEUE I-FIRST-CLASS-IDIOT 1>
@@ -1141,6 +1325,10 @@ absolutely cannot believe I just drunk that stuff.\"">)>
                   <SETG IDIOT-OHERE ,CAR-PARK>
                   <MOVE ,FIRST-CLASS-IDIOT ,RECEPTION>
                   <SETG IDIOT-WAY T>
+                  <QUEUE I-FIRST-CLASS-IDIOT 1>)
+
+                 (ELSE
+                  <V-FOO>
                   <QUEUE I-FIRST-CLASS-IDIOT 1>)>
 
            <COND (<AND <EQUAL? ,IDIOT-OHERE ,HERE>> ;"EXEUNT first-class idiot"
@@ -1158,7 +1346,7 @@ absolutely cannot believe I just drunk that stuff.\"">)>
                        ;<NOT <EQUAL? ,OHERE ,IDIOT-OHERE>>>
                   <FSET ,FIRST-CLASS-IDIOT ,SEENBIT>
                   <CRLF>
-                  <COND (<VERB? FAINT>
+                  <COND ;(<VERB? FAINT>
                          <TELL "A little later, you are startled by a door sliding open. ">)
                         (<OR <AND <EQUAL? ,HERE ,THIRD-C>
                                   <NOT ,IDIOT-WAY>>
@@ -1172,9 +1360,8 @@ absolutely cannot believe I just drunk that stuff.\"">)>
                          <TELL ", and walks right into the bathroom">
                          <QUEUE I-FIRST-CLASS-IDIOT 4>)>
                   <TELL ,PAUSES>
-                  <COND (<VERB? FAINT>
+                  ;<COND (<VERB? FAINT>
                          <FUCKING-CLEAR>)>)>)>>
-
 
 
 
@@ -1187,6 +1374,11 @@ absolutely cannot believe I just drunk that stuff.\"">)>
     (LOC KITCHEN)
     (DESC "head chef")
     (LDESC "The head chef is glaring at you.")
+    (TEXT
+"The head chef knows you're not really a waiter, but can't be bothered to complain
+because the stress of his career comnbined with the surly attitude of bosses and
+customers alike would get him fired. [Plus, as the somewhat biased saying goes,
+\"The customer is always right,\" even though everybody knows it's the exact opposite...]")
     (CHARACTER 5)
     (ADJECTIVE ANGRY SUSPICIOU GLARING STARING MISERABLE HEAD MAIN)
     (SYNONYM CHEF COOK MAN)
@@ -1197,7 +1389,7 @@ absolutely cannot believe I just drunk that stuff.\"">)>
     <COND (<AND <VERB? ASK-ABOUT>
                 <DOBJ? HEAD-COOK>>
            <COND (<IOBJ? HEAD-COOK>
-                  <TELL "\"Har, har. You don't want to know about me. I don't either. About you, I mean.\"" CR>)
+                  <TELL "\"Har, har. You don't want to know about me. I don't want to know either. About you, I mean" ,PIC>)
                  (<IOBJ? CUPBOARD>
                   <TELL
 "\"Oh, that's a nasty little thing,\" he whispers, taking a glance at it.
@@ -1205,7 +1397,7 @@ absolutely cannot believe I just drunk that stuff.\"">)>
 much much stuff of mine it has lost. My trick? You give it something, and
 then quickly take whatever it has in store - doesn't matter what it is,
 just take it while the cupboard's distracted. It's a wonder that we're
-able to cook as much food as we do with such tight limitations.\"" CR>)
+able to cook as much food as we do with such tight limitations" ,PIC>)
                  (<EQUAL? ,PRSI ,PLAYER>
                   <TELL "\"And how should I know?\"" CR>)
                  (<PERSON-F ,HEAD-COOK>
@@ -1221,9 +1413,6 @@ able to cook as much food as we do with such tight limitations.\"" CR>)
                   <RTRUE>)>)
           (<PERSON-F ,HEAD-COOK>
            <RTRUE>)>>
-
-
-
 
 
 
@@ -1252,32 +1441,34 @@ able to cook as much food as we do with such tight limitations.\"" CR>)
              "glances at the computer to see if anything has changed, then shakes his head and looks away">>
 
 <ROUTINE SLARTY-D ()
-    <TELL D ,SLARTY !\ <PICK-ONE ,SLARTY-DESCFCNS> ,PAUSES>>
+    <TELL CR D ,SLARTY " " <PICK-ONE ,SLARTY-DESCFCNS> ".">>
 
-<ROUTINE SLARTY-F ()
+<ROUTINE SLARTY-F ("AUX" X)
     <COND (<VERB? EXAMINE LOOK-INSIDE SEARCH>
            <COND (<EQUAL? <FIRST? ,SLARTY> ,BLUE-TUBE>
                   <TELL "He is working, and holding a blue test tube which he has forgotten to put down." CR>)
                  (ELSE
                   <TELL "He is busy doing his work." CR>)>
            <RTRUE>)
+          (<VERB? ATTACK KILL SLAP>
+           <TELL
+"What! Poor old Slarty! You couldn't do that unless he turns into a Arcturan Megagnat." CR>)
           (<AND <VERB? ASK-ABOUT>
                 <DOBJ? SLARTY>>
            <COND (<IOBJ? SLARTY>
                   <TELL
-"\"Oh, me?\" he asks. \"Don't mind me, just get on with your work.
-You can look me up in " ,GUIDE-NAME " if you wish.\"" CR>)
+"\"Oh, me?\" he asks. \"Don't mind me, just get on with your
+work. You can look me up in " ,GUIDE-NAME " if you wish" ,PIC>)
                  (<IOBJ? BLUE-TUBE CODE-3 DEVICE>
                   <PERFORM ,V?ASK-FOR ,SLARTY ,PRSI>)
                  (<IOBJ? DEVICE>
                   <COND (<IN? ,DEVICE ,LOCAL-GLOBALS>
                          <PERFORM ,V?ASK-FOR ,SLARTY ,DEVICE>)
                         (<EQUAL? ,CODES-DONE 3>
-                         <TELL "He explains that you won't need to anymore. Those were its purposes." CR>)
+                         <TELL "He explains that you won't need to anymore. \"Those were its purposes,\" he says." CR>)
                         (ELSE
                          <TELL
-"\"It's a " D ,DEVICE ",\" he tells you. \"You use it to fix
-problems with planets. ">
+"\"It's a " D ,DEVICE ",\" he tells you. \"You use it to fix problems with planets. ">
                          <COND (<=? 11 ,CODE-NUM1>
                                 <TELL
 "There's a code I'll give you which you have to enter into it, and once you're done">)
@@ -1285,12 +1476,12 @@ problems with planets. ">
                                 <TELL "As soon as you've finished entering the code I gave you,">)>
                          <TELL
 " I'll get you to help us leave this place. But remember, after each dial change,
-you must push the white button, and NEVER use the device when in the Fjords.\"" CR>)>
+you must push the white button, and NEVER use the device when in the Fjords" ,PIC>)>
                   <RTRUE>)
                  (<IOBJ? MARVIN BLIGHTED-GROUND>
                   <TELL
 "\"Oh, don't worry about the intelligence reports. It was just from a robot friend of
-mine called Marvin,\" he whispers, \"as if you could call him a friend in any way.\"" CR>)
+mine called Marvin,\" he whispers, \"as if you could call him a friend in any way" ,PIC>)
                  (<IOBJ? RED-FROB GREEN-FROB BLUE-FROB ;KNIFE ;FROBS>
                   <TELL !\">
                   <COND (<NOT <AND <OR <IOBJ? BLUE-FROB>
@@ -1317,7 +1508,7 @@ mine called Marvin,\" he whispers, \"as if you could call him a friend in any wa
                                 <TELL " - maybe in the form of a flismy penknife">)
                                ;(ELSE
                                 <TELL ", ">)>
-                         <TELL "? According to my intelligence reports, at least.\"" CR>
+                         <TELL "? According to my intelligence reports, at least" ,PIC>
                          <QUEUE I-REPLY 2>
                          <SETG AWAITING-REPLY 12>
                          <RTRUE>)>
@@ -1326,13 +1517,13 @@ mine called Marvin,\" he whispers, \"as if you could call him a friend in any wa
                  (<IOBJ? MAGRATHEA MICE BENJY PERCY>
                   <TELL
 "\"Yes, those people have been funding my work. I'm right now doing a project for the
-mice, on creating a new Earth to find the Question. You know, forty-two and all.\"" CR>)
+mice, on creating a new Earth to find the Question. You know, forty-two and all" ,PIC>)
                  (<OR <AND <IOBJ? THIRD-PLANET>
                            <NOUN-USED? ,THIRD-PLANET ,W?EARTH>>
                       <IOBJ? GLACIER-1>>
                   <TELL
-"\"Earth is a machine designed to find " ,QUESTION-ANSWER !\.
-!\" " He takes a deep breath. \"It's a mouthful to say, that
+"\"Earth is a machine designed to find " ,QUESTION-ANSWER
+".\" He takes a deep breath. \"It's a mouthful to say, that
 is. But I've been working on a second Earth, so we can find
 the actual answer. I got some very prestigious awards for my
 work on the Fjords in the original Earth.\" He smiles to himself. ">
@@ -1343,7 +1534,7 @@ work on the Fjords in the original Earth.\" He smiles to himself. ">
                  (<OR <AND <EQUAL? ,PRSI ,INTNUM>
                            <=? 42 ,P-NUMBER>>
                       <EQUAL? ,PRSI ,LEDGE>>
-                  <TELL "\"Look it up in the Guide.\"" CR>)
+                  <TELL "\"Look it up in the Guide" ,PIC>)
                  (<IOBJ? COMPUTER>
                   <COND (<NOT <IN? ,COMPUTER ,PDW>>
                          <TELL "\"Don't worry about that - it wasn't a good one anyway. I can order a new one anytime">)
@@ -1358,7 +1549,7 @@ he notices how hot it has become. \"Doesn't matter much">)>
                   <COND (<NOT <FSET? ,TELEPORTER ,RADPLUGBIT>>
                          <TELL "\"Don't go in yet. I'll explain." CR CR>)>
                   <COND ;(<FSET? ,TELEPORTER ,BADRADIOBIT>
-                         <TELL "\"Nothing will happen if you step in.\"" CR>)
+                         <TELL "\"Nothing will happen if you step in" ,PIC>)
                         (<FSET? ,TELEPORTER ,SADRADIOBIT>
                          <TELL
 "\"The teleporter's broken. That's what I brought you here for.|
@@ -1366,7 +1557,7 @@ he notices how hot it has become. \"Doesn't matter much">)>
 so we don't run out of energy and kill you - so the teleporter can stay open.
 I noticed (using a private intelligence source of mine) that you had found
 a frob. I was looking at " ,LOST-PLANET " because you were the first movement
-on it for hundreds of years now, if you don't count the mice.\"" CR>)
+on it for hundreds of years now, if you don't count the mice" ,PIC>)
                         (ELSE
                          <TELL "\"It's been fixed hasn't it?\"" CR>)>)
                  (<IOBJ? OBJECT-OF-GAME>
@@ -1377,8 +1568,19 @@ like this one. I'm a little bit too obsessed with my work, I fear. (Just like
 the author, apparently" ,ELLIPSIS ")" CR>)
                  (ELSE
                   <PERSON-F ,SLARTY>)>)
-          (<AND <VERB? ASK-FOR>
-                <DOBJ? SLARTY>>
+          (<OR <AND <VERB? ASK-FOR>
+                    <DOBJ? SLARTY>>
+               <AND <ORDERING?>
+                    <NOT <IOBJ? SLARTY>>
+                    <DOBJ? PLAYER>
+                    <VERB? SGIVE>>
+               <AND <ORDERING?>
+                    <NOT <DOBJ? SLARTY>>
+                    <IOBJ? PLAYER>
+                    <VERB? GIVE>
+                    <SET X ,PRSO>
+                    <SETG PRSO ,PRSI>
+                    <SETG PRSI .X>>>
            <COND (<IOBJ? BLUE-TUBE>
                   <TELL
 "\"Oh, how silly of me! Here you go.\"
@@ -1402,16 +1604,16 @@ the author, apparently" ,ELLIPSIS ")" CR>)
                                  <AGAIN>)
                                 (ELSE
                                  <RETURN>)>>)>
-                  <TELL "\"Yes, it's"><TELL-CODE><TELL ".\"" CR>
+                  <TELL "\"Yes, it's"><TELL-CODE><TELL ,PIC>
                   <FSET ,CODE-3 ,RADPLUGBIT>)
                  (<IOBJ? DEVICE>
                   <COND (<HELD? ,DEVICE>
-                         <TELL "\"You have it.\"" CR>)
+                         <TELL "\"You have it" ,PIC>)
                         (<IN? ,DEVICE ,LOCAL-GLOBALS>
                          <DEQUEUE I-DEVICE>
                          <I-DEVICE T>)
                         (ELSE
-                         <TELL "\"I gave it to you.\"" CR>)>)
+                         <TELL "\"I gave it to you. Now it's your responsibility" ,PIC>)>)
                  (ELSE
                   <PERSON-F ,SLARTY>)>)
           (<AND <VERB? SHOW GIVE>
@@ -1452,8 +1654,6 @@ it's quite rare, so he's sad to have to lose it so easily." CR>
 
 
 
-
-
 ;"*********************
   **** Ark Captain ****
   *********************
@@ -1477,7 +1677,8 @@ tells you he has little authority. He sits in the bath, looking pleased with him
                   <TELL " He is holding a dish of meat which doesn't look appetizing.">)>
            <CRLF>)
           (<AND <VERB? ASK-ABOUT ASK-FOR>
-                <IOBJ? MEAT-DISH>>
+                <IOBJ? MEAT-DISH>
+                <IN? ,MEAT-DISH ,ARK-CAPTAIN>>
            <TELL
 "\"Oh " ,ELLIPSIS " I don't really want it. I'm supposed to have it but I'm really not hungry.
 Here, you can have it.\" He puts it on the floor. \"The meat is made from the flesh
@@ -1486,7 +1687,7 @@ of a vegan snow lizard,\" he whispers, \"just in case it interests you!\"" CR>
            <PUTP ,MEAT-DISH ,P?SDESC "dish of vegan snow lizard meat">
            <MOVE ,MEAT-DISH ,ARK>)
           (<VERB? OPEN CLOSE>
-           <TELL "You can't do that to a captain!" CR>)
+           <TELL ,NOPE "do that to a captain!" CR>)
           (<PERSON-F ,ARK-CAPTAIN>
            <RTRUE>)>>
 
@@ -1519,19 +1720,11 @@ of a vegan snow lizard,\" he whispers, \"just in case it interests you!\"" CR>
     (LOC MORPHER-CAPTAIN)
     (DESC "automatic autograph pen")
     ;(LDESC "There is an automatic autograph pen here.")
-    (SYNONYM PEN AUTOGRAPH SIGNER SIGN SIGNATURE)
-    (ADJECTIVE AUTO AUTOMATIC AUTOGRAPH AUTO-SIGN SIGNATURE)
+    (SYNONYM PEN AUTOGRAPH SIGNER SIGN SIGNATURE NAME)
+    (ADJECTIVE AUTO AUTOMATIC AUTOGRAPH AUTO-SIGN SIGNATURE ;MORPHER CAPTAIN\'S)
     (GENERIC PEN-G)
     (FLAGS TAKEBIT TRYTAKEBIT VOWELBIT)
 	;(ACTION AUTO-SIGN-F)>
-
-;<ROUTINE AUTO-SIGN-F ()
-	<COND (<AND <VERB? USE PUT WRITE>
-                <IOBJ? REGISTER>>
-           <PERFORM ,V?WRITE ,AUTO-SIGN ,REGISTER>)
-          (<AND <IOBJ? AUTO-SIGN>
-                <VERB? WRITE-WHAT WRITE-IN-WHAT>>
-           <TELL "The pen only signs an automatic name." CR>)>>
 
 <GLOBAL CAPTAIN-OHERE:OBJECT <>>
 <GLOBAL CAPTAIN-NOTHERE <>>
@@ -1548,20 +1741,25 @@ of a vegan snow lizard,\" he whispers, \"just in case it interests you!\"" CR>
 ;<GLOBAL HIDEY T>
 <GLOBAL TWO-TURNS 0>
 
-<ROUTINE I-MORPHER-CAPTAIN ("AUX" OBJ (HIDE <NOT <FSET? ,MORPHER-CAPTAIN ,BADRADIOBIT>>))
+<ROUTINE I-MORPHER-CAPTAIN ("AUX" OBJ (HIDE <NOT <FSET? ,MORPHER-CAPTAIN ,BADRADIOBIT>>) NAMES PLACE)
+    <COND (<T? ,P-DBUG><TELL "(MORPHER CAPTAIN run)" CR>)>
     ;"HIDE for memory:
         - If BADRADIOBIT is set on the captain, he must move.
         - Therefore, if it is NOT set, then he may stay where he is."
     <FCLEAR ,MORPHER-CAPTAIN ,BADRADIOBIT>
     <SETG TWO-TURNS <+ ,TWO-TURNS 1>>
-    <COND (<AND <OR <AND <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
+    <COND (<FSET? ,MORPHER-CAPTAIN ,MUNGBIT>
+           <RTRUE>)    
+          (<AND <OR <AND <FSET? ,MORPHER-CAPTAIN ,INVISIBLE>
                          <NOT <IN? ,MORPHER-CAPTAIN ,HERE>>>
+                    ;<PROB 10>
                     <NOT .HIDE>>
                 ;<EQUAL? <MOD ,TWO-TURNS 2> 0>
                 <NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>>
+           <COND (<T? ,P-DBUG><TELL "(MORPHER CAPTAIN move)" CR>)>
            <HIDE-CAP .HIDE>)
           (<AND <IN? ,MORPHER-CAPTAIN ,HERE>
-                <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>
+                <FSET? ,MORPHER-CAPTAIN ,INVISIBLE>
                 <NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>>
            <SETG CAPTAIN-OHERE <LOC ,MORPHER-CAPTAIN>>
            <SETG CAPTAIN-NOTHERE <>>
@@ -1577,7 +1775,8 @@ of a vegan snow lizard,\" he whispers, \"just in case it interests you!\"" CR>
 captain that you saw earlier, who is brandishing a large weapon.
 Everything happens so quickly that you don't have time to react. "
 ,CAPTAIN-DEATH>
-                         <COND (<NOT <FSET? .OBJ ,RADPLUGBIT>>
+                         <COND (<AND .OBJ
+                                     <NOT <FSET? .OBJ ,RADPLUGBIT>>>
                                 <TELL CR CR "If you had no idea that ">
                                 <THE-J .OBJ T>
                                 <TELL
@@ -1585,24 +1784,10 @@ Everything happens so quickly that you don't have time to react. "
 time and try looking around.|Good luck finding your way out of ">
                                 <ITALICIZE "this">
                                 <TELL !\.>)>
-                         <JIGS-UP "">)>)>)>>
-
-<ROUTINE HIDE-CAP (HIDE ;"Can he stay hidden in the same place?" "AUX" NAMES PLACE)
-    <SETG CAPTAIN-OHERE <LOC ,MORPHER-CAPTAIN>>
-    <SETG CAPTAIN-NOTHERE T>
-    <COND (<NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
-           <FSET ,MORPHER-CAPTAIN ,SECRETBIT>)>
-
-    <REPEAT ()
-        <MOVE ,MORPHER-CAPTAIN <PICK-ONE ,CAP-ROOM>>
-        <COND (<EQUAL? <LOC ,MORPHER-CAPTAIN> ,CAPTAIN-OHERE> ;"If captain is in the same place..."
-               <COND (.HIDE ;"If BADRADIOBIT isn't set, then he may stay, just have to remove the NOTHERE."
-                      <SETG CAPTAIN-NOTHERE <>>)
-                     (ELSE  ;"Otherwise, the captain has recently fled your room, and so must change room."
-                      <AGAIN>)>)>
-        <RETURN>>
-
-    <COND (<AND <FSET? ,MORPHER-CAPTAIN ,SECRETBIT>>
+                         <JIGS-UP "">)>)>)>
+    
+    <COND (<AND <NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
+                <IN? ,MORPHER-CAPTAIN ,HERE>>
            <COND (<AND <EQUAL? ,HERE ,GALLEY>
                        <IN? ,MORPHER-CAPTAIN ,HERE>>
                   <COND (,CAPTAIN-NOTHERE
@@ -1650,10 +1835,26 @@ time and try looking around.|Good luck finding your way out of ">
                  (ELSE        ;"Otherwise, he is waiting, so he is getting bored."
                   <SETG CAPTAIN-WAIT <+ ,CAPTAIN-WAIT 1>>)>)
           (ELSE
-           <FSET <FIND-FLAG-HERE ,CAPTAINBIT> ,INVISIBLE>
-           <SETG CAPTAIN-WAIT 0>)>>
+           <COND (<FIND-FLAG-HERE ,CAPTAINBIT>
+                  <FSET <FIND-FLAG-HERE ,CAPTAINBIT> ,INVISIBLE>)>
+           <SETG CAPTAIN-WAIT 0>
+           <FSET ,MORPHER-CAPTAIN ,INVISIBLE>)>
+    <QUEUE I-MORPHER-CAPTAIN -1>>
 
+<ROUTINE HIDE-CAP (HIDE ;"Can he stay hidden in the same place?")
+    <SETG CAPTAIN-OHERE <LOC ,MORPHER-CAPTAIN>>
+    <SETG CAPTAIN-NOTHERE T>
+    <COND (<NOT <FSET? ,MORPHER-CAPTAIN ,MUNGBIT>>
+           <FSET ,MORPHER-CAPTAIN ,INVISIBLE>)>
 
+    <REPEAT ()
+        <MOVE ,MORPHER-CAPTAIN <PICK-ONE ,CAP-ROOM>>
+        <COND (<EQUAL? <LOC ,MORPHER-CAPTAIN> ,CAPTAIN-OHERE> ;"If captain is in the same place..."
+               <COND (.HIDE ;"If BADRADIOBIT isn't set, then he may stay, just have to remove the NOTHERE."
+                      <SETG CAPTAIN-NOTHERE <>>)
+                     (ELSE  ;"Otherwise, the captain has recently fled your room, and so must change room."
+                      <AGAIN>)>)>
+        <RETURN>>>
 
 
 
@@ -1684,15 +1885,25 @@ time and try looking around.|Good luck finding your way out of ">
 have been told by " D ,ZAPHOD " Beeblebrox that you are paying for his
 meal.\" So that's why " D ,ZAPHOD " pointed at you!|He continues. \"I
 just want you to sign your name here, on this phone. That's all, then
-we can continue the enjoyment.\" He holds the screen out to you." CR>
+we can continue the enjoyment.\" He holds the screen out to you." CR
+CR "Above, a comet streaks through the dark void! Everything lights up
+and the crowd ">
+                  <ITALICIZE "oohs">
+                  <TELL " and ">
+                  <ITALICIZE "aahs">
+                  <TELL ". It's so beautiful, you forget everything
+and your mind goes blank for who knows how long?|You are interrupted
+from your peaceful state of mind as the policeman clears his throat.
+\"Um, daydreamer, come on. You have stuff to do. Like, now, if possible" ,PIC>
                   <THIS-IS-IT ,CELL-PHONE>
                   <SETG AWAITING-REPLY 15>
                   <QUEUE I-REPLY 2>
                   ;<FCLEAR ,CELL-PHONE ,SECRETBIT>
                   <FSET ,POLICEMAN ,BADRADIOBIT>
+                  <FUCKING-CLEAR>
                   <RTRUE>)
                  (ELSE
-                  <TELL "The " D ,POLICEMAN " grunts. \"You're going to have to sign it, ya know.\"" CR>
+                  <TELL "The " D ,POLICEMAN " grunts. \"You're going to have to sign it, ya know" ,PIC>
                   <THIS-IS-IT ,CELL-PHONE>
                   <SETG AWAITING-REPLY 15>
                   <QUEUE I-REPLY 2>
@@ -1719,8 +1930,6 @@ swerving the phone away from you and making you stumble." CR>)
            <TELL
 "A normal phone, not too unordinary or high-tech (except touchscreen and stuff),
 is in the security agent's hands. You're meant to write a name on it." CR>)>>
-
-
 
 
 
@@ -1803,7 +2012,7 @@ agressive or biased feautures I may have,\" he beams." CR>)
                   <RTRUE>)
                  (ELSE
                   <TELL
-"\"Even if you were allowed into the room, I'm not supposed to accept orders from strangers.\"" CR>)>)
+"\"Even if you were allowed into the room, I'm not supposed to accept orders from strangers" ,PIC>)>)
           (<PERSON-F ,CLYDE>
            <RTRUE>)>>
 
@@ -1840,7 +2049,7 @@ the " D ,CLYDE-PANEL " falls out and bounces delicately along the floor." CR>
           (<AND <VERB? TAKE REMOVE>
                 <DOBJ? CLYDE-PANEL>
                 <IN? ,CLYDE-PANEL ,CLYDE>>
-           <TELL "You can't just take it like that! " ,TOO-STUCK>
+           <TELL ,NOPE "just take it like that! " ,TOO-STUCK>
            <PERFORM ,V?EXAMINE ,CLYDE-PANEL>)
           (<VERB? EXAMINE>
            <COND (<IN? ,CLYDE-PANEL ,CLYDE>
@@ -1887,8 +2096,6 @@ safe. He explains that if a mess was found, he would get in trouble for it." CR>
 
 
 
-
-
 "************************************"
 "**** ALL OF THE PEOPLE ROUTINES ****"
 "************************************"
@@ -1904,9 +2111,9 @@ safe. He explains that if a mess was found, he would get in trouble for it." CR>
 
 <ROUTINE TELL-DUNNO (PER OBJ)
  <COND ;(<FSET? .OBJ ,PERSONBIT>
-	<TELL "\"I don't indulge much in idle gossip, you know.\"" CR>)
+	<TELL "\"I don't indulge much in idle gossip, you know" ,PIC>)
        (T
-	<TELL "\"You know as much as I do.\"" CR>)>>
+	<TELL "\"You know as much as I do" ,PIC>)>>
 
 
 <CONSTANT CHARACTER-TABLE
@@ -1971,7 +2178,7 @@ safe. He explains that if a mess was found, he would get in trouble for it." CR>
 	       <COND (<ZERO? <GET .GL .C>>
 		      <PUT .GL .C T>
 		      <RETURN <GOOD-SHOW .PER .OBJ>>)
-		     (T <TELL"\"I know that you found a " D .OBJ ".\"" CR>)>)>>
+		     (T <TELL"\"I know that you found a " D .OBJ ,PIC>)>)>>
 
 ;<ROUTINE JUST-A-PERSON ()
 	<COND (<ORDERING?>
@@ -1994,7 +2201,7 @@ safe. He explains that if a mess was found, he would get in trouble for it." CR>
 	    <COND (<==? ,PRSO .PER>
 	           <COND (<UNSNOOZE .PER T>
 	    	          ;<TELL CHE .PER " gasps to see you so close!" CR>
-	    		      <TELL CHE .PER " shakes you off." CR>
+	    		      <YOU-MASHER .PER>
 	    	          <RTRUE>)
 	    	         (T
 	    	          <TELL CHE+VERB .PER "is" " still ">
@@ -2014,13 +2221,7 @@ safe. He explains that if a mess was found, he would get in trouble for it." CR>
 	    <COND (<AND <==? .PER ,PRSO>
 	    	        <FSET? .PER ,PERSONBIT>
 	    	        <NOT <FSET? .PER ,MUNGBIT>>>
-	           ;<PUTP .PER ,P?LINE <+ 1 <GETP .PER ,P?LINE>>>
-	           ;<COND (<NOT <EQUAL? <GETP .PER ,P?LDESC>
-	    			   4 ;"looking at you with suspicion">>
-	    	          <PUTP .PER ,P?LDESC 20 ;"ignoring you">)>
-	           <TELL
-He .PER " pushes you away and mutters, \"I don't think that's
-called for.\"" CR>
+	           <YOU-MASHER>
 	           <RTRUE>)
               (<AND <==? .PER ,PRSO>
 	    	        <FSET? .PER ,PERSONBIT>
@@ -2032,7 +2233,7 @@ called for.\"" CR>
 	    		   <NOT <GRAB-ATTENTION .PER>>>
 	    	      <RFATAL>)
 	    	     (T
-	    	      <PERFORM ,V?TELL-ABOUT ,PRSO ,PRSI>
+	    	      <PERFORM ,V?ASK-ABOUT ,PRSO ,PRSI>
 	    	      <RTRUE>)>)>)
        (<AND <VERB? SMILE>
              <NOT <DOBJ? MARVIN>>>
@@ -2079,6 +2280,7 @@ called for.\"" CR>
                (<AND <VERB? GIVE THROW-AT>
                      <EQUAL? ,PRSI ,PLAYER>>
                 <RESET-WINNER>
+                ;[<TELL "PERSON-F: ASKING "><TELL-D-LOC .X><TELL " FOR "><TELL-D-LOC ,PRSO><CRLF>]
                 <PERFORM ,V?ASK-FOR .PER ,PRSO>
                 <RTRUE>)
                (ELSE
@@ -2118,7 +2320,7 @@ called for.\"" CR>
 	       (<L? 0 .N>
 		<TELL "\"I'm too ">
 		<COND (<1? .N> <TELL "peeved">) (T <TELL "angry">)>
-		<TELL " with you now.\"" CR>
+		<TELL " with you now" ,PIC>
 		<RTRUE>)
 	       (<VERB? NO THANK YES>
 		<RFATAL>		;"let thru to next handler")
@@ -2128,7 +2330,7 @@ called for.\"" CR>
 		       <RFATAL>)
 		      (T
 		       <TELL
-"\"I will go where I please, thank you very much.\"" CR>
+"\"I will go where I please, thank you very much" ,PIC>
 		       <RTRUE>)>)
 	       (<VERB? INVENTORY>
 		<COND (<NOT <CARRY-CHECK .PER>>
@@ -2153,8 +2355,7 @@ called for.\"" CR>
 		<RFATAL> ;"let thru to next handler")
 	       (<VERB? KISS>
 		<UNSNOOZE .PER>
-		<TELL
-"\"I really don't think this is the proper time or place.\"" CR>)
+		<YOU-MASHER>)
 	       ;(<VERB? WALK-TO>
 		<COND (<DOBJ? HERE GLOBAL-HERE>
 		       <TELL "\"I am here!\"" CR>)>)
@@ -2216,7 +2417,7 @@ He .PER " fumbles in" his .PER " pocket and produces" him ,PRSO ,PAUSES>)>
 		<COND (<EQUAL? ,PRSO ,HERE ,GLOBAL-HERE ,PLAYER ,ROOMS>
 		       <COND (<==? .PER ,FOLLOWER>
 			      <SETG FOLLOWER 0>
-			      <TELL "\"As you wish.\"" CR>)
+			      <TELL "\"As you wish" ,PIC>)
 			     (T
 			      <SETG WINNER ,PLAYER>
 			      <PERFORM ,V?$CALL .PER>
@@ -2228,7 +2429,7 @@ He .PER " fumbles in" his .PER " pocket and produces" him ,PRSO ,PAUSES>)>
 
 <ROUTINE COMMON-ASK-ABOUT (PER OBJ)
 	<COND ;(<EQUAL? .OBJ .PER>
-		   <TELL "\"I have no secrets. Anyone can see what I am.\"" CR>)
+		   <TELL "\"I have no secrets. Anyone can see what I am" ,PIC>)
 		  (<EQUAL? .OBJ ,PLAYER>
            <COND (<EQUAL? .PER ,POLICEMAN>
                   <TELL "\"That's exactly what I want to find out from you!\"" CR>)
@@ -2238,10 +2439,16 @@ He .PER " fumbles in" his .PER " pocket and produces" him ,PRSO ,PAUSES>)>
 of thing, and he would like to tell you that it does not include him." CR>)
                  (<EQUAL? .PER ,CLYDE>
                   <TELL
-"\"Well, I dunno,\" he says. \"Apparently you're some morpher person, but
-you don't look like any morpher to me. Oh, wait, that's the point" ,ELLIPSIS "\"" CR>)
-		         (ELSE
-                  <TELL "\"You're Arthur Dent, the next-to-last Earthling.\"" CR>)>
+"\"Well, I dunno,\" he says. \"Apparently you're the captain of some shapeshifting ship, but
+you don't look like any morpher to me. Oh, wait, that's the point of shapeshifters.." ,PIC>)
+		         (<EQUAL? .PER ,FORD>
+                  <TELL "\"Who do you take me for? Some random guy down from Brighton or your best friend?\"" CR>)
+                 (<EQUAL? .PER ,TRILLIAN>
+                  <TELL "\"Arthur Dent. I hope you haven't gotten amnesia" ,PIC>)
+                 (<EQUAL? .PER ,ZAPHOD>
+                  <TELL "\"No time for that!\" he shouts." CR>)
+                 (ELSE
+                  <TELL "\"You're Arthur Dent, the next-to-last Earthling" ,PIC>)>
            <RTRUE>)
 		  (<FSET? .OBJ ,PERSONBIT>
 		   <RFALSE>)
@@ -2249,14 +2456,23 @@ you don't look like any morpher to me. Oh, wait, that's the point" ,ELLIPSIS "\"
 		   <COND (<EQUAL? .PER ,BENJY ,PERCY>
 		  		  <TELL ,YOUR-BRAIN
 " It's a very interesting subject to work on, and it's what we set out to find.
-But be careful with that head - our life's work is right there in your brain.\"" CR>)
+But be careful with that head - our life's work is right there in your brain.">
+                  <COND (<RUNNING? I-MOUSE-BLAB>
+                         <TELL " Anyway, ">
+                         <DEQUEUE I-MOUSE-BLAB>
+                         <I-MOUSE-BLAB T>)
+                        (ELSE
+                         <TELL !\" CR>)>)
 				 (ELSE
 				  <TELL ,ASK-ABOUT-OBJECT CR>)>
            <RTRUE>)
 		  ;(<IN? .OBJ .PER>
-		   <TELL "\"I have it right here.\"" CR>)
+		   <TELL "\"I have it right here" ,PIC>)
           (ELSE
-           <TELL CHE .PER " shrugs." CR>
+           <COND (<=? .OBJ ,ZAPHOD>
+                  <TELL "\"Ask Marvin. He knows everything, eh?\"" CR>)
+                 (T
+                  <TELL CHE .PER " shrugs." CR>)>
            <RTRUE>)>>
 
 <ROUTINE COMMON-OTHER (PER "AUX" (X <>) Y N VAL)
@@ -2264,17 +2480,15 @@ But be careful with that head - our life's work is right there in your brain.\""
        (<VERB? EXAMINE>
         <COND (<SET Y <GETP .PER ,P?DESCFCN>>
 	    	   <SET VAL <APPLY .Y ,M-OBJDESC>>)
+              (<SET Y <GETP .PER ,P?TEXT>>
+               <TELL .Y CR>)
               (ELSE
-               <TELL <GETP .PER ,P?TEXT> CR>)>
+               <TELL "Just "><THE-J .PER <>><TELL ,PAUSES>)>
 	    <COND (<AND <IN? .PER ,HERE>
 	    	        <SET N <FIRST? .PER>>
 	    	        <NOT <FSET? .N ,NDESCBIT>>>
 	           <COND (<CARRY-CHECK .PER>
 	    	          <SET X T>)>)>
-	    ;<COND (<FSET? .PER ,MUNGBIT>
-	           <COND (<NOT <ZERO? .X>> <TELL "And">)>
-	           <HE-SHE-IT .PER <NOT .X> "is">
-	           <TELL !\  <GET ,LDESC-STRINGS <GETP .PER ,P?LDESC>> ,PAUSES>)>
 	    <RTRUE>)
        (<AND <EQUAL? ,PRSO .PER> 
              <VERB? SHOW>>
