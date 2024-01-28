@@ -32,7 +32,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 	(T <PRINC "Loading">)>
 
 <PRINC " MILLIWAYS
-    the Restaurant at the End of the Eniverse!
+    the Restaurant at the End of the Universe!
     An interactive fiction by Max Fog
 
 ">
