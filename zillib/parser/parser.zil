@@ -204,7 +204,7 @@ Copyright (C) 1988 Infocom, Inc.  All rights reserved."
 		;<CURSET 1 1>		;"Erase old desc."
 		;<ERASE 1>	;<PRINT-SPACES <LOWCORE SCRH>>)>
      <CURSET 1 1>		;"Erase old desc."
-	 <ERASE 1>	;<PRINT-SPACES <LOWCORE SCRH>>
+	 <PRINT-SPACES <LOWCORE SCRH>>
      <CURSET 1 1>
 	 <TELL "  "><D-J ,HERE>
 	 <CURSET 1 <- <LOWCORE SCRH>
